@@ -1,0 +1,17 @@
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Console gameTests.dll
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Console gameTests.pdb
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Console game test.exe
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.dll
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Console game test.pdb
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Console game test.exe.config
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.xml
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.xml
+C:\Users\Matis\source\repos\Console game\Console gameTests\obj\Debug\Console gameTests.csprojAssemblyReference.cache
+C:\Users\Matis\source\repos\Console game\Console gameTests\obj\Debug\Console gameTests.csproj.CoreCompileInputs.cache
+C:\Users\Matis\source\repos\Console game\Console gameTests\obj\Debug\Console gameTests.csproj.CopyComplete
+C:\Users\Matis\source\repos\Console game\Console gameTests\obj\Debug\Console gameTests.dll
+C:\Users\Matis\source\repos\Console game\Console gameTests\obj\Debug\Console gameTests.pdb
