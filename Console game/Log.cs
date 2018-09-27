@@ -11,10 +11,11 @@ namespace Console_game
         public bool showDate;
         public bool showLineNumber;
         public bool showCaller;
+        public bool showFileName;
 
         private FileStream logStream;
 
-        public Log(string filePath, bool showDate, bool showLineNumber, bool showCaller)
+        public Log(string filePath, bool showDate, bool showLineNumber, bool showCaller, bool showFileName)
         {
             if (!File.Exists(filePath))
             {
@@ -26,19 +27,22 @@ namespace Console_game
             this.showDate = showDate;
             this.showLineNumber = showLineNumber;
             this.showCaller = showCaller;
+            this.showFileName = showFileName;
         }
 
         public void logInfo(string info,
             [CallerLineNumber] int lineNumber = 0,
-            [CallerMemberName] string caller = null)
+            [CallerMemberName] string caller = null,
+            [CallerFilePath] string callerFile = null)
         {
-            string formattedString = formatString(info, lineNumber, caller);
+            string formattedString = formatString(info, lineNumber, caller, callerFile);
             File.AppendAllText(filePath, formattedString);
         }
 
         private string formatString(string logString,
             int lineNumber,
-            string caller)
+            string caller,
+            string callerFile)
         {
 
             if (showLineNumber)
@@ -48,6 +52,10 @@ namespace Console_game
             if (showCaller)
             {
                 logString = $"called by {caller} " + logString;
+            }
+            if (showFileName)
+            {
+                logString = $"at file {Path.GetFileName(callerFile)} " + logString;
             }
             if (showDate)
             {

@@ -16,7 +16,8 @@ namespace Console_game
             logger = new Log("logs/log.txt",
                 showDate: true,
                 showLineNumber: true,
-                showCaller: true);
+                showCaller: true,
+                showFileName: true);
         }
     }
 }

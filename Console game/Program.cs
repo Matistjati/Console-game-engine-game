@@ -1,52 +1,42 @@
 using System;
+using System.Threading;
 
 namespace Console_game
 {
     class Program
     {
-        static DateTime start = DateTime.Now;
+        static readonly DateTime start = DateTime.Now;
         static float total;
 
-        static void print1(object state)
+        public static void print1(object state)
         {
-            
-            //Console.Clear();
-            total += FrameInfo.timeDelta;
-            //Console.Write($"{(DateTime.Now - start).Seconds},             {(int)total}");
+            Console.Clear();
+            total += GameObject.timeDelta;
+            Console.Write($"{(DateTime.Now - start).Seconds},{(DateTime.Now - start).Milliseconds} {total}");
         }
 
         static void Main(string[] args)
         {
-
-            Globals.logger.logInfo("DAB");
-            Console.Write("hai\n");
-
-            Console.ReadKey();
-            for (int i = 0; i < 100; i++)
-            {
-                Win32Console.SetConsoleFont();
-                Console.ReadKey();
-            }
-            Console.Write("hai\n");
-            Console.ReadKey();
-
-
             FrameRunner frameRunner = new FrameRunner();
             frameRunner += print1;
 
             Console.ReadKey();
             frameRunner.Pause();
             Console.ReadKey();
+            frameRunner.Run();
+            Console.ReadKey();
 
 
 
 
 
-            Console.SetWindowSize(120, 30);
+
             Console.SetBufferSize(120, 30);
+            Console.SetWindowSize(120, 30);
             Map thisMap = new Map();
 
             printMap(thisMap);
+
             Console.ReadKey();
         }
 

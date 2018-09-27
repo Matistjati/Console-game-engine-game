@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Fastnoise.cs" />
     <Compile Include="FrameRunner.cs" />
+    <Compile Include="GameObject.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Map Generator.cs" />
