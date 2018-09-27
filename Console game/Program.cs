@@ -1,5 +1,5 @@
 using System;
-using System.Threading;
+using System.Collections.Generic;
 
 namespace Console_game
 {
@@ -8,22 +8,33 @@ namespace Console_game
         static readonly DateTime start = DateTime.Now;
         static float total;
 
-        public static void print1(object state)
+        public static void print1()
         {
+            Console.Write(1);
+            /*
             Console.Clear();
             total += GameObject.timeDelta;
-            Console.Write($"{(DateTime.Now - start).Seconds},{(DateTime.Now - start).Milliseconds} {total}");
+            Console.Write($"{(DateTime.Now - start).Seconds},{(DateTime.Now - start).Milliseconds} {total}");*/
         }
+
+        public static void print2()
+        {
+            Console.Write(2);
+            
+        }
+
+        public delegate void frameUpdateSubscriber();
 
         static void Main(string[] args)
         {
-            FrameRunner frameRunner = new FrameRunner();
-            frameRunner += print1;
+            //GameObjectChildren<GameObject>.frameCallSubscribers  maaboi = new GameObjectChildren<GameObject>().GetMethodsByString("update");
+            //maaboi.Invoke();
+            frameUpdateSubscriber frameBoi = new frameUpdateSubscriber(print1);
 
             Console.ReadKey();
-            frameRunner.Pause();
+            //frameRunner.Pause();
             Console.ReadKey();
-            frameRunner.Run();
+            //frameRunner.Run();
             Console.ReadKey();
 
 

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Console_game
 {
@@ -10,7 +6,8 @@ namespace Console_game
     {
         public volatile static float timeDelta;
         public volatile static float time;
-
         public virtual void frameUpdate() { }
+
+        public virtual void Update() { }
     }
 }
