@@ -3,13 +3,16 @@ using System.Runtime.InteropServices;
 
 namespace Console_game
 {
-    class Win32Console
+    class Win32ConsoleHelper
     {
         [DllImport("Kernel32.dll")]
+        public static extern int SetConsoleTitle(string lpConsoleTitle);
+
+        [DllImport("Kernel32.dll")]
         private static extern Int32 SetCurrentConsoleFontEx(
-            IntPtr hConsoleOutput,
-            bool bMaximumWindow,
-            ref _CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
+                    IntPtr hConsoleOutput,
+                    bool bMaximumWindow,
+                    ref _CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
 
         [DllImport("Kernel32.dll")]
         private static extern Int32 GetCurrentConsoleFontEx(
@@ -22,7 +25,7 @@ namespace Console_game
             OutputHandle = -11
         }
 
-        private static IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
+        private static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
         [DllImport("kernel32")]
         private static extern IntPtr GetStdHandle(StdHandle index);

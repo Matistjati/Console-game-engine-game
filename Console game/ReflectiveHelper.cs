@@ -5,21 +5,21 @@ using System.Reflection;
 
 namespace Console_game
 {
-    public class GameObjectChildren<T>
+    public class ReflectiveHelper<T> where T : class
     {
         // This is black magic
 
         readonly IEnumerable<Type> gameObjectChildren;
-        public GameObjectChildren()
+        public ReflectiveHelper()
         {
             gameObjectChildren = Assembly.GetAssembly(typeof(T)).GetTypes()
                 .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(T)));
         }
 
-        public delegate void frameCallSubscribers();
+        public delegate void methodSignature();
 
         // For this to work, the class must inherit from GameObject and the method must be public and static
-        public frameCallSubscribers GetMethodsByString(string methodName)
+        public methodSignature GetMethodsByString(string methodName)
         {
             List<Delegate> methods = new List<Delegate>();
             
@@ -27,14 +27,14 @@ namespace Console_game
             {
                 if (instanceType.GetMethod(methodName) != null)
                 {
-                    methods.Add(Delegate.CreateDelegate(typeof(frameCallSubscribers), instanceType, methodName, false, true));
+                    methods.Add(Delegate.CreateDelegate(typeof(methodSignature), instanceType, methodName, false, true));
                 }
             }
 
-            frameCallSubscribers joinedSubscribers = new frameCallSubscribers(DoNothing);
+            methodSignature joinedSubscribers = new methodSignature(DoNothing);
             for (int i = 0; i < methods.Count; i++)
             {
-                joinedSubscribers += (frameCallSubscribers)methods[i];
+                joinedSubscribers += (methodSignature)methods[i];
             }
             return joinedSubscribers;
         }

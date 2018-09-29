@@ -38,7 +38,6 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -50,19 +49,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Input.cs" />
     <Compile Include="Map generating\Fastnoise.cs" />
     <Compile Include="FrameRunner.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="Globals.cs" />
-    <Compile Include="maboi.cs" />
-    <Compile Include="ReflectiveEnumerator.cs" />
+    <Compile Include="ReflectiveHelper.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Map generating\Map Generator.cs" />
     <Compile Include="Map generating\Map.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="testt.cs" />
-    <Compile Include="Win32Console.cs" />
+    <Compile Include="Win32ConsoleHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

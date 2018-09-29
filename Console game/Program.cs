@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Windows.Input;
+using static Console_game.NativeMethods;
 
 namespace Console_game
 {
@@ -8,34 +10,47 @@ namespace Console_game
         static readonly DateTime start = DateTime.Now;
         static float total;
 
-        public static void print1()
+        public static void print1(KEY_EVENT_RECORD r)
         {
-            Console.Write(1);
+            //Console.Write(r.UnicodeChar);
+            //Console.Write(r.UnicodeChar);
             /*
             Console.Clear();
             total += GameObject.timeDelta;
             Console.Write($"{(DateTime.Now - start).Seconds},{(DateTime.Now - start).Milliseconds} {total}");*/
         }
 
-        public static void print2()
+        public static void print2(MOUSE_EVENT_RECORD r)
         {
-            Console.Write(2);
-            
+            if (r.dwButtonState == MOUSE_EVENT_RECORD.FROM_LEFT_1ST_BUTTON_PRESSED)
+            {
+                Console.Write(2);
+            }
         }
-
-        public delegate void frameUpdateSubscriber();
 
         static void Main(string[] args)
         {
-            //GameObjectChildren<GameObject>.frameCallSubscribers  maaboi = new GameObjectChildren<GameObject>().GetMethodsByString("update");
-            //maaboi.Invoke();
-            frameUpdateSubscriber frameBoi = new frameUpdateSubscriber(print1);
+            // Set the console's title to a preset gamename
+            Win32ConsoleHelper.SetConsoleTitle(Globals.gameName);
 
-            Console.ReadKey();
+            IntPtr inHandle = GetStdHandle(STD_INPUT_HANDLE);
+            uint mode = 0;
+            GetConsoleMode(inHandle, ref mode);
+            mode &= ~ENABLE_QUICK_EDIT_MODE; //disable
+            mode |= ENABLE_WINDOW_INPUT; //enable (if you want)
+            mode |= ENABLE_MOUSE_INPUT; //enable
+            SetConsoleMode(inHandle, mode);
+            ConsoleListener.MouseEvent += print2;
+            ConsoleListener.KeyEvent += print1;
+
+            //ReflectiveHelper<GameObject>.methodSignature  maaboi = new ReflectiveHelper<GameObject>().GetMethodsByString("update");
+            //maaboi.Invoke();
+            ConsoleListener.Start();
+            Console.ReadKey(false);
             //frameRunner.Pause();
-            Console.ReadKey();
+            Console.ReadKey(false);
             //frameRunner.Run();
-            Console.ReadKey();
+            Console.ReadKey(false);
 
 
 
@@ -48,7 +63,7 @@ namespace Console_game
 
             printMap(thisMap);
 
-            Console.ReadKey();
+            Console.ReadKey(false);
         }
 
         private const string blockChar = "█";

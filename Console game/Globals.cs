@@ -5,9 +5,12 @@ namespace Console_game
     static class Globals
     {
         public static Log logger;
+        public static readonly string gameName;
 
         static Globals()
         {
+            gameName = "TempGameName";
+
             // Creating the necessary folders and files
             Directory.CreateDirectory("logs");
             using (StreamWriter x = File.AppendText("logs/log.txt"))
