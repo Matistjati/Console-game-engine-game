@@ -57,7 +57,7 @@ namespace Console_game
 
         public FrameRunner()
         {
-            InternalFrameRunner.frameCaller = new Timer(InternalFrameRunner.frameCallback, null, new TimeSpan(0), new TimeSpan(166667));
+            InternalFrameRunner.frameCaller = new Timer(InternalFrameRunner.frameCallback, null, new TimeSpan(0), new TimeSpan(/*166667*/10000000));
             InternalFrameRunner.timeTracker = new Timer(InternalFrameRunner.SetFrameTime, null, new TimeSpan(0), new TimeSpan(-1));
         }
     }

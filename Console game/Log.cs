@@ -30,32 +30,60 @@ namespace Console_game
             this.showFileName = showFileName;
         }
 
-        public void logInfo(string info,
+        public void LogInfo(string info,
             [CallerLineNumber] int lineNumber = 0,
             [CallerMemberName] string caller = null,
             [CallerFilePath] string callerFile = null)
         {
-            string formattedString = formatString(info, lineNumber, caller, callerFile);
+            log(info, lineNumber, caller, callerFile, LogLevel.Info);
+        }
+
+        public void LogWarning(string info,
+            [CallerLineNumber] int lineNumber = 0,
+            [CallerMemberName] string caller = null,
+            [CallerFilePath] string callerFile = null)
+        {
+            log(info, lineNumber, caller, callerFile, LogLevel.Warning);
+        }
+
+        public void LogException(string info,
+            [CallerLineNumber] int lineNumber = 0,
+            [CallerMemberName] string caller = null,
+            [CallerFilePath] string callerFile = null)
+        {
+            log(info, lineNumber, caller, callerFile, LogLevel.Error);
+        }
+
+        private enum LogLevel
+        {
+            Info, Warning, Error
+        }
+
+        private void log(string logText, int lineNumber, string caller, string callerFile, LogLevel logLevel)
+        {
+            string formattedString = formatString(logText, lineNumber, caller, callerFile, logLevel);
             File.AppendAllText(filePath, formattedString);
         }
 
         private string formatString(string logString,
             int lineNumber,
             string caller,
-            string callerFile)
+            string callerFile,
+            LogLevel logLevel)
         {
+            logString = $"{logLevel}: {logString}";
 
             if (showLineNumber)
             {
-                logString = $"at line {lineNumber} " + logString;
+                logString = $"at line {lineNumber} {logString}";
             }
             if (showCaller)
             {
-                logString = $"called by {caller} " + logString;
+                logString = $"called by {caller} {logString}";
             }
             if (showFileName)
             {
-                logString = $"at file {Path.GetFileName(callerFile)} " + logString;
+                logString = $"at file {Path.GetFileName(callerFile)} {logString}";
             }
             if (showDate)
             {

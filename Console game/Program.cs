@@ -20,11 +20,19 @@ namespace Console_game
             Console.Write($"{(DateTime.Now - start).Seconds},{(DateTime.Now - start).Milliseconds} {total}");*/
         }
 
-        public static void print2(MOUSE_EVENT_RECORD r)
+        public static void print2()
         {
-            if (r.dwButtonState == MOUSE_EVENT_RECORD.FROM_LEFT_1ST_BUTTON_PRESSED)
+            if (Input.keysDown['a'])
             {
-                Console.Write(2);
+                Console.Write("down\n");
+            }
+            if (Input.keysHeld['a'])
+            {
+                Console.Write("holding\n");
+            }
+            if (Input.keysUp['a'])
+            {
+                Console.Write("up\n");
             }
         }
 
@@ -40,13 +48,29 @@ namespace Console_game
             mode |= ENABLE_WINDOW_INPUT; //enable (if you want)
             mode |= ENABLE_MOUSE_INPUT; //enable
             SetConsoleMode(inHandle, mode);
-            ConsoleListener.MouseEvent += print2;
-            ConsoleListener.KeyEvent += print1;
+            ConsoleListener.MouseEvent += InternalInput.MouseSetter;
+            ConsoleListener.KeyEvent += InternalInput.KeySetter;
 
-            //ReflectiveHelper<GameObject>.methodSignature  maaboi = new ReflectiveHelper<GameObject>().GetMethodsByString("update");
-            //maaboi.Invoke();
+            ReflectiveHelper<GameObject>.methodSignature frameSubscribers = new ReflectiveHelper<GameObject>().GetMethodsByString("update");
+            frameSubscribers += print2;
             ConsoleListener.Start();
-            Console.ReadKey(false);
+
+            DateTime lastFrameCall = DateTime.Now;
+            while (true)
+            {
+                // Calculating timedelta and incrementing time
+                float timeDelta = (DateTime.Now - lastFrameCall).Ticks / 10000000;
+                GameObject.timeDelta = timeDelta;
+                GameObject.time += timeDelta;
+
+                Input.UpdateInput();
+
+                frameSubscribers.Invoke();
+
+
+                lastFrameCall = DateTime.Now;
+                
+            }
             //frameRunner.Pause();
             Console.ReadKey(false);
             //frameRunner.Run();
