@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Input;
 using static Console_game.NativeMethods;
 
@@ -7,34 +8,33 @@ namespace Console_game
 {
     class Program
     {
-        static readonly DateTime start = DateTime.Now;
-        static float total;
-
-        public static void print1(KEY_EVENT_RECORD r)
+        private static float total;
+        private static void DisplayTimeAccuracy()
         {
-            //Console.Write(r.UnicodeChar);
-            //Console.Write(r.UnicodeChar);
-            /*
-            Console.Clear();
             total += GameObject.timeDelta;
-            Console.Write($"{(DateTime.Now - start).Seconds},{(DateTime.Now - start).Milliseconds} {total}");*/
+            Console.Clear();
+            Console.Write($"time: {GameObject.time}\ntimedelta total: {total}\ntimedelta: {GameObject.timeDelta}\ndifference: {total -GameObject.time}");
         }
 
         public static void print2()
         {
-            if (Input.keysDown['a'])
+            if (Input.GetKeyDown('a'))
             {
                 Console.Write("down\n");
             }
-            if (Input.keysHeld['a'])
+            if (Input.GetKeyHeld('a'))
             {
                 Console.Write("holding\n");
             }
-            if (Input.keysUp['a'])
+            if (Input.GetKeyUp('a'))
             {
                 Console.Write("up\n");
             }
         }
+
+        private static readonly TimeSpan frameWait = new TimeSpan(166667);
+
+        static DateTime start;
 
         static void Main(string[] args)
         {
@@ -48,28 +48,30 @@ namespace Console_game
             mode |= ENABLE_WINDOW_INPUT; //enable (if you want)
             mode |= ENABLE_MOUSE_INPUT; //enable
             SetConsoleMode(inHandle, mode);
+
             ConsoleListener.MouseEvent += InternalInput.MouseSetter;
             ConsoleListener.KeyEvent += InternalInput.KeySetter;
 
             ReflectiveHelper<GameObject>.methodSignature frameSubscribers = new ReflectiveHelper<GameObject>().GetMethodsByString("update");
-            frameSubscribers += print2;
+            frameSubscribers += DisplayTimeAccuracy;
             ConsoleListener.Start();
 
             DateTime lastFrameCall = DateTime.Now;
+            start = DateTime.Now;
             while (true)
             {
-                // Calculating timedelta and incrementing time
-                float timeDelta = (DateTime.Now - lastFrameCall).Ticks / 10000000;
-                GameObject.timeDelta = timeDelta;
-                GameObject.time += timeDelta;
+                // Calculating and setting timedelta
+                GameObject.timeDelta = (float)(DateTime.Now - lastFrameCall).TotalSeconds;
+
+                GameObject.time = (float)(DateTime.Now - start).TotalSeconds;
 
                 Input.UpdateInput();
 
+                lastFrameCall = DateTime.Now;
                 frameSubscribers.Invoke();
 
 
-                lastFrameCall = DateTime.Now;
-                
+                System.Threading.Thread.Sleep(frameWait);
             }
             //frameRunner.Pause();
             Console.ReadKey(false);

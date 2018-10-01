@@ -11,8 +11,8 @@ namespace Console_game
         public int mapSizeX { get; }
         public float[,] map { get; }
 
-        private Vector2 _playerPosition;
-        public Vector2 playerPosition
+        private Vector2Int _playerPosition;
+        public Vector2Int playerPosition
         {
             set
             {
@@ -49,7 +49,7 @@ namespace Console_game
             this.seed = seed;
             this.mapSizeY = mapSizeY;
             this.mapSizeX = mapSizeX;
-            playerPosition = new Vector2(15, 15);
+            playerPosition = new Vector2Int(15, 15);
             map = Map_Generator.MakeMap(seed, mapSizeX, mapSizeY, scale);
         }
 

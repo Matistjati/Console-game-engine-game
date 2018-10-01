@@ -16,10 +16,11 @@ namespace Console_game
         public static event ConsoleWindowBufferSizeEvent WindowBufferSizeEvent;
 
         private static bool Run = false;
+        private static bool ThreadExists = false;
 
         public static void Start()
         {
-            if (!Run)
+            if (!Run && !ThreadExists)
             {
                 Run = true;
                 IntPtr handleIn = GetStdHandle(STD_INPUT_HANDLE);
@@ -52,11 +53,17 @@ namespace Console_game
                         }
                     }
                 }).Start();
+                ThreadExists = true;
+            }
+            else
+            {
+                Continue();
             }
         }
 
-        public static void Stop() => Run = false;
+        public static void Continue() => Run = true;
 
+        public static void Stop() => Run = false;
 
         public delegate void ConsoleMouseEvent(MOUSE_EVENT_RECORD r);
 
@@ -65,7 +72,6 @@ namespace Console_game
         public delegate void ConsoleWindowBufferSizeEvent(WINDOW_BUFFER_SIZE_RECORD r);
 
     }
-
 
     public static class NativeMethods
     {

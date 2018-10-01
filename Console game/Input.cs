@@ -8,8 +8,8 @@ namespace Console_game
     internal static class InternalInput
     {
         public static bool leftMouseButtonPressed;
-        pbulic static bool rightMouseButtonPressed;
-        public static Vector2 mousePosition = new Vector2();
+        public static bool rightMouseButtonPressed;
+        public static Vector2Int mousePosition = new Vector2Int();
 
         public static void MouseSetter(MOUSE_EVENT_RECORD r)
         {
@@ -37,6 +37,8 @@ namespace Console_game
         public static Dictionary<char, bool> keysUp;
 
         public static Dictionary<char, bool> keysHeld;
+
+        public static object _keysHeldLock = new object();
 
         static readonly char[] keyStatesKeys = new char[]
             { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
@@ -72,7 +74,10 @@ namespace Console_game
                     if (keysDown[r.UnicodeChar])
                     {
                         keysDown[r.UnicodeChar] = false;
-                        keysHeld[r.UnicodeChar] = true;
+                        lock (_keysHeldLock)
+                        {
+                            keysHeld[r.UnicodeChar] = true;
+                        }
                     }
                     else if (!keysHeld[r.UnicodeChar])
                     {
@@ -83,7 +88,10 @@ namespace Console_game
                 // Up
                 else
                 {
-                    keysHeld[r.UnicodeChar] = false;
+                    lock (_keysHeldLock)
+                    {
+                        keysHeld[r.UnicodeChar] = false;
+                    }
                     releasedChars.Enqueue(r.UnicodeChar);
                 }
             }
@@ -98,9 +106,13 @@ namespace Console_game
 
     public static class Input
     {
+        static Dictionary<char, bool> keysHeldCopy;
         internal static void UpdateInput()
         {
-			Dictionary<char, bool> keysHeldCopy = new Dictionary<char, bool>(InternalInput.keysHeld);
+            lock (InternalInput._keysHeldLock)
+            {
+                keysHeldCopy = new Dictionary<char, bool>(InternalInput.keysHeld);
+            }
 
             foreach (KeyValuePair<char, bool> keyInfo in keysHeldCopy)
             {
@@ -143,7 +155,7 @@ namespace Console_game
 
         internal static Dictionary<char, bool> keysHeld;
 
-		public bool GetKeyDown(char key)
+		public static bool GetKeyDown(char key)
 		{
 			if (!keyStatesKeys.Contains(key)) 
 			{
@@ -153,7 +165,7 @@ namespace Console_game
 			return keysDown[key];
 		}
 
-		public bool GetKeyHeld(char key)
+		public static bool GetKeyHeld(char key)
 		{
 			if (!keyStatesKeys.Contains(key)) 
 			{
@@ -163,7 +175,7 @@ namespace Console_game
 			return keysHeld[key];
 		}
 
-		public bool GetKeyUp(char key)
+		public static bool GetKeyUp(char key)
 		{
 			if (!keyStatesKeys.Contains(key)) 
 			{
@@ -173,7 +185,7 @@ namespace Console_game
 			return keysUp[key];
 		}
 
-		public bool GetButtonDown(ButtonPress button)
+		public static bool GetButtonDown(ButtonPress button)
 		{
 			switch (button)
 			{

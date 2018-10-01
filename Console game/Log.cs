@@ -29,29 +29,29 @@ namespace Console_game
             this.showCaller = showCaller;
             this.showFileName = showFileName;
         }
-
-        public void LogInfo(string info,
+            
+        public void LogInfo<T>(T info,
             [CallerLineNumber] int lineNumber = 0,
             [CallerMemberName] string caller = null,
             [CallerFilePath] string callerFile = null)
         {
-            log(info, lineNumber, caller, callerFile, LogLevel.Info);
+            log(info.ToString(), lineNumber, caller, callerFile, LogLevel.Info);
         }
 
-        public void LogWarning(string info,
+        public void LogWarning<T>(T info,
             [CallerLineNumber] int lineNumber = 0,
             [CallerMemberName] string caller = null,
             [CallerFilePath] string callerFile = null)
         {
-            log(info, lineNumber, caller, callerFile, LogLevel.Warning);
+            log(info.ToString(), lineNumber, caller, callerFile, LogLevel.Warning);
         }
 
-        public void LogException(string info,
+        public void LogException<T>(T info,
             [CallerLineNumber] int lineNumber = 0,
             [CallerMemberName] string caller = null,
             [CallerFilePath] string callerFile = null)
         {
-            log(info, lineNumber, caller, callerFile, LogLevel.Error);
+            log(info.ToString(), lineNumber, caller, callerFile, LogLevel.Error);
         }
 
         private enum LogLevel
