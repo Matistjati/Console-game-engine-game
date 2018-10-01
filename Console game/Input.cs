@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 using System.Linq;
 using static Console_game.NativeMethods;
 
@@ -6,17 +7,22 @@ namespace Console_game
 {
     internal static class InternalInput
     {
-        static bool leftMouseButtonPressed;
-        static bool rightMouseButtonPressed;
-        static Vector2 mousePosition = new Vector2();
+        public static bool leftMouseButtonPressed;
+        pbulic static bool rightMouseButtonPressed;
+        public static Vector2 mousePosition = new Vector2();
 
         public static void MouseSetter(MOUSE_EVENT_RECORD r)
         {
             if (r.dwEventFlags == 0x0000)
             {
-                leftMouseButtonPressed = r.dwButtonState == MOUSE_EVENT_RECORD.FROM_LEFT_1ST_BUTTON_PRESSED ? true : false;
-
-                rightMouseButtonPressed = r.dwButtonState == MOUSE_EVENT_RECORD.RIGHTMOST_BUTTON_PRESSED ? true : false;
+				if (r.dwButtonState == MOUSE_EVENT_RECORD.FROM_LEFT_1ST_BUTTON_PRESSED) 
+				{
+					leftMouseButtonPressed = true;
+                }
+				else if (r.dwButtonState == MOUSE_EVENT_RECORD.RIGHTMOST_BUTTON_PRESSED) 
+				{
+					rightMouseButtonPressed = true;
+                }
             }
             else if (r.dwEventFlags == 0x0001)
             {
@@ -84,7 +90,7 @@ namespace Console_game
         }
     }
 
-    public enum ButtonPresses
+    public enum ButtonPress
     {
         left = 0x0001,
         right = 0x0002
@@ -94,9 +100,9 @@ namespace Console_game
     {
         internal static void UpdateInput()
         {
-            // Copy the things being iterated
+			Dictionary<char, bool> keysHeldCopy = new Dictionary<char, bool>(InternalInput.keysHeld);
 
-            foreach (KeyValuePair<char, bool> keyInfo in InternalInput.keysHeld)
+            foreach (KeyValuePair<char, bool> keyInfo in keysHeldCopy)
             {
                 keysHeld[keyInfo.Key] = keyInfo.Value;
             }
@@ -120,17 +126,68 @@ namespace Console_game
                 keysDown[charChanged] = true;
                 keysHeld[charChanged] = false;
             }
+
+			leftMouseButtonPressed = InternalInput.leftMouseButtonPressed;
+			InternalInput.leftMouseButtonPressed = false;
+
+			rightMouseButtonPressed = InternalInput.rightMouseButtonPressed;
+			InternalInput.rightMouseButtonPressed = false;
         }
 
-        private static bool leftMouseButtonPressed;
-        private static bool rightMouseButtonPressed;
+        internal static bool leftMouseButtonPressed;
+        internal static bool rightMouseButtonPressed;
 
-        public static Dictionary<char, bool> keysDown;
+        internal static Dictionary<char, bool> keysDown;
 
-        public static Dictionary<char, bool> keysUp;
+        internal static Dictionary<char, bool> keysUp;
 
-        public static Dictionary<char, bool> keysHeld;
+        internal static Dictionary<char, bool> keysHeld;
 
+		public bool GetKeyDown(char key)
+		{
+			if (!keyStatesKeys.Contains(key)) 
+			{
+				throw new ArgumentException($"The char {key} is not tracked");
+			}
+
+			return keysDown[key];
+		}
+
+		public bool GetKeyHeld(char key)
+		{
+			if (!keyStatesKeys.Contains(key)) 
+			{
+				throw new ArgumentException($"The char {key} is not tracked");
+			}
+
+			return keysHeld[key];
+		}
+
+		public bool GetKeyUp(char key)
+		{
+			if (!keyStatesKeys.Contains(key)) 
+			{
+				throw new ArgumentException($"The char {key} is not tracked");
+			}
+
+			return keysUp[key];
+		}
+
+		public bool GetButtonDown(ButtonPress button)
+		{
+			switch (button)
+			{
+				case ButtonPress.left:
+					return leftMouseButtonPressed;
+				case ButtonPress.right:
+					return rightMouseButtonPressed;
+				default:
+					Globals.logger.LogException($"Case default was reached: {button}");
+					return false;
+			}
+
+		}
+		
         static readonly char[] keyStatesKeys = new char[]
             { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
                 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'å', 'ä', 'ö',
