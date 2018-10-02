@@ -12,6 +12,7 @@ namespace Console_game
         readonly IEnumerable<Type> gameObjectChildren;
         public ReflectiveHelper()
         {
+            // TODO: Assembly being used by
             gameObjectChildren = Assembly.GetAssembly(typeof(T)).GetTypes()
                 .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(T)));
         }

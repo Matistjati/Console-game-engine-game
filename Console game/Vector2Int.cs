@@ -10,7 +10,7 @@
         public Vector2Int(int X, int Y)
         {
             this.X = X;
-            this.Y = X;
+            this.Y = Y;
         }
     }
 }

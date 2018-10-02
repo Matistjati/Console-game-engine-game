@@ -1,11 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Console_game;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Numerics;
 
 namespace Console_game.Tests
 {
@@ -15,12 +15,19 @@ namespace Console_game.Tests
         [TestMethod()]
         public void MapTestEmptyConstructorSucces()
         {
+            // This one takes a while since the default constructor size is 600 x 150
             Map gameMap = new Map();
 
             // Assuring that the map has been filled
             Random randomGen = new Random();
-            Assert.AreEqual(true, gameMap.map[randomGen.Next(0, gameMap.map.GetLength(0)), randomGen.Next(0, gameMap.map.GetLength(1))] != 0 &&
-                                  gameMap.map[randomGen.Next(0, gameMap.map.GetLength(0)), randomGen.Next(0, gameMap.map.GetLength(1))] != 0);
+            for (int i = 0; i < 50; i++)
+            {
+                float randomPosition1 = gameMap.map[
+                    randomGen.Next(0, gameMap.map.GetLength(0)),
+                    randomGen.Next(0, gameMap.map.GetLength(1))];
+                Assert.AreEqual(true, randomPosition1 < 1 && randomPosition1 > -1);
+            }
+            
 
             // Variables being set
             Assert.AreEqual(true, gameMap.seed != 0);
@@ -33,10 +40,15 @@ namespace Console_game.Tests
         {
             Map gameMap = new Map(new Random().Next(1, int.MaxValue));
 
-            // Assuring that the map has been filled
+            // Assuring that the map has been filled with proper values
             Random randomGen = new Random();
-            Assert.AreEqual(true, gameMap.map[randomGen.Next(0, gameMap.map.GetLength(0)), randomGen.Next(0, gameMap.map.GetLength(1))] != 0 &&
-                                  gameMap.map[randomGen.Next(0, gameMap.map.GetLength(0)), randomGen.Next(0, gameMap.map.GetLength(1))] != 0);
+            for (int i = 0; i < 50; i++)
+            {
+                float randomPosition1 = gameMap.map[
+                    randomGen.Next(0, gameMap.map.GetLength(0)),
+                    randomGen.Next(0, gameMap.map.GetLength(1))];
+                Assert.AreEqual(true, randomPosition1 < 1 && randomPosition1 > -1);
+            }
 
             // Variables being set
             Assert.AreEqual(true, gameMap.seed != 0);
@@ -61,14 +73,15 @@ namespace Console_game.Tests
         }
 
         [TestMethod()]
-        public void getPrintableMapTest()
+        public void GetPrintableMapTest()
         {
             Random randomGen = new Random();
             Map gameMap = new Map(randomGen.Next(), 30, 30, 1);
-            ConsoleColor[,] mapColors = gameMap.getPrintableMap();
+            ConsoleColor[,] mapColors = gameMap.getPrintableMap(new Vector2(15, 15));
+            Rectangle mapCutOut = gameMap.GetSeenMap(new Vector2(15, 15));
 
-            for (int x = 0; x < gameMap.map.GetLength(0); x++)
-                for (int y = 0; y < gameMap.map.GetLength(1); y++)
+            for (int x = 0; x < mapCutOut.Width; x++)
+                for (int y = 0; y < mapCutOut.Height; y++)
                 {
                     float mapValue = gameMap.map[x, y];
 
@@ -102,10 +115,124 @@ namespace Console_game.Tests
                 }
         }
 
+        // Getseenmaptests beyond this point
+        Map testMap = new Map(30, 30);
+
         [TestMethod()]
-        public void getSeenMapTest()
+        public void GetSeenMapNormalUsage()
         {
-            Assert.Fail();
+            Vector2 position = new Vector2(15, 15);
+
+            Rectangle seenMap = testMap.GetSeenMap(position);
+            Assert.AreEqual(position.X - testMap.playerViewRangeX, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.playerViewRangeY, seenMap.Y);
+
+            Assert.AreEqual(testMap.playerViewRangeX * 2, seenMap.Width);
+            Assert.AreEqual(testMap.playerViewRangeY * 2, seenMap.Height);
+        }
+
+        [TestMethod()]
+        public void GetSeenMapRightEdge()
+        {
+            Vector2 position = new Vector2(29, 15);
+
+            Rectangle seenMap = testMap.GetSeenMap(position);
+            Assert.AreEqual(position.X - testMap.playerViewRangeX, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.playerViewRangeY, seenMap.Y);
+
+            Assert.AreEqual(testMap.playerViewRangeX * 2, seenMap.Width);
+            Assert.AreEqual(testMap.playerViewRangeY * 2, seenMap.Height);
+        }
+
+        [TestMethod()]
+        public void GetSeenMapLeftEdge()
+        {
+            Vector2 position = new Vector2(0, 15);
+
+            Rectangle seenMap = testMap.GetSeenMap(position);
+            Assert.AreEqual(0, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.playerViewRangeY, seenMap.Y);
+
+            Assert.AreEqual(testMap.playerViewRangeX * 2, seenMap.Width);
+            Assert.AreEqual(testMap.playerViewRangeY * 2, seenMap.Height);
+        }
+
+        [TestMethod()]
+        public void GetSeenMapTop()
+        {
+            Vector2 position = new Vector2(15, 0);
+
+            Rectangle seenMap = testMap.GetSeenMap(position);
+            Assert.AreEqual(position.X - testMap.playerViewRangeX, seenMap.X);
+            Assert.AreEqual(0, seenMap.Y);
+
+            Assert.AreEqual(testMap.playerViewRangeX * 2, seenMap.Width);
+            Assert.AreEqual(testMap.playerViewRangeY * 2, seenMap.Height);
+        }
+
+        [TestMethod()]
+        public void GetSeenMapBottom()
+        {
+            Vector2 position = new Vector2(15, 29);
+
+            Rectangle seenMap = testMap.GetSeenMap(position);
+            Assert.AreEqual(position.X - testMap.playerViewRangeX, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.playerViewRangeY, seenMap.Y);
+
+            Assert.AreEqual(testMap.playerViewRangeX * 2, seenMap.Width);
+            Assert.AreEqual(testMap.playerViewRangeY * 2, seenMap.Height);
+        }
+
+        [TestMethod()]
+        public void GetSeenMapOutOfBoundsRight()
+        {
+            Vector2 position = new Vector2(60, 15);
+
+            Rectangle seenMap = testMap.GetSeenMap(position);
+            Assert.AreEqual(position.X - testMap.playerViewRangeX, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.playerViewRangeY, seenMap.Y);
+
+            Assert.AreEqual(testMap.playerViewRangeX * 2, seenMap.Width);
+            Assert.AreEqual(testMap.playerViewRangeY * 2, seenMap.Height);
+        }
+
+        [TestMethod()]
+        public void GetSeenMapOutOfBoundsLeft()
+        {
+            Vector2 position = new Vector2(-20, 15);
+
+            Rectangle seenMap = testMap.GetSeenMap(position);
+            Assert.AreEqual(0, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.playerViewRangeY, seenMap.Y);
+
+            Assert.AreEqual(testMap.playerViewRangeX * 2, seenMap.Width);
+            Assert.AreEqual(testMap.playerViewRangeY * 2, seenMap.Height);
+        }
+
+        [TestMethod()]
+        public void GetSeenMapOutOfBoundsTop()
+        {
+            Vector2 position = new Vector2(15, -20);
+
+            Rectangle seenMap = testMap.GetSeenMap(position);
+            Assert.AreEqual(position.X - testMap.playerViewRangeX, seenMap.X);
+            Assert.AreEqual(0, seenMap.Y);
+
+            Assert.AreEqual(testMap.playerViewRangeX * 2, seenMap.Width);
+            Assert.AreEqual(testMap.playerViewRangeY * 2, seenMap.Height);
+        }
+
+        [TestMethod()]
+        public void GetSeenMapOutOfBoundsBottom()
+        {
+            Vector2 position = new Vector2(15, 60);
+
+            Rectangle seenMap = testMap.GetSeenMap(position);
+            Assert.AreEqual(position.X - testMap.playerViewRangeX, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.playerViewRangeY, seenMap.Y);
+
+            Assert.AreEqual(testMap.playerViewRangeX * 2, seenMap.Width);
+            Assert.AreEqual(testMap.playerViewRangeY * 2, seenMap.Height);
         }
     }
 }

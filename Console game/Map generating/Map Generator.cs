@@ -12,7 +12,7 @@ namespace Console_game
                 throw new ArgumentException($"Scale: {scale} was negative");
 
             float[,] map = new float[mapSizeX, mapSizeY];
-            
+
             FastNoise perlin = new FastNoise(seed);
 
             for (int x = 0; x < map.GetLength(0); x++)

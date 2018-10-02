@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Console_game
 {
-    class Win32ConsoleHelper
+    internal class Win32ConsoleHelper
     {
         [DllImport("Kernel32.dll")]
         public static extern int SetConsoleTitle(string lpConsoleTitle);
@@ -30,29 +30,27 @@ namespace Console_game
         [DllImport("kernel32")]
         private static extern IntPtr GetStdHandle(StdHandle index);
 
-        public static void SetConsoleFontSize(short x, short y)
+        public static void SetConsoleFontSize(ushort x, ushort y)
         {
-            unsafe
+
+            IntPtr outPutHandle = GetStdHandle(StdHandle.OutputHandle);
+
+            if (outPutHandle == INVALID_HANDLE_VALUE)
             {
-                IntPtr outPutHandle = GetStdHandle(StdHandle.OutputHandle);
-
-                if (outPutHandle == INVALID_HANDLE_VALUE)
-                {
-                    Log.defaultLogger.LogInfo($"Invalid handle {outPutHandle}");
-                    return;
-                }
-
-                _CONSOLE_FONT_INFO_EX ConsoleFontInfo = new _CONSOLE_FONT_INFO_EX();
-                ConsoleFontInfo.cbSize = (uint)Marshal.SizeOf(ConsoleFontInfo);
-
-                GetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
-                ConsoleFontInfo.dwFontSize.X = x;
-                ConsoleFontInfo.dwFontSize.Y = y;
-
-                SetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
-
-                Marshal.FreeHGlobal(outPutHandle);
+                Log.defaultLogger.LogInfo($"Invalid handle {outPutHandle}");
+                return;
             }
+
+            _CONSOLE_FONT_INFO_EX ConsoleFontInfo = new _CONSOLE_FONT_INFO_EX();
+            ConsoleFontInfo.cbSize = (uint)Marshal.SizeOf(ConsoleFontInfo);
+
+            GetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
+            ConsoleFontInfo.dwFontSize.X = (short)x;
+            ConsoleFontInfo.dwFontSize.Y = (short)y;
+
+            SetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
+
+            Marshal.FreeHGlobal(outPutHandle);
         }
 
         public enum ConsoleFont
@@ -109,6 +107,9 @@ namespace Console_game
                 Marshal.Copy(newFontString.ToCharArray(), 0, ptr, newFontString.Length);
 
                 SetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
+
+                Marshal.FreeHGlobal(outPutHandle);
+                Marshal.FreeHGlobal(ptr);
             }
         }
 
