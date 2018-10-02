@@ -32,55 +32,23 @@ namespace Console_game
             }
         }
 
-        private static readonly TimeSpan frameWait = new TimeSpan(166667);
-
-        static DateTime start;
-
         static void Main(string[] args)
         {
             // Set the console's title to a preset gamename
             Win32ConsoleHelper.SetConsoleTitle(Globals.gameName);
 
-            IntPtr inHandle = GetStdHandle(STD_INPUT_HANDLE);
-            uint mode = 0;
-            GetConsoleMode(inHandle, ref mode);
-            mode &= ~ENABLE_QUICK_EDIT_MODE; //disable
-            mode |= ENABLE_WINDOW_INPUT; //enable (if you want)
-            mode |= ENABLE_MOUSE_INPUT; //enable
-            SetConsoleMode(inHandle, mode);
-
             ConsoleListener.MouseEvent += InternalInput.MouseSetter;
             ConsoleListener.KeyEvent += InternalInput.KeySetter;
 
-            ReflectiveHelper<GameObject>.methodSignature frameSubscribers = new ReflectiveHelper<GameObject>().GetMethodsByString("update");
+            Globals.GameMethodSignature frameSubscribers = new ReflectiveHelper<GameObject>().GetMethodsByString("update");
             frameSubscribers += DisplayTimeAccuracy;
             ConsoleListener.Start();
+			frameRunner.AddFrameSubscriber(frameSubscribers);
+			frameRunner.start();
 
-            DateTime lastFrameCall = DateTime.Now;
-            start = DateTime.Now;
-            while (true)
-            {
-                // Calculating and setting timedelta
-                GameObject.timeDelta = (float)(DateTime.Now - lastFrameCall).TotalSeconds;
-
-                GameObject.time = (float)(DateTime.Now - start).TotalSeconds;
-
-                Input.UpdateInput();
-
-                lastFrameCall = DateTime.Now;
-                frameSubscribers.Invoke();
-
-
-                System.Threading.Thread.Sleep(frameWait);
-            }
-            //frameRunner.Pause();
-            Console.ReadKey(false);
-            //frameRunner.Run();
-            Console.ReadKey(false);
-
-
-
-
+            // Creating the necessary folders and files
+            Directory.CreateDirectory("logs");
+            using (StreamWriter x = File.AppendText("logs/log.txt"))
 
 
             Console.SetBufferSize(120, 30);

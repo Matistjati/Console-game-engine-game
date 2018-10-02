@@ -16,10 +16,8 @@ namespace Console_game
                 .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(T)));
         }
 
-        public delegate void methodSignature();
-
         // For this to work, the class must inherit from GameObject and the method must be public and static
-        public methodSignature GetMethodsByString(string methodName)
+        public Globals.GameMethodSignature GetMethodsByString(string methodName)
         {
             List<Delegate> methods = new List<Delegate>();
             
@@ -27,19 +25,16 @@ namespace Console_game
             {
                 if (instanceType.GetMethod(methodName) != null)
                 {
-                    methods.Add(Delegate.CreateDelegate(typeof(methodSignature), instanceType, methodName, false, true));
+                    methods.Add(Delegate.CreateDelegate(typeof(Globals.GameMethodSignature), instanceType, methodName, false, true));
                 }
             }
 
-            methodSignature joinedSubscribers = new methodSignature(DoNothing);
+            Globals.GameMethodSignature joinedSubscribers = new Globals.GameMethodSignature(() => { });
             for (int i = 0; i < methods.Count; i++)
             {
-                joinedSubscribers += (methodSignature)methods[i];
+                joinedSubscribers += (Globals.GameMethodSignature)methods[i];
             }
             return joinedSubscribers;
         }
-
-        public void DoNothing()
-        { }
     }
 }

@@ -17,10 +17,20 @@ namespace Console_game
         
         private Log _defaultLogger;
         
-        public static Log GetLogger()
-        {
-            return _deraultLogger;
-        }
+		internal Log defaultLogger
+		{
+			get
+			{
+				if (_defaultLogger == null)
+				{
+					_defaultLogger = new Log("logs/log.txt",
+						showDate: true,
+						showLineNumber: true,
+						showCaller: true,
+						showFileName: true);
+				}
+			}
+		}
         
         public Log(string filePath, bool showDate, bool showLineNumber, bool showCaller, bool showFileName)
         {

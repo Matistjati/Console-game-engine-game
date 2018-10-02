@@ -23,7 +23,16 @@ namespace Console_game
             if (!Run && !ThreadExists)
             {
                 Run = true;
+
                 IntPtr handleIn = GetStdHandle(STD_INPUT_HANDLE);
+				uint mode = 0;
+				// Setting some shit
+				GetConsoleMode(inHandle, ref mode);
+				mode &= ~ENABLE_QUICK_EDIT_MODE; //disable
+				mode |= ENABLE_WINDOW_INPUT;	 //enable
+				mode |= ENABLE_MOUSE_INPUT;		 //enable
+				SetConsoleMode(inHandle, mode);
+
                 new Thread(() =>
                 {
                     while (true)
@@ -70,7 +79,6 @@ namespace Console_game
         public delegate void ConsoleKeyEvent(KEY_EVENT_RECORD r);
 
         public delegate void ConsoleWindowBufferSizeEvent(WINDOW_BUFFER_SIZE_RECORD r);
-
     }
 
     public static class NativeMethods

@@ -3,62 +3,56 @@ using System.Threading;
 
 namespace Console_game
 {
-    public class FrameRunner
+    public static class FrameRunner
     {
-        private static class InternalFrameRunner
+        static DateTime lastFrameCall;
+        static DateTime start;
+		
+		private static readonly TimeSpan frameWait = new TimeSpan(166667);
+
+
+        public static void Pause()
         {
-            public static DateTime lastFrameCall;
+			run = false;
+        }
 
-            public static AutoResetEvent frameSyncer;
-            public static TimerCallback frameCallback;
-            public static Timer timeTracker;
-            public static Timer frameCaller;
-
-            static public void SetFrameTime(object state)
+        public static void Run()
+        {
+			start = DateTime.Now;
+			lastFrameCall = DateTime.Now;
+            while (true)
             {
-                // Calculating timedelta and incrementing time
-                TimeSpan timeDeltaTimeSpan = DateTime.Now - lastFrameCall;
-                float timeDelta = (float)timeDeltaTimeSpan.Ticks / 10000000;
-                GameObject.timeDelta = timeDelta;
-                GameObject.time += timeDelta;
+                // Calculating and setting timedelta
+                GameObject.timeDelta = (float)(DateTime.Now - lastFrameCall).TotalSeconds;
+
+                GameObject.time = (float)(DateTime.Now - start).TotalSeconds;
+
+                Input.UpdateInput();
 
                 lastFrameCall = DateTime.Now;
-                timeTracker.Change(new TimeSpan(166667), new TimeSpan(-1));
-            }
+                frameCallback.Invoke();
 
-            private static void EmptyMethod(object state) { }
 
-            static InternalFrameRunner()
-            {
-                frameCallback = new TimerCallback(EmptyMethod);
-                frameSyncer = new AutoResetEvent(false);
-                lastFrameCall = DateTime.Now;
+                System.Threading.Thread.Sleep(frameWait);
             }
         }
+		
+		static Globals.GameMethodSignature frameCallback;
 
-        public void Pause()
+        public static AddFrameSubscriber(Globals.GameMethodSignature method)
         {
-            InternalFrameRunner.timeTracker.Change(Timeout.Infinite, Timeout.Infinite);
-            InternalFrameRunner.frameCaller.Change(Timeout.Infinite, Timeout.Infinite);
+            frameCallback += method;
         }
 
-        public void Run()
-        {
-            InternalFrameRunner.timeTracker.Change(new TimeSpan(0), new TimeSpan(-1));
-            InternalFrameRunner.frameCaller.Change(new TimeSpan(0), new TimeSpan(166667));
-            InternalFrameRunner.lastFrameCall = DateTime.Now;
-        }
+		private static bool run;
 
-        public static FrameRunner operator +(FrameRunner _this, TimerCallback other)
+		public static void Start()
         {
-            InternalFrameRunner.frameCallback += other;
-            return new FrameRunner();
-        }
-
-        public FrameRunner()
-        {
-            InternalFrameRunner.frameCaller = new Timer(InternalFrameRunner.frameCallback, null, new TimeSpan(0), new TimeSpan(/*166667*/10000000));
-            InternalFrameRunner.timeTracker = new Timer(InternalFrameRunner.SetFrameTime, null, new TimeSpan(0), new TimeSpan(-1));
+			if (!run)
+			{
+				run = true;
+				Run();
+			}
         }
     }
 }
