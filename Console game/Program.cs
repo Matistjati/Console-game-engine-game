@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Input;
+using System.IO;
 using static Console_game.NativeMethods;
 
 namespace Console_game
@@ -43,8 +44,9 @@ namespace Console_game
             Globals.GameMethodSignature frameSubscribers = new ReflectiveHelper<GameObject>().GetMethodsByString("update");
             frameSubscribers += DisplayTimeAccuracy;
             ConsoleListener.Start();
-			frameRunner.AddFrameSubscriber(frameSubscribers);
-			frameRunner.start();
+
+			FrameRunner.AddFrameSubscriber(frameSubscribers);
+			FrameRunner.Start();
 
             // Creating the necessary folders and files
             Directory.CreateDirectory("logs");

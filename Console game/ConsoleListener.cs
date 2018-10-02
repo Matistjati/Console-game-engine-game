@@ -24,7 +24,7 @@ namespace Console_game
             {
                 Run = true;
 
-                IntPtr handleIn = GetStdHandle(STD_INPUT_HANDLE);
+                IntPtr inHandle = GetStdHandle(STD_INPUT_HANDLE);
 				uint mode = 0;
 				// Setting some shit
 				GetConsoleMode(inHandle, ref mode);
@@ -40,7 +40,7 @@ namespace Console_game
                         uint numRead = 0;
                         INPUT_RECORD[] record = new INPUT_RECORD[1];
                         record[0] = new INPUT_RECORD();
-                        ReadConsoleInput(handleIn, record, 1, ref numRead);
+                        ReadConsoleInput(inHandle, record, 1, ref numRead);
                         if (Run)
                             switch (record[0].EventType)
                             {
@@ -57,7 +57,7 @@ namespace Console_game
                         else
                         {
                             uint numWritten = 0;
-                            WriteConsoleInput(handleIn, record, 1, ref numWritten);
+                            WriteConsoleInput(inHandle, record, 1, ref numWritten);
                             return;
                         }
                     }

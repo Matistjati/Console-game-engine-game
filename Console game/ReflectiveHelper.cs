@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Console_game
 {
-    public class ReflectiveHelper<T> where T : class
+    internal class ReflectiveHelper<T> where T : class
     {
         // This is black magic
 

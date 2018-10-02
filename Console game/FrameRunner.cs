@@ -23,9 +23,9 @@ namespace Console_game
             while (true)
             {
                 // Calculating and setting timedelta
-                GameObject.timeDelta = (float)(DateTime.Now - lastFrameCall).TotalSeconds;
+                GameObject._timeDelta = (float)(DateTime.Now - lastFrameCall).TotalSeconds;
 
-                GameObject.time = (float)(DateTime.Now - start).TotalSeconds;
+                GameObject._time = (float)(DateTime.Now - start).TotalSeconds;
 
                 Input.UpdateInput();
 
@@ -39,7 +39,7 @@ namespace Console_game
 		
 		static Globals.GameMethodSignature frameCallback;
 
-        public static AddFrameSubscriber(Globals.GameMethodSignature method)
+        internal static void AddFrameSubscriber(Globals.GameMethodSignature method)
         {
             frameCallback += method;
         }

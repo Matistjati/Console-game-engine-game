@@ -15,9 +15,9 @@ namespace Console_game
 
         private FileStream logStream;
         
-        private Log _defaultLogger;
+        private static Log _defaultLogger;
         
-		internal Log defaultLogger
+		internal static Log defaultLogger
 		{
 			get
 			{
@@ -29,6 +29,7 @@ namespace Console_game
 						showCaller: true,
 						showFileName: true);
 				}
+                return _defaultLogger;
 			}
 		}
         
