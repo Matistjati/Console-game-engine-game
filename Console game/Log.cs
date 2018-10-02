@@ -14,7 +14,14 @@ namespace Console_game
         public bool showFileName;
 
         private FileStream logStream;
-
+        
+        private Log _defaultLogger;
+        
+        public static Log GetLogger()
+        {
+            return _deraultLogger;
+        }
+        
         public Log(string filePath, bool showDate, bool showLineNumber, bool showCaller, bool showFileName)
         {
             if (!File.Exists(filePath))
