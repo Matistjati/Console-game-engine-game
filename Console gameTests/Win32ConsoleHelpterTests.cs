@@ -1,31 +1,32 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Collections.Generic;
 
 namespace Console_game.Tests
 {
     [TestClass()]
     public class Win32ConsoleHelpterTests
     {
-        Process cmd;
+        static List<Process> cmd = new List<Process>();
 
         [TestInitialize]
         public void SetUp()
         {
-            cmd = Process.Start("cmd.exe");
+            cmd.Add(Process.Start("cmd.exe"));
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            cmd.WaitForExit(1);
-            cmd.Dispose();
+            for (int i = 0; i < cmd.Count; i++)
+            {
+                cmd[i].Kill();
+            }
+            cmd.Clear();
         }
 
         [DllImport("Kernel32.dll")]
@@ -48,6 +49,11 @@ namespace Console_game.Tests
             IntPtr hConsoleOutput,
             int nFont);
 
+        [DllImport("kernel32")]
+        private static extern Int32 GetConsoleTitle(
+            [MarshalAs(UnmanagedType.LPArray)] byte[] lpConsoleTitle,
+            uint nSize);
+
         private enum StdHandle
         {
             OutputHandle = -11
@@ -61,6 +67,7 @@ namespace Console_game.Tests
         [TestMethod()]
         public void SetConsoleFontSizeNormalUsage()
         {
+            // Slow because testing all possible font sizes
             for (int i = 0; i < ConsoleFontSizes.Length; i++)
             {
                 ushort x = (ushort)ConsoleFontSizes[i].X;
@@ -73,6 +80,31 @@ namespace Console_game.Tests
                 Assert.AreEqual(x, (ushort)fontSize.X);
                 Assert.AreEqual(y, (ushort)fontSize.Y);
             }
+        }
+
+        // Random strings to test in SetConsoleTitleNormalUsage
+        private static readonly string[] consoleTestNames = new string[] { "memory", "whether", "industrial", "reach", "car", "off",
+            "toward", "oxygen", "friendly", "draw", "window", "aboard",
+            "bend", "been", "track", "central", "war", "keep",
+            "personal", "gas", "proud", "involved", "smooth", "tightly",
+            "swing", "soldier", "fur", "roof", "bring", "plates",
+            "compound", "accept", "concerned", "track", "bright", "you",
+            "storm", "listen", "advice", "earlier", "influence", "car" };
+
+        [TestMethod()]
+        public void SetConsoleTitleNormalUsage()
+        {
+            Random rnd = new Random();
+            string consoleTestName = consoleTestNames[rnd.Next(0, consoleTestNames.Length)];
+            Win32ConsoleHelper.SetConsoleTitle(consoleTestName);
+
+            byte[] receiver = new byte[consoleTestName.Length + 1];
+            GetConsoleTitle(receiver, (uint)receiver.Length);
+
+            
+            Assert.AreEqual(consoleTestName, 
+                // Converting the byte array to string and slicing away the null terminator
+                Encoding.Default.GetString(receiver).Substring(0, receiver.Length - 1));
         }
 
         [StructLayout(LayoutKind.Sequential)]
