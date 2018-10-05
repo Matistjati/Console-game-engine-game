@@ -66,21 +66,24 @@ namespace Console_game
 
         static void Main(string[] args)
         {
-            GameSetup();
 
-            Console.SetBufferSize(120, 30);
-            Console.SetWindowSize(120, 30);
-            Map thisMap = new Map();
+            //GameSetup();
 
-            printMap(thisMap);
+            Console.SetBufferSize(1200, 300);
+            //Console.SetWindowSize(599, 149);
+            Map thisMap = new Map(5000, 1500);
+            thisMap.PlayerViewRangeX = 600;
+            thisMap.PlayerViewRangeY = 150;
+
+            PrintMap(thisMap);
 
             Console.ReadKey(false);
         }
 
         private const string blockChar = "█";
-        static void printMap(Map map)
+        static void PrintMap(Map map)
         {
-            ConsoleColor[,] mapColors = map.getPrintableMap(new Vector2(15, 15));
+            ConsoleColor[,] mapColors = map.GetPrintableMap(new Vector2(15, 15));
             for (int y = 0; y < mapColors.GetLength(0); y++)
             {
                 for (int x = 0; x < mapColors.GetLength(1); x++)

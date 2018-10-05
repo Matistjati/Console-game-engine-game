@@ -14,13 +14,14 @@ namespace Console_game
             float[,] map = new float[mapSizeX, mapSizeY];
 
             FastNoise perlin = new FastNoise(seed);
-
-            for (int x = 0; x < map.GetLength(0); x++)
+            perlin.SetNoiseType(FastNoise.NoiseType.Perlin);
+            for (int y = 0; y < map.GetLength(1); y++)
             {
-                for (int y = 0; y < map.GetLength(1); y++)
+                for (int x = 0; x < map.GetLength(0); x++)
+
                 {
-                    float yCoord = (float)y / mapSizeY * scale;
                     float xCoord = (float)x / mapSizeX * scale;
+                    float yCoord = (float)y / mapSizeY * scale;
 
                     map[x, y] = perlin.GetValue(x, y);
                 }

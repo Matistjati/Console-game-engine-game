@@ -6,19 +6,20 @@ namespace Console_game
     internal class Win32ConsoleHelper
     {
         [DllImport("Kernel32.dll")]
-        public static extern int SetConsoleTitle(string lpConsoleTitle);
+        public static extern int SetConsoleTitle(
+            string lpConsoleTitle);
 
-        [DllImport("Kernel32.dll")]
-        private static extern Int32 SetCurrentConsoleFontEx(
-                    IntPtr hConsoleOutput,
-                    bool bMaximumWindow,
-                    ref _CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
-
-        [DllImport("Kernel32.dll")]
-        private static extern Int32 GetCurrentConsoleFontEx(
+        [DllImport("Kernel32.dll", SetLastError = true)]
+        static extern Int32 SetCurrentConsoleFontEx(
             IntPtr hConsoleOutput,
             bool bMaximumWindow,
-            ref _CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
+            ref CONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern Int32 GetCurrentConsoleFontEx(
+            IntPtr hConsoleOutput,
+            bool bMaximumWindow,
+            ref CONSOLE_FONT_INFOEX lpConsoleCurrentFont);
 
         private enum StdHandle
         {
@@ -32,7 +33,6 @@ namespace Console_game
 
         public static void SetConsoleFontSize(ushort x, ushort y)
         {
-
             IntPtr outPutHandle = GetStdHandle(StdHandle.OutputHandle);
 
             if (outPutHandle == INVALID_HANDLE_VALUE)
@@ -41,9 +41,8 @@ namespace Console_game
                 return;
             }
 
-            _CONSOLE_FONT_INFO_EX ConsoleFontInfo = new _CONSOLE_FONT_INFO_EX();
+            CONSOLE_FONT_INFOEX ConsoleFontInfo = new CONSOLE_FONT_INFOEX();
             ConsoleFontInfo.cbSize = (uint)Marshal.SizeOf(ConsoleFontInfo);
-
             GetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
             ConsoleFontInfo.dwFontSize.X = (short)x;
             ConsoleFontInfo.dwFontSize.Y = (short)y;
@@ -90,52 +89,58 @@ namespace Console_game
                     return;
             }
 
-            unsafe
+
+            IntPtr outPutHandle = GetStdHandle(StdHandle.OutputHandle);
+
+            if (outPutHandle == INVALID_HANDLE_VALUE)
             {
-                IntPtr outPutHandle = GetStdHandle(StdHandle.OutputHandle);
-
-                if (outPutHandle == INVALID_HANDLE_VALUE)
-                {
-                    Log.defaultLogger.LogInfo($"Invalid handle {outPutHandle}");
-                    return;
-                }
-
-                _CONSOLE_FONT_INFO_EX ConsoleFontInfo = new _CONSOLE_FONT_INFO_EX();
-                ConsoleFontInfo.cbSize = (uint)Marshal.SizeOf(ConsoleFontInfo);
-
-                IntPtr ptr = new IntPtr(ConsoleFontInfo.FaceName);
-                Marshal.Copy(newFontString.ToCharArray(), 0, ptr, newFontString.Length);
-
-                SetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
-
-                Marshal.FreeHGlobal(outPutHandle);
-                Marshal.FreeHGlobal(ptr);
+                Log.defaultLogger.LogInfo($"Invalid handle {outPutHandle}");
+                return;
             }
+
+            CONSOLE_FONT_INFOEX ConsoleFontInfo = new CONSOLE_FONT_INFOEX();
+            ConsoleFontInfo.cbSize = (uint)Marshal.SizeOf(ConsoleFontInfo);
+            GetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
+
+            // For some reason, the terminal font can't be changed
+            if (ConsoleFontInfo.FaceName == "Terminal")
+            {
+                Marshal.FreeHGlobal(outPutHandle);
+                return;
+            }
+
+            ConsoleFontInfo.FaceName = newFontString;
+
+
+            int i = SetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
+
+            Marshal.FreeHGlobal(outPutHandle);
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct _COORD
+        private struct COORD
         {
             public short X;
             public short Y;
 
-            public _COORD(short x, short y)
+            public COORD(short x, short y)
             {
                 X = x;
                 Y = y;
             }
         }
 
-        private const int LF_FACESIZE = 32;
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        private unsafe struct _CONSOLE_FONT_INFO_EX
+        private struct CONSOLE_FONT_INFOEX
         {
             public uint cbSize;
             public uint nFont;
-            public _COORD dwFontSize;
+            public COORD dwFontSize;
             public int FontFamily;
             public int FontWeight;
-            public fixed char FaceName[LF_FACESIZE];
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string FaceName;
         }
     }
 }

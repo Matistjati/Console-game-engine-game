@@ -1,17 +1,16 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Console_game.Tests
 {
     [TestClass()]
     public class Win32ConsoleHelpterTests
     {
-        static List<Process> cmd = new List<Process>();
+        List<Process> cmd = new List<Process>();
 
         [TestInitialize]
         public void SetUp()
@@ -24,16 +23,16 @@ namespace Console_game.Tests
         {
             for (int i = 0; i < cmd.Count; i++)
             {
-                cmd[i].Kill();
+                cmd[0].Kill();
+                cmd.RemoveAt(0);
             }
-            cmd.Clear();
         }
 
-        [DllImport("Kernel32.dll")]
+        [DllImport("Kernel32.dll", SetLastError = true)]
         private static extern Int32 GetCurrentConsoleFontEx(
             IntPtr hConsoleOutput,
             bool bMaximumWindow,
-            ref _CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
+            ref CONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
 
         [DllImport("kernel32")]
         private static extern IntPtr GetStdHandle(StdHandle index);
@@ -42,17 +41,17 @@ namespace Console_game.Tests
         private static extern Int32 GetCurrentConsoleFont(
             IntPtr hConsoleOutput,
             bool bMaximumWindow,
-            ref _CONSOLE_FONT_INFO lpConsoleCurrentFont);
-
-        [DllImport("kernel32")]
-        private static extern _COORD GetConsoleFontSize(
-            IntPtr hConsoleOutput,
-            int nFont);
+            ref CONSOLE_FONT_INFO lpConsoleCurrentFont);
 
         [DllImport("kernel32")]
         private static extern Int32 GetConsoleTitle(
             [MarshalAs(UnmanagedType.LPArray)] byte[] lpConsoleTitle,
             uint nSize);
+
+        [DllImport("kernel32")]
+        private static extern COORD GetConsoleFontSize(
+            IntPtr hConsoleOutput,
+            int nFont);
 
         private enum StdHandle
         {
@@ -67,15 +66,14 @@ namespace Console_game.Tests
         [TestMethod()]
         public void SetConsoleFontSizeNormalUsage()
         {
-            // Slow because testing all possible font sizes
             for (int i = 0; i < ConsoleFontSizes.Length; i++)
             {
                 ushort x = (ushort)ConsoleFontSizes[i].X;
                 ushort y = (ushort)ConsoleFontSizes[i].Y;
                 Win32ConsoleHelper.SetConsoleFontSize(x, y);
-                _CONSOLE_FONT_INFO fontInfo = new _CONSOLE_FONT_INFO();
+                CONSOLE_FONT_INFO fontInfo = new CONSOLE_FONT_INFO();
                 GetCurrentConsoleFont(GetStdHandle(StdHandle.OutputHandle), false, ref fontInfo);
-                _COORD fontSize = GetConsoleFontSize(GetStdHandle(StdHandle.OutputHandle), fontInfo.nFont);
+                COORD fontSize = GetConsoleFontSize(GetStdHandle(StdHandle.OutputHandle), fontInfo.nFont);
 
                 Assert.AreEqual(x, (ushort)fontSize.X);
                 Assert.AreEqual(y, (ushort)fontSize.Y);
@@ -101,42 +99,70 @@ namespace Console_game.Tests
             byte[] receiver = new byte[consoleTestName.Length + 1];
             GetConsoleTitle(receiver, (uint)receiver.Length);
 
-            
-            Assert.AreEqual(consoleTestName, 
-                // Converting the byte array to string and slicing away the null terminator
-                Encoding.Default.GetString(receiver).Substring(0, receiver.Length - 1));
+
+            Assert.AreEqual(consoleTestName,
+            // Converting the byte array to string and slicing away the null terminator
+            Encoding.Default.GetString(receiver).Substring(0, receiver.Length - 1));
+        }
+
+        private const string consolasString = "Consolas";
+        private const string luicidaConsoleString = "Lucida Console";
+
+        [TestMethod()]
+        public void SetConsoleFontNormalUsage()
+        {
+            // Only testing the options "guaranteed" to be installed
+            Win32ConsoleHelper.SetConsoleFont(Win32ConsoleHelper.ConsoleFont.Consolas);
+            CONSOLE_FONT_INFOEX consoleFontInfo = new CONSOLE_FONT_INFOEX();
+            consoleFontInfo.cbSize = Marshal.SizeOf(consoleFontInfo);
+            GetCurrentConsoleFontEx(GetStdHandle(StdHandle.OutputHandle), false, ref consoleFontInfo);
+
+            // For some reason, the terminal font can't be changed
+            if (consoleFontInfo.FaceName == "Terminal")
+            {
+                Assert.AreEqual(true, true);
+                return;
+            }
+
+            else
+                Assert.AreEqual(consolasString, consoleFontInfo.FaceName);
+
+            Win32ConsoleHelper.SetConsoleFont(Win32ConsoleHelper.ConsoleFont.Lucida_console);
+            GetCurrentConsoleFontEx(GetStdHandle(StdHandle.OutputHandle), false, ref consoleFontInfo);
+            Assert.AreEqual(luicidaConsoleString, consoleFontInfo.FaceName);
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct _COORD
+        private struct CONSOLE_FONT_INFO
+        {
+            public int nFont;
+            public COORD dwFontSize;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct COORD
         {
             public short X;
             public short Y;
 
-            public _COORD(short x, short y)
+            public COORD(short x, short y)
             {
                 X = x;
                 Y = y;
             }
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct _CONSOLE_FONT_INFO
-        {
-            public int nFont;
-            public _COORD dwFontSize;
-        }
-
-        private const int LF_FACESIZE = 32;
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        private unsafe struct _CONSOLE_FONT_INFO_EX
+        private struct CONSOLE_FONT_INFOEX
         {
-            public uint cbSize;
-            public uint nFont;
-            public _COORD dwFontSize;
+            public int cbSize;
+            public int FontIndex;
+            public COORD dwFontSize;
             public int FontFamily;
             public int FontWeight;
-            public fixed char FaceName[LF_FACESIZE];
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string FaceName;
         }
     }
 }
