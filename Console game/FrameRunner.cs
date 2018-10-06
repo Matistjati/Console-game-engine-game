@@ -33,7 +33,7 @@ namespace Console_game
                 frameCallback.Invoke();
 
 
-                System.Threading.Thread.Sleep(frameWait);
+                Thread.Sleep(frameWait);
             }
         }
 		

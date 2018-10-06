@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace Console_game
+﻿namespace Console_game
 {
     static class Globals
     {

@@ -1,27 +1,51 @@
 ﻿using System.Collections.Generic;
-using System;
-using System.Linq;
 using static Console_game.NativeMethods;
 
 namespace Console_game
 {
     internal static class InternalInput
     {
+        public static void Start()
+        {
+            ConsoleListener.MouseEvent += MouseEventHandler;
+            ConsoleListener.KeyEvent += KeyEventHandler;
+            ConsoleListener.Start();
+        }
+
+        public static void Stop()
+        {
+            ConsoleListener.Stop();
+        }
+
+        public static void Reset()
+        {
+            leftMouseButtonPressed = false;
+            rightMouseButtonPressed = false;
+            mousePosition.X = 0;
+            mousePosition.Y = 0;
+            pressedChars.Clear();
+            heldChars.Clear();
+            Input.charsMayRelease.Clear();
+            Input.heldChars.Clear();
+            Input.releasedChars.Clear();
+            Input.pressedChars.Clear();
+        }
+
         public static bool leftMouseButtonPressed;
         public static bool rightMouseButtonPressed;
         public static Vector2Int mousePosition = new Vector2Int();
 
-        public static void MouseSetter(MOUSE_EVENT_RECORD r)
+        public static void MouseEventHandler(MOUSE_EVENT_RECORD r)
         {
             if (r.dwEventFlags == 0x0000)
             {
-				if (r.dwButtonState == MOUSE_EVENT_RECORD.FROM_LEFT_1ST_BUTTON_PRESSED) 
-				{
-					leftMouseButtonPressed = true;
+                if (r.dwButtonState == MOUSE_EVENT_RECORD.FROM_LEFT_1ST_BUTTON_PRESSED)
+                {
+                    leftMouseButtonPressed = true;
                 }
-				else if (r.dwButtonState == MOUSE_EVENT_RECORD.RIGHTMOST_BUTTON_PRESSED) 
-				{
-					rightMouseButtonPressed = true;
+                else if (r.dwButtonState == MOUSE_EVENT_RECORD.RIGHTMOST_BUTTON_PRESSED)
+                {
+                    rightMouseButtonPressed = true;
                 }
             }
             else if (r.dwEventFlags == 0x0001)
@@ -31,191 +55,109 @@ namespace Console_game
             }
         }
 
-        // Pressed
-        public static Dictionary<char, bool> keysDown;
-
-        public static Dictionary<char, bool> keysUp;
-
-        public static Dictionary<char, bool> keysHeld;
-
-        public static object _keysHeldLock = new object();
-
-        static readonly char[] keyStatesKeys = new char[]
-            { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-                'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'å', 'ä', 'ö',
-                    '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
-
-        static InternalInput()
-        {
-            keysHeld = new Dictionary<char, bool>();
-            keysDown = new Dictionary<char, bool>();
-            keysUp = new Dictionary<char, bool>();
-
-            for (int i = 0; i < keyStatesKeys.Length; i++)
-            {
-                keysDown.Add(keyStatesKeys[i], false);
-                keysHeld.Add(keyStatesKeys[i], false);
-                keysUp.Add(keyStatesKeys[i], false);
-            }
-        }
-
-        public static Queue<char> releasedChars = new Queue<char>();
         public static Queue<char> pressedChars = new Queue<char>();
+        public static Queue<char> heldChars = new Queue<char>();
 
-        // TODO make this shit work
-        public static void KeySetter(KEY_EVENT_RECORD r)
+        public static void KeyEventHandler(KEY_EVENT_RECORD r)
         {
-            // Checking if the character is within what we check
-            if (keyStatesKeys.Contains(r.UnicodeChar))
+            if (r.bKeyDown)
             {
-                // Down
-                if (r.bKeyDown)
+                if (r.wRepeatCount > 1 && !pressedChars.Contains(r.UnicodeChar))
                 {
-                    if (keysDown[r.UnicodeChar])
-                    {
-                        keysDown[r.UnicodeChar] = false;
-                        lock (_keysHeldLock)
-                        {
-                            keysHeld[r.UnicodeChar] = true;
-                        }
-                    }
-                    else if (!keysHeld[r.UnicodeChar])
-                    {
-                        keysDown[r.UnicodeChar] = true;
-                        pressedChars.Enqueue(r.UnicodeChar);
-                    }
+                    heldChars.Enqueue(r.UnicodeChar);
                 }
-                // Up
                 else
                 {
-                    lock (_keysHeldLock)
-                    {
-                        keysHeld[r.UnicodeChar] = false;
-                    }
-                    releasedChars.Enqueue(r.UnicodeChar);
+                    pressedChars.Enqueue(r.UnicodeChar);
                 }
             }
         }
-    }
 
-    public enum ButtonPress
-    {
-        left = 0x0001,
-        right = 0x0002
+        
     }
 
     public static class Input
     {
-        static Dictionary<char, bool> keysHeldCopy;
+        public static void Reset() => InternalInput.Reset();
+
+        internal static Queue<char> charsMayRelease = new Queue<char>();
+
+        internal static List<char> heldChars = new List<char>();
+        internal static List<char> releasedChars = new List<char>();
+        internal static List<char> pressedChars = new List<char>();
+
         internal static void UpdateInput()
         {
-            lock (InternalInput._keysHeldLock)
-            {
-                keysHeldCopy = new Dictionary<char, bool>(InternalInput.keysHeld);
-            }
+            heldChars.Clear();
+            releasedChars.Clear();
+            pressedChars.Clear();
 
-            foreach (KeyValuePair<char, bool> keyInfo in keysHeldCopy)
+            for (int i = 0; i < charsMayRelease.Count; i++)
             {
-                keysHeld[keyInfo.Key] = keyInfo.Value;
-            }
-
-            foreach (char key in keyStatesKeys)
-            {
-                keysUp[key] = false;
-                keysDown[key] = false;
-            }
-
-            for (int i = 0; i < InternalInput.releasedChars.Count; i++)
-            {
-                char charChanged = InternalInput.releasedChars.Dequeue();
-                keysUp[charChanged] = true;
-                keysHeld[charChanged] = false;
+                char potentiallyReleased = charsMayRelease.Dequeue();
+                if (!InternalInput.heldChars.Contains(potentiallyReleased) &&
+                    !InternalInput.pressedChars.Contains(potentiallyReleased))
+                {
+                    releasedChars.Add(potentiallyReleased);
+                }
+                else if (!charsMayRelease.Contains(potentiallyReleased))
+                {
+                    charsMayRelease.Enqueue(potentiallyReleased);
+                }
             }
 
             for (int i = 0; i < InternalInput.pressedChars.Count; i++)
             {
                 char charChanged = InternalInput.pressedChars.Dequeue();
-                keysDown[charChanged] = true;
-                keysHeld[charChanged] = false;
+                pressedChars.Add(charChanged);
+                charsMayRelease.Enqueue(charChanged);
             }
 
-			leftMouseButtonPressed = InternalInput.leftMouseButtonPressed;
-			InternalInput.leftMouseButtonPressed = false;
+            for (int i = 0; i < InternalInput.heldChars.Count; i++)
+            {
+                char charChanged = InternalInput.heldChars.Dequeue();
+                heldChars.Add(charChanged);
+                charsMayRelease.Enqueue(charChanged);
+            }
 
-			rightMouseButtonPressed = InternalInput.rightMouseButtonPressed;
-			InternalInput.rightMouseButtonPressed = false;
+            leftMouseButtonPressed = InternalInput.leftMouseButtonPressed;
+            InternalInput.leftMouseButtonPressed = false;
+
+            rightMouseButtonPressed = InternalInput.rightMouseButtonPressed;
+            InternalInput.rightMouseButtonPressed = false;
+
+            mousePosition.X = InternalInput.mousePosition.X;
+            mousePosition.Y = InternalInput.mousePosition.Y;
+        }
+
+        public static bool GetKeyDown(char key) => pressedChars.Contains(key);
+
+        public static bool GetKeyHeld(char key) => heldChars.Contains(key);
+
+        public static bool GetKeyUp(char key) => releasedChars.Contains(key);
+
+        public static Vector2Int mousePosition = new Vector2Int();
+
+        public enum ButtonPress
+        {
+            left = 0x0001,
+            right = 0x0002
         }
 
         internal static bool leftMouseButtonPressed;
         internal static bool rightMouseButtonPressed;
 
-        internal static Dictionary<char, bool> keysDown;
-
-        internal static Dictionary<char, bool> keysUp;
-
-        internal static Dictionary<char, bool> keysHeld;
-
-		public static bool GetKeyDown(char key)
-		{
-			if (!keyStatesKeys.Contains(key)) 
-			{
-				throw new ArgumentException($"The char {key} is not tracked");
-			}
-
-			return keysDown[key];
-		}
-
-		public static bool GetKeyHeld(char key)
-		{
-			if (!keyStatesKeys.Contains(key)) 
-			{
-				throw new ArgumentException($"The char {key} is not tracked");
-			}
-
-			return keysHeld[key];
-		}
-
-		public static bool GetKeyUp(char key)
-		{
-			if (!keyStatesKeys.Contains(key)) 
-			{
-				throw new ArgumentException($"The char {key} is not tracked");
-			}
-
-			return keysUp[key];
-		}
-
-		public static bool GetButtonDown(ButtonPress button)
-		{
-			switch (button)
-			{
-				case ButtonPress.left:
-					return leftMouseButtonPressed;
-				case ButtonPress.right:
-					return rightMouseButtonPressed;
-				default:
-					Log.defaultLogger.LogException($"Case default was reached: {button}");
-					return false;
-			}
-
-		}
-		
-        static readonly char[] keyStatesKeys = new char[]
-            { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-                'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'å', 'ä', 'ö',
-                    '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
-
-        static Input()
+        public static bool GetButtonDown(ButtonPress button)
         {
-            keysHeld = new Dictionary<char, bool>();
-            keysDown = new Dictionary<char, bool>();
-            keysUp = new Dictionary<char, bool>();
-
-            for (int i = 0; i < keyStatesKeys.Length; i++)
+            switch (button)
             {
-                keysDown.Add(keyStatesKeys[i], false);
-                keysHeld.Add(keyStatesKeys[i], false);
-                keysUp.Add(keyStatesKeys[i], false);
+                case ButtonPress.left:
+                    return leftMouseButtonPressed;
+                case ButtonPress.right:
+                    return rightMouseButtonPressed;
+                default:
+                    Log.defaultLogger.LogException($"Case default was reached: {button}");
+                    return false;
             }
         }
     }

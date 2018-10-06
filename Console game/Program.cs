@@ -1,10 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Windows.Input;
 using System.IO;
 using System.Numerics;
-using static Console_game.NativeMethods;
 
 namespace Console_game
 {
@@ -13,9 +9,9 @@ namespace Console_game
         private static float total;
         private static void TestTimeAccuracy()
         {
-            total += GameObject.timeDelta;
+            total += GameObject.TimeDelta;
             Console.Clear();
-            Console.Write($"time: {GameObject.time}\ntimedelta total: {total}\ntimedelta: {GameObject.timeDelta}\ndifference: {total -GameObject.time}");
+            Console.Write($"time: {GameObject.Time}\ntimedelta total: {total}\ntimedelta: {GameObject.TimeDelta}\ndifference: {total -GameObject.Time}");
         }
 
         private static void TestInputAccuracy()
@@ -37,13 +33,11 @@ namespace Console_game
         static void GameSetup()
         {
             // Set the console's title to a preset gamename
-            Win32ConsoleHelper.SetConsoleTitle(Globals.gameName);
+            NativeMethods.SetConsoleTitle(Globals.gameName);
             Win32ConsoleHelper.SetConsoleFontSize(18, 18);
 
             // Set up input handlelers
-            ConsoleListener.MouseEvent += InternalInput.MouseSetter;
-            ConsoleListener.KeyEvent += InternalInput.KeySetter;
-            ConsoleListener.Start();
+            InternalInput.Start();
 
             // Getting all classes deriving from gameobject and getting update and start methods
             ReflectiveHelper<GameObject> gameObjectChildren = new ReflectiveHelper<GameObject>();
@@ -66,14 +60,21 @@ namespace Console_game
 
         static void Main(string[] args)
         {
+            InternalInput.Start();
+            Console.ReadKey(false);
+            Console.ReadKey(false);
+            Console.ReadKey(false);
+            Console.ReadKey(false);
 
             //GameSetup();
 
             Console.SetBufferSize(1200, 300);
             //Console.SetWindowSize(599, 149);
-            Map thisMap = new Map(5000, 1500);
-            thisMap.PlayerViewRangeX = 600;
-            thisMap.PlayerViewRangeY = 150;
+            Map thisMap = new Map(5000, 1500)
+            {
+                PlayerViewRangeX = 600,
+                PlayerViewRangeY = 150
+            };
 
             PrintMap(thisMap);
 

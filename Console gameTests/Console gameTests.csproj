@@ -59,6 +59,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="InputTest.cs" />
     <Compile Include="MapTests.cs" />
     <Compile Include="Map_GeneratorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
