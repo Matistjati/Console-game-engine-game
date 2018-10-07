@@ -13,8 +13,8 @@ namespace Console_game.Tests
             float[,] gameMap = Map_Generator.MakeMap(randomGen.Next(), randomGen.Next(1, 100), randomGen.Next(1, 25), 1);
 
             // Assuring that the map has been filled
-            Assert.AreEqual(true, gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0 &&
-                                  gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0);
+            Assert.IsTrue(gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0 &&
+                          gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0);
         }
 
         [TestMethod()]
@@ -24,8 +24,8 @@ namespace Console_game.Tests
             float[,] gameMap = Map_Generator.MakeMap(randomGen.Next(-1000, -1), randomGen.Next(1, 100), randomGen.Next(1, 25), 1);
 
             // Assuring that the map has been filled
-            Assert.AreEqual(true, gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0 &&
-                                  gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0);
+            Assert.IsTrue(gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0 &&
+                          gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0);
         }
 
         [TestMethod()]

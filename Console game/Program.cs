@@ -60,10 +60,10 @@ namespace Console_game
 
         static void Main(string[] args)
         {
-            InternalInput.Start();
+            /*InternalInput.Start();
             Console.ReadKey(false);
             Console.ReadKey(false);
-            Console.ReadKey(false);
+            Console.ReadKey(false);*/
             Console.ReadKey(false);
 
             //GameSetup();
@@ -84,7 +84,7 @@ namespace Console_game
         private const string blockChar = "█";
         static void PrintMap(Map map)
         {
-            ConsoleColor[,] mapColors = map.GetPrintableMap(new Vector2(15, 15));
+            ConsoleColor[,] mapColors = map.GetPrintableMap(new Vector2Int(15, 15));
             for (int y = 0; y < mapColors.GetLength(0); y++)
             {
                 for (int x = 0; x < mapColors.GetLength(1); x++)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Numerics;
 using System.Text;
 
 namespace Console_game
@@ -26,8 +25,8 @@ namespace Console_game
             {
                 if (value <= 2)
                     throw new ArgumentException($"X was too small. X was {value}");
-                if (value > MapSizeX)
-                    throw new ArgumentException($"Y was too big. {value} > {MapSizeX}(mapsize)");
+                if (value * 2 > MapSizeX)
+                    throw new ArgumentException($"Y was too big. {value} * 2 > {MapSizeX}(mapsize)");
                 _playerViewRangeX = value;
             }
         }
@@ -39,8 +38,8 @@ namespace Console_game
             {
                 if (value <= 2)
                     throw new ArgumentException($"Y was too small. Y was {value}");
-                if (value > MapSizeY)
-                    throw new ArgumentException($"Y was too big. {value} > {MapSizeY}(mapsize)");
+                if (value * 2 > MapSizeY)
+                    throw new ArgumentException($"Y was too big. {value} * 2 > {MapSizeY}(mapsize)");
                 _playerViewRangeY = value;
             }
         }
@@ -62,33 +61,53 @@ namespace Console_game
             this.Seed = seed;
             this.MapSizeY = mapSizeY;
             this.MapSizeX = mapSizeX;
+            maxMapPosition = new Vector2Int(MapSizeX, MapSizeX);
             map = Map_Generator.MakeMap(seed, mapSizeX, mapSizeY, scale);
         }
 
-        public Rectangle GetSeenMap(Vector2 position)
-        {
-            position.X = (int)position.X;
-            position.Y = (int)position.Y;
+        private readonly Vector2Int minMapPosition = new Vector2Int(0, 0);
+        private readonly Vector2Int maxMapPosition;
 
-            int x = (int)(position.X - PlayerViewRangeX);
-            int y = (int)(position.Y - PlayerViewRangeY);
+        public Rectangle GetSeenMap(Vector2Int position)
+        {
+            // Setting the position to the top left
+
+            position.X = (position.X - PlayerViewRangeX > 0) ? position.X - PlayerViewRangeX : 0;
+            position.Y = (position.Y - PlayerViewRangeY > 0) ? position.Y - PlayerViewRangeY : 0;
+
+            // Assuring that we're inside the map
+            position.Clamp(minMapPosition, maxMapPosition);
+
+            int width = PlayerViewRangeX * 2;
+            int heigth = PlayerViewRangeY * 2;
+
+            if (position.X + width > MapSizeX)
+            {
+                position.X -= position.X + width - MapSizeX;
+            }
+
+            if (position.Y + heigth > MapSizeY)
+            {
+                position.Y -= position.Y + heigth - MapSizeY;
+            }
 
             return new Rectangle(
-                x: x > 0 ? x : 0, // Negative value protection
-                y: y > 0 ? y : 0, // Negative value protection
-                width: PlayerViewRangeX * 2 <= map.GetLength(0) ? PlayerViewRangeX * 2 : map.GetLength(0),
-                height: PlayerViewRangeY * 2 <= map.GetLength(1) ? PlayerViewRangeY * 2 : map.GetLength(1));
+                x: position.X,
+                y: position.Y,
+                width: width,
+                height: heigth);
         }
 
-        public ConsoleColor[,] GetPrintableMap(Vector2 playerPosition)
+        public ConsoleColor[,] GetPrintableMap(Vector2Int playerPosition)
         {
             Rectangle mapBoundaries = GetSeenMap(playerPosition);
             ConsoleColor[,] mapColors = new ConsoleColor[mapBoundaries.Width, mapBoundaries.Height];
 
             for (int x = 0; x < mapBoundaries.Width; ++x)
+            {
                 for (int y = 0; y < mapBoundaries.Height; ++y)
                 {
-                    float mapValue = this.map[x + mapBoundaries.X, y + mapBoundaries.Y];
+                    float mapValue = this.map[x, y];
 
                     ConsoleColor tileColor;
                     if (mapValue < -0.75)
@@ -118,6 +137,7 @@ namespace Console_game
 
                     mapColors[x, y] = tileColor;
                 }
+            }
 
             return mapColors;
         }

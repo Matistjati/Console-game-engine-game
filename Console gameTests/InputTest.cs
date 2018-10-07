@@ -49,10 +49,10 @@ namespace Console_game.Tests
             InternalInput.KeyEventHandler(keyEvent);
 
             Input.UpdateInput();
-            Assert.AreEqual(true, Input.GetKeyDown('w'));
+            Assert.IsTrue(Input.GetKeyDown('w'));
 
             Input.UpdateInput();
-            Assert.AreEqual(true, Input.GetKeyUp('w'));
+            Assert.IsTrue(Input.GetKeyUp('w'));
 
             Input.UpdateInput();
             Input.UpdateInput();
@@ -69,7 +69,7 @@ namespace Console_game.Tests
             InternalInput.KeyEventHandler(keyEvent);
             Input.UpdateInput();
 
-            Assert.AreEqual(true, Input.GetKeyHeld('c'));
+            Assert.IsTrue(Input.GetKeyHeld('c'));
         }
 
         [TestMethod()]
@@ -82,7 +82,7 @@ namespace Console_game.Tests
             InternalInput.KeyEventHandler(keyEvent);
             Input.UpdateInput();
 
-            Assert.AreEqual(true, Input.GetKeyHeld('妹'));
+            Assert.IsTrue(Input.GetKeyHeld('妹'));
         }
 
         [TestMethod]
@@ -92,13 +92,13 @@ namespace Console_game.Tests
             InternalInput.MouseEventHandler(mouseEvent);
 
             Input.UpdateInput();
-            Assert.AreEqual(true, Input.GetButtonDown(Input.ButtonPress.left));
+            Assert.IsTrue(Input.GetButtonDown(Input.ButtonPress.left));
 
             mouseEvent.dwButtonState = 0x0002; // Right click
             InternalInput.MouseEventHandler(mouseEvent);
 
             Input.UpdateInput();
-            Assert.AreEqual(true, Input.GetButtonDown(Input.ButtonPress.right));
+            Assert.IsTrue(Input.GetButtonDown(Input.ButtonPress.right));
         }
 
         [TestMethod]

@@ -86,7 +86,7 @@ namespace Console_game.Tests
             // For some reason, the terminal font can't be changed
             if (consoleFontInfo.FaceName == "Terminal")
             {
-                Assert.AreEqual(true, true);
+                Assert.IsTrue(true);
                 return;
             }
 
