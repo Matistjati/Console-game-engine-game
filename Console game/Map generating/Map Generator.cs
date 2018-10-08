@@ -23,7 +23,7 @@ namespace Console_game
                     float xCoord = (float)x / mapSizeX * scale;
                     float yCoord = (float)y / mapSizeY * scale;
 
-                    map[x, y] = perlin.GetValue(x, y);
+                    map[x, y] = perlin.GetValue(xCoord, yCoord);
                 }
             }
 
