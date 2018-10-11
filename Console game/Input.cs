@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using static Console_game.NativeMethods;
 
 namespace Console_game
@@ -33,7 +34,7 @@ namespace Console_game
 
         public static bool leftMouseButtonPressed;
         public static bool rightMouseButtonPressed;
-        public static Vector2Int mousePosition = new Vector2Int();
+        public static Point mousePosition = new Point();
 
         public static void MouseEventHandler(MOUSE_EVENT_RECORD r)
         {
@@ -136,7 +137,7 @@ namespace Console_game
 
         public static bool GetKeyUp(char key) => releasedChars.Contains(key);
 
-        public static Vector2Int mousePosition = new Vector2Int();
+        public static Point mousePosition = new Point();
 
         public enum ButtonPress
         {

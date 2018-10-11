@@ -63,7 +63,7 @@
     <Compile Include="MapTests.cs" />
     <Compile Include="Map_GeneratorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Vector2IntTests.cs" />
+    <Compile Include="PointExtensionsTests.cs" />
     <Compile Include="Win32ConsoleHelpterTests.cs" />
   </ItemGroup>
   <ItemGroup>

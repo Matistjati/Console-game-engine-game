@@ -178,6 +178,7 @@ public class FastNoise
         }
     }
 
+    // TODO
     private static readonly Float2[] GRAD_2D = {
         new Float2(-1,-1), new Float2( 1,-1), new Float2(-1, 1), new Float2( 1, 1),
         new Float2( 0,-1), new Float2(-1, 0), new Float2( 0, 1), new Float2( 1, 0),
@@ -377,6 +378,8 @@ public class FastNoise
         return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
     }
 
+
+    // TODO grad2cord
     [MethodImplAttribute(FN_INLINE)]
     private static FN_DECIMAL GradCoord2D(int seed, int x, int y, FN_DECIMAL xd, FN_DECIMAL yd)
     {
@@ -1075,6 +1078,7 @@ public class FastNoise
         return sum;
     }
 
+    // TODO
     public FN_DECIMAL GetPerlin(FN_DECIMAL x, FN_DECIMAL y)
     {
         return SinglePerlin(m_seed, x * m_frequency, y * m_frequency);

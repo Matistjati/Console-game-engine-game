@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Numerics;
+using System.Drawing;
 
 namespace Console_game
 {
@@ -64,7 +65,7 @@ namespace Console_game
             Console.ReadKey(false);
             Console.ReadKey(false);
             Console.ReadKey(false);*/
-            Console.ReadKey(false);
+            //Console.ReadKey(false);
 
             //GameSetup();
 
@@ -72,8 +73,7 @@ namespace Console_game
             //Console.SetWindowSize(599, 149);
             Map thisMap = new Map(5000, 1500)
             {
-                PlayerViewRangeX = 600,
-                PlayerViewRangeY = 150
+                PlayerViewRange = new Point(600, 150)
             };
 
             PrintMap(thisMap);
@@ -81,10 +81,10 @@ namespace Console_game
             Console.ReadKey(false);
         }
 
-        private const string blockChar = "█";
+        private const char blockChar = '█';
         static void PrintMap(Map map)
         {
-            ConsoleColor[,] mapColors = map.GetPrintableMap(new Vector2Int(15, 15));
+            ConsoleColor[,] mapColors = map.GetPrintableMap(new Point(15, 15));
             for (int y = 0; y < mapColors.GetLength(0); y++)
             {
                 for (int x = 0; x < mapColors.GetLength(1); x++)

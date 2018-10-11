@@ -4,6 +4,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using static Console_game.NativeMethods;
+using System.Drawing;
 
 namespace Console_game.Tests
 {
@@ -24,10 +25,10 @@ namespace Console_game.Tests
             cmd.Kill();
         }
 
-        private readonly Vector2Int[] ConsoleFontSizes = new Vector2Int[]
-            { new Vector2Int(4, 6), new Vector2Int(6, 8), new Vector2Int(8, 8), new Vector2Int(16, 8),
-            new Vector2Int(5, 12), new Vector2Int(7, 12), new Vector2Int(8, 12), new Vector2Int(16, 12),
-            new Vector2Int(12, 16), new Vector2Int(10, 18), new Vector2Int(4, 6), new Vector2Int(4, 6)};
+        private readonly Point[] ConsoleFontSizes = new Point[]
+            { new Point(4, 6), new Point(6, 8), new Point(8, 8), new Point(16, 8),
+            new Point(5, 12), new Point(7, 12), new Point(8, 12), new Point(16, 12),
+            new Point(12, 16), new Point(10, 18), new Point(4, 6), new Point(4, 6)};
 
         [TestMethod()]
         public void SetConsoleFontSizeNormalUsage()

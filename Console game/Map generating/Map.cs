@@ -7,48 +7,42 @@ namespace Console_game
     public class Map
     {
         public int Seed { get; }
-        public int MapSizeY { get; }
-        public int MapSizeX { get; }
         public float[,] map { get; }
 
-        private const int standardMapSizeX = 600;
-        private const int standardMapSizeY = 150;
-        private const float standardScale = 0.001f;
+        private static readonly Point standardMapSize = new Point(600, 150);
+        private const float standardScale = 1f;
 
-        private int _playerViewRangeX = 14;
-        private int _playerViewRangeY = 14;
+        // Do not modify, it will break things as Point is a struct
+        private Point _mapSize = new Point();
 
-        public int PlayerViewRangeX
+        public Point MapSize => _mapSize;
+
+        private Point _playerViewRange = new Point(14, 14);
+
+        public Point PlayerViewRange
         {
-            get { return _playerViewRangeX; }
+            get { return _playerViewRange; }
             set
             {
-                if (value <= 2)
+                if (value.X <= 2)
                     throw new ArgumentException($"X was too small. X was {value}");
-                if (value * 2 > MapSizeX)
-                    throw new ArgumentException($"Y was too big. {value} * 2 > {MapSizeX}(mapsize)");
-                _playerViewRangeX = value;
-            }
-        }
-
-        public int PlayerViewRangeY
-        {
-            get { return _playerViewRangeY; }
-            set
-            {
-                if (value <= 2)
+                if (value.Y <= 2)
                     throw new ArgumentException($"Y was too small. Y was {value}");
-                if (value * 2 > MapSizeY)
-                    throw new ArgumentException($"Y was too big. {value} * 2 > {MapSizeY}(mapsize)");
-                _playerViewRangeY = value;
+
+                if (value.X * 2 > MapSize.X)
+                    throw new ArgumentException($"Y was too big. {value} * 2 > {MapSize.X}(mapsize)");
+                if (value.Y * 2 > MapSize.Y)
+                    throw new ArgumentException($"Y was too big. {value} * 2 > {MapSize.Y}(mapsize)");
+
+                _playerViewRange = value;
             }
         }
 
         public Map()
-            : this(new Random().Next(1, int.MaxValue), standardMapSizeX, standardMapSizeY, standardScale) { }
+            : this(new Random().Next(1, int.MaxValue), standardMapSize.X, standardMapSize.Y, standardScale) { }
 
         public Map(int seed)
-            : this(seed, standardMapSizeX, standardMapSizeY, standardScale) { }
+            : this(seed, standardMapSize.X, standardMapSize.Y, standardScale) { }
 
         public Map(int mapSizeX, int mapSizeY)
             : this(new Random().Next(1, int.MaxValue), mapSizeX, mapSizeY, standardScale) { }
@@ -57,38 +51,39 @@ namespace Console_game
         {
             if (mapSizeY <= 0 || mapSizeX <= 0)
                 throw new ArgumentException($"map must have a size greater than 0. X: {mapSizeX} Y: {mapSizeY} ");
+            if (scale <= 0)
+                throw new ArgumentException($"Scale: {scale} was negative");
 
             this.Seed = seed;
-            this.MapSizeY = mapSizeY;
-            this.MapSizeX = mapSizeX;
-            maxMapPosition = new Vector2Int(MapSizeX, MapSizeX);
-            map = Map_Generator.MakeMap(seed, mapSizeX, mapSizeY, scale);
+            this._mapSize.Y = mapSizeY;
+            this._mapSize.X = mapSizeX;
+            maxMapPosition = new Point(MapSize.X, MapSize.X);
+            map = Map_Generator.MakeMap(seed, _mapSize, scale);
         }
 
-        private readonly Vector2Int minMapPosition = new Vector2Int(0, 0);
-        private readonly Vector2Int maxMapPosition;
+        private readonly Point minMapPosition = new Point(0, 0);
+        private readonly Point maxMapPosition;
 
-        public Rectangle GetSeenMap(Vector2Int position)
+        public Rectangle GetSeenMap(Point position)
         {
             // Setting the position to the top left
-
-            position.X = (position.X - PlayerViewRangeX > 0) ? position.X - PlayerViewRangeX : 0;
-            position.Y = (position.Y - PlayerViewRangeY > 0) ? position.Y - PlayerViewRangeY : 0;
+            position.X = (position.X - PlayerViewRange.X > 0) ? position.X - PlayerViewRange.X : 0;
+            position.Y = (position.Y - PlayerViewRange.Y > 0) ? position.Y - PlayerViewRange.Y : 0;
 
             // Assuring that we're inside the map
-            position.Clamp(minMapPosition, maxMapPosition);
+            position = position.Clamp(minMapPosition, maxMapPosition);
 
-            int width = PlayerViewRangeX * 2;
-            int heigth = PlayerViewRangeY * 2;
+            int width = PlayerViewRange.X * 2;
+            int heigth = PlayerViewRange.Y * 2;
 
-            if (position.X + width > MapSizeX)
+            if (position.X + width > MapSize.X)
             {
-                position.X -= position.X + width - MapSizeX;
+                position.X -= position.X + width - MapSize.X;
             }
 
-            if (position.Y + heigth > MapSizeY)
+            if (position.Y + heigth > MapSize.Y)
             {
-                position.Y -= position.Y + heigth - MapSizeY;
+                position.Y -= position.Y + heigth - MapSize.Y;
             }
 
             return new Rectangle(
@@ -98,7 +93,7 @@ namespace Console_game
                 height: heigth);
         }
 
-        public ConsoleColor[,] GetPrintableMap(Vector2Int playerPosition)
+        public ConsoleColor[,] GetPrintableMap(Point playerPosition)
         {
             Rectangle mapBoundaries = GetSeenMap(playerPosition);
             ConsoleColor[,] mapColors = new ConsoleColor[mapBoundaries.Width, mapBoundaries.Height];
@@ -107,7 +102,7 @@ namespace Console_game
             {
                 for (int y = 0; y < mapBoundaries.Height; ++y)
                 {
-                    float mapValue = this.map[x, y];
+                    double mapValue = this.map[x, y];
 
                     ConsoleColor tileColor;
                     if (mapValue < -0.75)
@@ -145,7 +140,7 @@ namespace Console_game
         public override string ToString()
         {
 #if (DEBUG)
-            StringBuilder stringBuilder = new StringBuilder(MapSizeX * MapSizeY);
+            StringBuilder stringBuilder = new StringBuilder(MapSize.X * MapSize.Y);
             for (int y = 0; y < map.GetLength(0); y++)
             {
                 for (int x = 0; x < map.GetLength(1); x++)

@@ -1,16 +1,21 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Drawing;
 
 namespace Console_game.Tests
 {
     [TestClass()]
     public class Map_GeneratorTests
     {
+        Random randomGen = new Random();
+
         [TestMethod()]
         public void MakeMapSuccessNormal()
         {
-            Random randomGen = new Random();
-            float[,] gameMap = Map_Generator.MakeMap(randomGen.Next(), randomGen.Next(1, 100), randomGen.Next(1, 25), 1);
+            float[,] gameMap = Map_Generator.MakeMap(
+                seed: randomGen.Next(),
+                mapSize: new Point(randomGen.Next(1, 100), randomGen.Next(1, 25)),
+                scale: 1);
 
             // Assuring that the map has been filled
             Assert.IsTrue(gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0 &&
@@ -20,8 +25,10 @@ namespace Console_game.Tests
         [TestMethod()]
         public void MakeMapSuccessNegativeSeed()
         {
-            Random randomGen = new Random();
-            float[,] gameMap = Map_Generator.MakeMap(randomGen.Next(-1000, -1), randomGen.Next(1, 100), randomGen.Next(1, 25), 1);
+            float[,] gameMap = Map_Generator.MakeMap(
+                seed: randomGen.Next(-1000, -1),
+                mapSize: new Point(randomGen.Next(1, 100), randomGen.Next(1, 25)),
+                scale: 1);
 
             // Assuring that the map has been filled
             Assert.IsTrue(gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0 &&
@@ -32,16 +39,20 @@ namespace Console_game.Tests
         [ExpectedException(typeof(ArgumentException))]
         public void MakeMapNegativeXException()
         {
-            Random randomGen = new Random();
-            float[,] gameMap = Map_Generator.MakeMap(randomGen.Next(), -20, randomGen.Next(1, 25), 1);
+            float[,] gameMap = Map_Generator.MakeMap(
+                seed: randomGen.Next(),
+                mapSize: new Point(-20, randomGen.Next(1, 25)),
+                scale: 1);
         }
 
         [TestMethod()]
         [ExpectedException(typeof(ArgumentException))]
         public void MakeMapNegativeYException()
         {
-            Random randomGen = new Random();
-            float[,] gameMap = Map_Generator.MakeMap(randomGen.Next(), randomGen.Next(1, 25), -50, 1);
+            float[,] gameMap = Map_Generator.MakeMap(
+                seed: randomGen.Next(), 
+                mapSize: new Point(randomGen.Next(1, 25), -50),
+                scale: 1);
         }
     }
 }

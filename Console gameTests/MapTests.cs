@@ -29,8 +29,8 @@ namespace Console_game.Tests
 
             // Variables being set
             Assert.IsTrue(gameMap.Seed != 0);
-            Assert.IsTrue(gameMap.MapSizeX != 0);
-            Assert.IsTrue(gameMap.MapSizeY != 0);
+            Assert.IsTrue(gameMap.MapSize.X != 0);
+            Assert.IsTrue(gameMap.MapSize.Y != 0);
         }
 
         [TestMethod()]
@@ -52,8 +52,8 @@ namespace Console_game.Tests
 
             // Variables being set
             Assert.IsTrue(gameMap.Seed != 0);
-            Assert.IsTrue(gameMap.MapSizeX != 0);
-            Assert.IsTrue(gameMap.MapSizeY != 0);
+            Assert.IsTrue(gameMap.MapSize.X != 0);
+            Assert.IsTrue(gameMap.MapSize.Y != 0);
         }
 
         [TestMethod()]
@@ -74,8 +74,8 @@ namespace Console_game.Tests
         public void GetPrintableMapTest()
         {
             Map gameMap = new Map(rnd.Next(), 30, 30, 1);
-            ConsoleColor[,] mapColors = gameMap.GetPrintableMap(new Vector2Int(15, 15));
-            Rectangle mapCutOut = gameMap.GetSeenMap(new Vector2Int(15, 15));
+            ConsoleColor[,] mapColors = gameMap.GetPrintableMap(new Point(15, 15));
+            Rectangle mapCutOut = gameMap.GetSeenMap(new Point(15, 15));
 
             for (int x = 0; x < mapCutOut.Width; ++x)
             {
@@ -120,118 +120,115 @@ namespace Console_game.Tests
         [TestMethod()]
         public void GetSeenMapNormalUsage()
         {
-            Vector2Int position = new Vector2Int(15, 15);
+            Point position = new Point(15, 15);
 
             Rectangle seenMap = testMap.GetSeenMap(position);
-            Assert.AreEqual(position.X - testMap.PlayerViewRangeX, seenMap.X);
-            Assert.AreEqual(position.Y - testMap.PlayerViewRangeY, seenMap.Y);
+            Assert.AreEqual(position.X - testMap.PlayerViewRange.X, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.PlayerViewRange.Y, seenMap.Y);
 
-            Assert.AreEqual(testMap.PlayerViewRangeX * 2, seenMap.Width);
-            Assert.AreEqual(testMap.PlayerViewRangeY * 2, seenMap.Height);
+            Assert.AreEqual(testMap.PlayerViewRange.X * 2, seenMap.Width);
+            Assert.AreEqual(testMap.PlayerViewRange.Y * 2, seenMap.Height);
         }
 
         [TestMethod()]
         public void GetSeenMapRightEdge()
         {
-            Vector2Int position = new Vector2Int(29, 15);
+            Point position = new Point(29, 15);
 
             Rectangle seenMap = testMap.GetSeenMap(position);
-            Assert.AreEqual(position.X - testMap.PlayerViewRangeX, seenMap.X);
-            Assert.AreEqual(position.Y - testMap.PlayerViewRangeY, seenMap.Y);
+            Assert.AreEqual(position.X - testMap.PlayerViewRange.X, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.PlayerViewRange.Y, seenMap.Y);
 
-            Assert.AreEqual(testMap.PlayerViewRangeX * 2, seenMap.Width);
-            Assert.AreEqual(testMap.PlayerViewRangeY * 2, seenMap.Height);
+            Assert.AreEqual(testMap.PlayerViewRange.X * 2, seenMap.Width);
+            Assert.AreEqual(testMap.PlayerViewRange.Y * 2, seenMap.Height);
         }
 
         [TestMethod()]
         public void GetSeenMapLeftEdge()
         {
-            Vector2Int position = new Vector2Int(0, 15);
+            Point position = new Point(0, 15);
 
             Rectangle seenMap = testMap.GetSeenMap(position);
-            Assert.AreEqual(0, seenMap.X);
-            Assert.AreEqual(position.Y - testMap.PlayerViewRangeY, seenMap.Y);
-
-            Assert.AreEqual(testMap.PlayerViewRangeX * 2, seenMap.Width);
-            Assert.AreEqual(testMap.PlayerViewRangeY * 2, seenMap.Height);
+            Assert.AreEqual(testMap.PlayerViewRange.X + 0, seenMap.Width + seenMap.X);
+            Assert.AreEqual(testMap.PlayerViewRange.Y + 15, seenMap.Height + seenMap.Y);
         }
 
         [TestMethod()]
         public void GetSeenMapTop()
         {
-            Vector2Int position = new Vector2Int(15, 0);
+            Point position = new Point(15, 0);
 
             Rectangle seenMap = testMap.GetSeenMap(position);
-            Assert.AreEqual(position.X - testMap.PlayerViewRangeX, seenMap.X);
+            Assert.AreEqual(position.X - testMap.PlayerViewRange.X, seenMap.X);
             Assert.AreEqual(0, seenMap.Y);
 
-            Assert.AreEqual(testMap.PlayerViewRangeX * 2, seenMap.Width);
-            Assert.AreEqual(testMap.PlayerViewRangeY * 2, seenMap.Height);
+            Assert.AreEqual(testMap.PlayerViewRange.X * 2, seenMap.Width);
+            Assert.AreEqual(testMap.PlayerViewRange.Y * 2, seenMap.Height);
         }
 
         [TestMethod()]
         public void GetSeenMapBottom()
         {
-            Vector2Int position = new Vector2Int(15, 29);
+            Point position = new Point(15, 29);
 
             Rectangle seenMap = testMap.GetSeenMap(position);
-            Assert.AreEqual(position.X - testMap.PlayerViewRangeX, seenMap.X);
-            Assert.AreEqual(position.Y - testMap.PlayerViewRangeY, seenMap.Y);
+            Assert.AreEqual(position.X - testMap.PlayerViewRange.X, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.PlayerViewRange.Y, seenMap.Y);
 
-            Assert.AreEqual(testMap.PlayerViewRangeX * 2, seenMap.Width);
-            Assert.AreEqual(testMap.PlayerViewRangeY * 2, seenMap.Height);
+            Assert.AreEqual(testMap.PlayerViewRange.X * 2, seenMap.Width);
+            Assert.AreEqual(testMap.PlayerViewRange.Y * 2, seenMap.Height);
         }
 
         [TestMethod()]
         public void GetSeenMapOutOfBoundsRight()
         {
-            Vector2Int position = new Vector2Int(60, 15);
+            Point position = new Point(60, 15);
 
             Rectangle seenMap = testMap.GetSeenMap(position);
-            Assert.AreEqual(position.X - testMap.PlayerViewRangeX, seenMap.X);
-            Assert.AreEqual(position.Y - testMap.PlayerViewRangeY, seenMap.Y);
+            Assert.AreEqual(position.X - testMap.PlayerViewRange.X, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.PlayerViewRange.Y, seenMap.Y);
 
-            Assert.AreEqual(testMap.PlayerViewRangeX * 2, seenMap.Width);
-            Assert.AreEqual(testMap.PlayerViewRangeY * 2, seenMap.Height);
+            Assert.AreEqual(testMap.PlayerViewRange.X * 2, seenMap.Width);
+            Assert.AreEqual(testMap.PlayerViewRange.Y * 2, seenMap.Height);
         }
 
         [TestMethod()]
         public void GetSeenMapOutOfBoundsLeft()
         {
-            Vector2Int position = new Vector2Int(-20, 15);
+            Point position = new Point(-20, 15);
 
             Rectangle seenMap = testMap.GetSeenMap(position);
             Assert.AreEqual(0, seenMap.X);
-            Assert.AreEqual(position.Y - testMap.PlayerViewRangeY, seenMap.Y);
+            Assert.AreEqual(position.Y - testMap.PlayerViewRange.Y, seenMap.Y);
 
-            Assert.AreEqual(testMap.PlayerViewRangeX * 2, seenMap.Width);
-            Assert.AreEqual(testMap.PlayerViewRangeY * 2, seenMap.Height);
+            Assert.AreEqual(testMap.PlayerViewRange.X * 2, seenMap.Width);
+            Assert.AreEqual(testMap.PlayerViewRange.Y * 2, seenMap.Height);
         }
 
         [TestMethod()]
         public void GetSeenMapOutOfBoundsTop()
         {
-            Vector2Int position = new Vector2Int(15, -20);
+            Point position = new Point(15, -20);
 
             Rectangle seenMap = testMap.GetSeenMap(position);
-            Assert.AreEqual(position.X - testMap.PlayerViewRangeX, seenMap.X);
+            Assert.AreEqual(position.X - testMap.PlayerViewRange.X, seenMap.X);
             Assert.AreEqual(0, seenMap.Y);
 
-            Assert.AreEqual(testMap.PlayerViewRangeX * 2, seenMap.Width);
-            Assert.AreEqual(testMap.PlayerViewRangeY * 2, seenMap.Height);
+            Assert.AreEqual(testMap.PlayerViewRange.X * 2, seenMap.Width);
+            Assert.AreEqual(testMap.PlayerViewRange.Y * 2, seenMap.Height);
         }
 
         [TestMethod()]
         public void GetSeenMapOutOfBoundsBottom()
         {
-            Vector2Int position = new Vector2Int(15, 60);
+            Point position = new Point(15, 60);
 
             Rectangle seenMap = testMap.GetSeenMap(position);
-            Assert.AreEqual(position.X - testMap.PlayerViewRangeX, seenMap.X);
-            Assert.AreEqual(position.Y - testMap.PlayerViewRangeY, seenMap.Y);
+            Assert.AreEqual(position.X - testMap.PlayerViewRange.X, seenMap.X);
+            Assert.AreEqual(position.Y - testMap.PlayerViewRange.Y, seenMap.Y);
 
-            Assert.AreEqual(testMap.PlayerViewRangeX * 2, seenMap.Width);
-            Assert.AreEqual(testMap.PlayerViewRangeY * 2, seenMap.Height);
+            Assert.AreEqual(testMap.PlayerViewRange.X * 2, seenMap.Width);
+            Assert.AreEqual(testMap.PlayerViewRange.Y * 2, seenMap.Height);
         }
     }
 }
