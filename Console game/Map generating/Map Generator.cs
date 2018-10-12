@@ -11,6 +11,9 @@ namespace Console_game
                 throw new ArgumentException($"The map size must be grater than 0. mapSizeX {mapSize.X} <= 0");
             if (mapSize.Y <= 0)
                 throw new ArgumentException($"The map size must be grater than 0. mapSizeX {mapSize.Y} <= 0");
+            if (scale <= 0)
+                throw new ArgumentException($"Scale: {scale} was negative");
+
             float[,] map = new float[mapSize.X, mapSize.Y];
 
             FastNoise perlin = new FastNoise(seed);

@@ -87,9 +87,9 @@ namespace Console_game
             }
 
             return new Rectangle(
-                x: position.X,
-                y: position.Y,
-                width: width,
+                x: (width + position.X > PlayerViewRange.X * 2) ? position.X - (width + position.X - PlayerViewRange.X * 2) : position.X,
+                y: (heigth + position.Y > PlayerViewRange.Y * 2) ? position.Y - (heigth + position.Y - PlayerViewRange.Y * 2) : position.Y,
+                width:  width,
                 height: heigth);
         }
 
