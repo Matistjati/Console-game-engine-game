@@ -12,12 +12,10 @@ namespace Console_game
         public bool showLineNumber;
         public bool showCaller;
         public bool showFileName;
-
-        private FileStream logStream;
-        
+  
         private static Log _defaultLogger;
         
-		internal static Log defaultLogger
+		internal static Log DefaultLogger
 		{
 			get
 			{
@@ -33,15 +31,12 @@ namespace Console_game
 			}
 		}
         
-        public Log(string filePath, bool showDate, bool showLineNumber, bool showCaller, bool showFileName)
+        public Log(string logPath, bool showDate, bool showLineNumber, bool showCaller, bool showFileName)
         {
             if (!File.Exists(filePath))
-            {
-                logStream = File.Create(filePath);
-                logStream.Close();
-            }
+                using (File.Create(logPath))
 
-            this.filePath = filePath;
+            this.filePath = logPath;
             this.showDate = showDate;
             this.showLineNumber = showLineNumber;
             this.showCaller = showCaller;

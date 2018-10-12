@@ -12,7 +12,7 @@ namespace Console_game
 
             if (outPutHandle == INVALID_HANDLE_VALUE)
             {
-                Log.defaultLogger.LogInfo($"Invalid handle {outPutHandle}");
+                Log.DefaultLogger.LogInfo($"Invalid handle {outPutHandle}");
                 return;
             }
 
@@ -59,7 +59,7 @@ namespace Console_game
                     newFontString = "SimSun-ExtB";
                     break;
                 default:
-                    Log.defaultLogger.LogInfo($"Newfont went to default case: {newFont}");
+                    Log.DefaultLogger.LogInfo($"Newfont went to default case: {newFont}");
                     newFontString = "";
                     return;
             }
@@ -69,7 +69,7 @@ namespace Console_game
 
             if (outPutHandle == INVALID_HANDLE_VALUE)
             {
-                Log.defaultLogger.LogInfo($"Invalid handle {outPutHandle}");
+                Log.DefaultLogger.LogInfo($"Invalid handle {outPutHandle}");
                 return;
             }
 

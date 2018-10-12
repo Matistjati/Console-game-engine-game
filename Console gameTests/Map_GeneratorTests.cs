@@ -18,8 +18,19 @@ namespace Console_game.Tests
                 scale: 1);
 
             // Assuring that the map has been filled
-            Assert.IsTrue(gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0 &&
-                          gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0);
+            // Assuring that the map has been filled
+            int unfilledTiles = 0;
+            int checkedTiles = 30;
+            for (int i = 0; i < checkedTiles; i++)
+            {
+                float value = gameMap[
+                    randomGen.Next(gameMap.GetLength(0)),
+                    randomGen.Next(gameMap.GetLength(1))];
+
+                if (value == 0)
+                    unfilledTiles++;
+            }
+            Assert.AreNotEqual(unfilledTiles, checkedTiles);
         }
 
         [TestMethod()]
@@ -31,8 +42,18 @@ namespace Console_game.Tests
                 scale: 1);
 
             // Assuring that the map has been filled
-            Assert.IsTrue(gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0 &&
-                          gameMap[randomGen.Next(0, gameMap.GetLength(0)), randomGen.Next(0, gameMap.GetLength(1))] != 0);
+            int unfilledTiles = 0;
+            int checkedTiles = 30;
+            for (int i = 0; i < checkedTiles; i++)
+            {
+                float value = gameMap[
+                    randomGen.Next(gameMap.GetLength(0)),
+                    randomGen.Next(gameMap.GetLength(1))];
+
+                if (value == 0)
+                    unfilledTiles++;
+            }
+            Assert.AreNotEqual(unfilledTiles, checkedTiles);
         }
 
         [TestMethod()]

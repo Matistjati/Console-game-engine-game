@@ -7,12 +7,13 @@ namespace Console_game.Tests
     [TestClass()]
     public class MapTests
     {
-        static Random rnd = new Random();
+        static Random randomGen = new Random();
 
         [TestMethod()]
         public void MapTestEmptyConstructorSucces()
         {
             // This one takes a while since the default constructor size is 600 x 150
+            // Also, the method placed physically at the top is always faster for some reason
             Map gameMap = new Map();
 
             // Assuring that the map has been filled
@@ -20,12 +21,11 @@ namespace Console_game.Tests
             int height = gameMap.map.GetLength(1);
             for (int i = 0; i < 50; i++)
             {
-                float randomPosition1 = gameMap.map[
-                    rnd.Next(0, width),
-                    rnd.Next(0, height)];
-                Assert.IsTrue(randomPosition1 < 1 && randomPosition1 > -1);
+                float randomMapValue = gameMap.map[
+                    randomGen.Next(0, width),
+                    randomGen.Next(0, height)];
+                Assert.IsTrue(randomMapValue < 1 && randomMapValue > -1);
             }
-
 
             // Variables being set
             Assert.IsTrue(gameMap.Seed != 0);
@@ -37,17 +37,17 @@ namespace Console_game.Tests
         public void MapTestSeedConstructorSucces()
         {
             // This one takes a while since the default constructor size is 600 x 150
-            Map gameMap = new Map(rnd.Next(1, int.MaxValue));
+            Map gameMap = new Map(randomGen.Next());
 
             // Assuring that the map has been filled with proper values
             int width = gameMap.map.GetLength(0);
             int height = gameMap.map.GetLength(1);
             for (int i = 0; i < 50; i++)
             {
-                float randomPosition1 = gameMap.map[
-                    rnd.Next(0, width),
-                    rnd.Next(0, height)];
-                Assert.IsTrue(randomPosition1 < 1 && randomPosition1 > -1);
+                float randomMapValue = gameMap.map[
+                    randomGen.Next(0, width),
+                    randomGen.Next(0, height)];
+                Assert.IsTrue(randomMapValue < 1 && randomMapValue > -1);
             }
 
             // Variables being set
@@ -60,20 +60,20 @@ namespace Console_game.Tests
         [ExpectedException(typeof(ArgumentException))]
         public void MapTestSeedConstructorExceptionNegativeX()
         {
-            Map gameMap = new Map(rnd.Next(), -20, rnd.Next(1, 250), 1);
+            Map gameMap = new Map(randomGen.Next(), -20, randomGen.Next(1, 250), 1);
         }
 
         [TestMethod()]
         [ExpectedException(typeof(ArgumentException))]
         public void MapTestSeedConstructorExceptionNegativeY()
         {
-            Map gameMap = new Map(rnd.Next(), rnd.Next(1, 250), -20, 1);
+            Map gameMap = new Map(randomGen.Next(), randomGen.Next(1, 250), -20, 1);
         }
 
         [TestMethod()]
         public void GetPrintableMapTest()
         {
-            Map gameMap = new Map(rnd.Next(), 30, 30, 1);
+            Map gameMap = new Map(randomGen.Next(), 30, 30, 1);
             ConsoleColor[,] mapColors = gameMap.GetPrintableMap(new Point(15, 15));
             Rectangle mapCutOut = gameMap.GetSeenMap(new Point(15, 15));
 

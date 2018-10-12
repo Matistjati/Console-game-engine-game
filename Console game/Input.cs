@@ -157,7 +157,7 @@ namespace Console_game
                 case ButtonPress.right:
                     return rightMouseButtonPressed;
                 default:
-                    Log.defaultLogger.LogException($"Case default was reached: {button}");
+                    Log.DefaultLogger.LogException($"Case default was reached: {button}");
                     return false;
             }
         }

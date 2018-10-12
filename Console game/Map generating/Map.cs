@@ -6,6 +6,8 @@ namespace Console_game
 {
     public class Map
     {
+        private static Random randomGen = new Random();
+
         public int Seed { get; }
         public float[,] map { get; }
 
@@ -39,13 +41,13 @@ namespace Console_game
         }
 
         public Map()
-            : this(new Random().Next(1, int.MaxValue), standardMapSize.X, standardMapSize.Y, standardScale) { }
+            : this(1, standardMapSize.X, standardMapSize.Y, standardScale) { }
 
         public Map(int seed)
             : this(seed, standardMapSize.X, standardMapSize.Y, standardScale) { }
 
         public Map(int mapSizeX, int mapSizeY)
-            : this(new Random().Next(1, int.MaxValue), mapSizeX, mapSizeY, standardScale) { }
+            : this(randomGen.Next(), mapSizeX, mapSizeY, standardScale) { }
 
         public Map(int seed, int mapSizeX, int mapSizeY, float scale)
         {
