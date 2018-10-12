@@ -33,25 +33,120 @@ namespace Console_game.Tests
         [TestMethod]
         public void LogTestConstructorFileExists()
         {
-            const string loggedString = "hai";
-            Log log = new Log("log.txt", true, true, true, true);
+            Log log = new Log(logName, true, true, true, true);
+        }
 
-            StackFrame currentState = new StackFrame(true);
+        [TestMethod]
+        public void LogTestConstructorFileDoesntExists()
+        {
+            Log log = new Log("Sample.txt", true, true, true, true);
+            Assert.IsTrue(File.Exists("Sample.txt"));
+            File.Delete("Sample.txt");
+        }
 
-            log.LogInfo(loggedString);
+        [TestMethod]
+        public void LogTestConstructorFileTreeDoesntExists()
+        {
+            Log log = new Log("folding/folder/text.txt", true, true, true, true);
+            Assert.IsTrue(File.Exists("folding/folder/text.txt"));
+            DirectoryInfo directory = new DirectoryInfo("folding");
+            directory.Delete(true);
+        }
 
+        private enum LogLevel
+        {
+            Info, Warning, Error
+        }
+
+        private string FormatString(string text, StackFrame currentState, bool line, bool date, bool method, bool fileName, LogLevel logLevel)
+        {
             int lineNumber = currentState.GetFileLineNumber();
             lineNumber++; // The log calling is one line under getting the line number
 
             // It's beautiful and you can't change my mind
-            string cleanMethodName = currentState.GetMethod().ToString().Substring(0, currentState.GetMethod().ToString().Length - 2).Substring((int)(currentState.GetMethod() as MethodInfo).ReturnParameter.ParameterType.ToString().Substring("System.".Length).Length + 1);
+            string cleanMethodName = "called by " +  currentState.GetMethod().ToString().Substring(0, currentState.GetMethod().ToString().Length - 2).Substring((int)(currentState.GetMethod() as MethodInfo).ReturnParameter.ParameterType.ToString().Substring("System.".Length).Length + 1) + " ";
 
-            string formattedLogString = $"{DateTime.Now.ToString("yyyy/MM/dd, HH:mm")} at file" +
-                $" {Path.GetFileName(currentState.GetFileName())} called by {cleanMethodName}" +
-                $" at line {lineNumber} Info: {loggedString}";
+            string dateString = $"{DateTime.Now.ToString("yyyy/MM/dd, HH:mm")}" + " ";
+            string fileString = "at file " + Path.GetFileName(currentState.GetFileName()) + " ";
+            string lineString = "at line " + lineNumber + " ";
+
+            return $"{(date ? dateString : string.Empty)}"+
+                $"{(fileName ? fileString : string.Empty)}{(method ? cleanMethodName : string.Empty)}" +
+                $"{(line ? lineString : string.Empty)}{logLevel}: {text}";
+        }
+
+        Log testLogger = new Log(logName, true, true, true, true);
+        Random random = new Random();
+
+
+        [TestMethod]
+        public void LogTestLogInfo()
+        {
+            const string loggedString = "hai";
+
+            // Setting the log flags randomly
+            bool showMethod = (random.Next(0, 2) == 1) ? true : false ;
+            bool showDate = (random.Next(0, 2) == 1) ? true : false ;
+            bool showLine = (random.Next(0, 2) == 1) ? true : false ;
+            bool showFile = (random.Next(0, 2) == 1) ? true : false ;
+
+            testLogger.showCaller = showMethod;
+            testLogger.showDate = showDate;
+            testLogger.showLineNumber = showLine;
+            testLogger.showFileName = showFile;
+
+            StackFrame currentState = new StackFrame(true);
+            testLogger.LogInfo(loggedString);
+            string formattedText = FormatString(loggedString, currentState, showLine, showDate, showMethod, showFile, LogLevel.Info);
 
             Assert.AreEqual(
-                formattedLogString,
+                formattedText,
+                File.ReadAllText(logName).Trim());
+        }
+
+        [TestMethod]
+        public void LogTestLogWarning()
+        {
+            const string loggedString = "hoiiii";
+            bool showMethod = (random.Next(0, 2) == 1) ? true : false;
+            bool showDate = (random.Next(0, 2) == 1) ? true : false;
+            bool showLine = (random.Next(0, 2) == 1) ? true : false;
+            bool showFile = (random.Next(0, 2) == 1) ? true : false;
+
+            testLogger.showCaller = showMethod;
+            testLogger.showDate = showDate;
+            testLogger.showLineNumber = showLine;
+            testLogger.showFileName = showFile;
+
+            StackFrame currentState = new StackFrame(true);
+            testLogger.LogWarning(loggedString);
+            string formattedText = FormatString(loggedString, currentState, showLine, showDate, showMethod, showFile, LogLevel.Warning);
+
+            Assert.AreEqual(
+                formattedText,
+                File.ReadAllText(logName).Trim());
+        }
+
+        [TestMethod]
+        public void LogTestLogError()
+        {
+            const string loggedString = "I Rise from the void bringing forth this unreadable piece of code";
+            bool showMethod = (random.Next(0, 2) == 1) ? true : false;
+            bool showDate = (random.Next(0, 2) == 1) ? true : false;
+            bool showLine = (random.Next(0, 2) == 1) ? true : false;
+            bool showFile = (random.Next(0, 2) == 1) ? true : false;
+
+            testLogger.showCaller = showMethod;
+            testLogger.showDate = showDate;
+            testLogger.showLineNumber = showLine;
+            testLogger.showFileName = showFile;
+
+            StackFrame currentState = new StackFrame(true);
+            testLogger.LogError(loggedString);
+            string formattedText = FormatString(loggedString, currentState, showLine, showDate, showMethod, showFile, LogLevel.Error);
+
+            Assert.AreEqual(
+                formattedText,
                 File.ReadAllText(logName).Trim());
         }
     }

@@ -33,8 +33,18 @@ namespace Console_game
         
         public Log(string logPath, bool showDate, bool showLineNumber, bool showCaller, bool showFileName)
         {
-            if (!File.Exists(filePath))
-                using (File.Create(logPath))
+            try
+            {
+                if (!File.Exists(filePath))
+                    using (File.Create(logPath)) { }
+            }
+            catch (DirectoryNotFoundException)
+            {
+                string logName = Path.GetFileName(logPath);
+                string logPathNoFile = Path.GetDirectoryName(logPath);
+                Directory.CreateDirectory(logPathNoFile);
+                using (File.Create(Path.Combine(logPathNoFile, logName))) { }
+            }
 
             this.filePath = logPath;
             this.showDate = showDate;
@@ -59,7 +69,7 @@ namespace Console_game
             log(info.ToString(), lineNumber, caller, callerFile, LogLevel.Warning);
         }
 
-        public void LogException<T>(T info,
+        public void LogError<T>(T info,
             [CallerLineNumber] int lineNumber = 0,
             [CallerMemberName] string caller = null,
             [CallerFilePath] string callerFile = null)
@@ -74,11 +84,11 @@ namespace Console_game
 
         private void log(string logText, int lineNumber, string caller, string callerFile, LogLevel logLevel)
         {
-            string formattedString = formatString(logText, lineNumber, caller, callerFile, logLevel);
+            string formattedString = FormatString(logText, lineNumber, caller, callerFile, logLevel);
             File.AppendAllText(filePath, formattedString);
         }
 
-        private string formatString(string logString,
+        private string FormatString(string logString,
             int lineNumber,
             string caller,
             string callerFile,
