@@ -11,17 +11,14 @@ namespace Console_game
         public int Seed { get; }
         public float[,] map { get; }
 
-        private static readonly Point standardMapSize = new Point(600, 150);
+        private static readonly Coord standardMapSize = new Coord(600, 150);
         private const float standardScale = 1f;
 
-        // Do not modify, it will break things as Point is a struct
-        private Point _mapSize = new Point();
+        public Coord MapSize { get; } = new Coord();
 
-        public Point MapSize => _mapSize;
+        private Coord _playerViewRange = new Coord(14, 14);
 
-        private Point _playerViewRange = new Point(14, 14);
-
-        public Point PlayerViewRange
+        public Coord PlayerViewRange
         {
             get { return _playerViewRange; }
             set
@@ -46,37 +43,35 @@ namespace Console_game
         public Map(int seed)
             : this(seed, standardMapSize.X, standardMapSize.Y, standardScale) { }
 
-        public Map(int mapSizeX, int mapSizeY)
+        public Map(uint mapSizeX, uint mapSizeY)
             : this(randomGen.Next(), mapSizeX, mapSizeY, standardScale) { }
 
-        public Map(int seed, int mapSizeX, int mapSizeY, float scale)
+        public Map(int seed, uint mapSizeX, uint mapSizeY, float scale)
         {
-            if (mapSizeY <= 0 || mapSizeX <= 0)
-                throw new ArgumentException($"map must have a size greater than 0. X: {mapSizeX} Y: {mapSizeY} ");
             if (scale <= 0)
                 throw new ArgumentException($"Scale: {scale} was negative");
 
             this.Seed = seed;
-            this._mapSize.Y = mapSizeY;
-            this._mapSize.X = mapSizeX;
-            maxMapPosition = new Point(MapSize.X, MapSize.X);
-            map = Map_Generator.MakeMap(seed, _mapSize, scale);
+            this.MapSize.Y = mapSizeY;
+            this.MapSize.X = mapSizeX;
+            maxMapPosition = new Coord(MapSize.X, MapSize.X);
+            map = Map_Generator.MakeMap(seed, MapSize, scale);
         }
 
-        private readonly Point minMapPosition = new Point(0, 0);
-        private readonly Point maxMapPosition;
+        private readonly Coord minMapPosition = Coord.empty;
+        private readonly Coord maxMapPosition;
 
-        public Rectangle GetSeenMap(Point position)
+        public Rectangle GetSeenMap(Coord position)
         {
             // Setting the position to the top left
             position.X = (position.X - PlayerViewRange.X > 0) ? position.X - PlayerViewRange.X : 0;
             position.Y = (position.Y - PlayerViewRange.Y > 0) ? position.Y - PlayerViewRange.Y : 0;
 
             // Assuring that we're inside the map
-            position = position.Clamp(minMapPosition, maxMapPosition);
+            position.Clamp(minMapPosition, maxMapPosition);
 
-            int width = PlayerViewRange.X * 2;
-            int heigth = PlayerViewRange.Y * 2;
+            uint width = PlayerViewRange.X * 2;
+            uint heigth = PlayerViewRange.Y * 2;
 
             if (position.X + width > MapSize.X)
             {
@@ -89,13 +84,13 @@ namespace Console_game
             }
 
             return new Rectangle(
-                x: (width + position.X > PlayerViewRange.X * 2) ? position.X - (width + position.X - PlayerViewRange.X * 2) : position.X,
-                y: (heigth + position.Y > PlayerViewRange.Y * 2) ? position.Y - (heigth + position.Y - PlayerViewRange.Y * 2) : position.Y,
-                width:  width,
-                height: heigth);
+                x: (int)((width + position.X > PlayerViewRange.X * 2) ? position.X - (width + position.X - PlayerViewRange.X * 2) : position.X),
+                y: (int)((heigth + position.Y > PlayerViewRange.Y * 2) ? position.Y - (heigth + position.Y - PlayerViewRange.Y * 2) : position.Y),
+                width:  (int)width,
+                height: (int)heigth);
         }
 
-        public ConsoleColor[,] GetPrintableMap(Point playerPosition)
+        public ConsoleColor[,] GetPrintableMap(Coord playerPosition)
         {
             Rectangle mapBoundaries = GetSeenMap(playerPosition);
             ConsoleColor[,] mapColors = new ConsoleColor[mapBoundaries.Width, mapBoundaries.Height];
@@ -142,7 +137,7 @@ namespace Console_game
         public override string ToString()
         {
 #if (DEBUG)
-            StringBuilder stringBuilder = new StringBuilder(MapSize.X * MapSize.Y);
+            StringBuilder stringBuilder = new StringBuilder((int)(MapSize.X * MapSize.Y));
             for (int y = 0; y < map.GetLength(0); y++)
             {
                 for (int x = 0; x < map.GetLength(1); x++)
@@ -152,7 +147,7 @@ namespace Console_game
             }
             return stringBuilder.ToString();
 #else
-            return "Use printer class for printing the map";
+            return "Use GetPrintableMap for printing the map";
 #endif
         }
     }

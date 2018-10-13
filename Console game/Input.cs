@@ -34,7 +34,7 @@ namespace Console_game
 
         public static bool leftMouseButtonPressed;
         public static bool rightMouseButtonPressed;
-        public static Point mousePosition = new Point();
+        public static Coord mousePosition = new Coord();
 
         public static void MouseEventHandler(MOUSE_EVENT_RECORD r)
         {
@@ -51,8 +51,8 @@ namespace Console_game
             }
             else if (r.dwEventFlags == MOUSE_EVENT_RECORD.MOUSE_MOVED)
             {
-                mousePosition.X = r.dwMousePosition.X;
-                mousePosition.Y = r.dwMousePosition.Y;
+                mousePosition.X = (uint)r.dwMousePosition.X;
+                mousePosition.Y = (uint)r.dwMousePosition.Y;
             }
         }
 
@@ -137,7 +137,7 @@ namespace Console_game
 
         public static bool GetKeyUp(char key) => releasedChars.Contains(key);
 
-        public static Point mousePosition = new Point();
+        public static Coord mousePosition = new Coord();
 
         public enum ButtonPress
         {

@@ -5,12 +5,8 @@ namespace Console_game
 {
     public class Map_Generator
     {
-        public static float[,] MakeMap(int seed, Point mapSize, float scale)
+        public static float[,] MakeMap(int seed, Coord mapSize, float scale)
         {
-            if (mapSize.X <= 0)
-                throw new ArgumentException($"The map size must be grater than 0. mapSizeX {mapSize.X} <= 0");
-            if (mapSize.Y <= 0)
-                throw new ArgumentException($"The map size must be grater than 0. mapSizeX {mapSize.Y} <= 0");
             if (scale <= 0)
                 throw new ArgumentException($"Scale: {scale} was negative");
 

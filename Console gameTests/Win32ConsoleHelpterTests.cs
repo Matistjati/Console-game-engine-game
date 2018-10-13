@@ -25,10 +25,10 @@ namespace Console_game.Tests
             cmd.Kill();
         }
 
-        private readonly Point[] ConsoleFontSizes = new Point[]
-            { new Point(4, 6), new Point(6, 8), new Point(8, 8), new Point(16, 8),
-            new Point(5, 12), new Point(7, 12), new Point(8, 12), new Point(16, 12),
-            new Point(12, 16), new Point(10, 18), new Point(4, 6), new Point(4, 6)};
+        private readonly Coord[] ConsoleFontSizes = new Coord[]
+            { new Coord(4, 6), new Coord(6, 8), new Coord(8, 8), new Coord(16, 8),
+            new Coord(5, 12), new Coord(7, 12), new Coord(8, 12), new Coord(16, 12),
+            new Coord(12, 16), new Coord(10, 18), new Coord(4, 6), new Coord(4, 6)};
 
         [TestMethod()]
         public void SetConsoleFontSizeNormalUsage()

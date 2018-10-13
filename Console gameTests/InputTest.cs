@@ -118,8 +118,8 @@ namespace Console_game.Tests
 
             Input.UpdateInput();
 
-            Assert.AreEqual(x, Input.mousePosition.X);
-            Assert.AreEqual(y, Input.mousePosition.Y);
+            Assert.AreEqual((uint)x, Input.mousePosition.X);
+            Assert.AreEqual((uint)y, Input.mousePosition.Y);
         }
     }
 }

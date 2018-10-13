@@ -71,10 +71,11 @@ namespace Console_game
 
             Console.SetBufferSize(1200, 300);
             //Console.SetWindowSize(599, 149);
-            Map thisMap = new Map(5000, 1500)
-            {
-                PlayerViewRange = new Point(600, 150)
-            };
+            Map thisMap = new Map(5000, 1500);
+            thisMap.PlayerViewRange.X = 600;
+            thisMap.PlayerViewRange.X = 150;
+
+
 
             PrintMap(thisMap);
 
@@ -84,7 +85,7 @@ namespace Console_game
         private const char blockChar = '█';
         static void PrintMap(Map map)
         {
-            ConsoleColor[,] mapColors = map.GetPrintableMap(new Point(15, 15));
+            ConsoleColor[,] mapColors = map.GetPrintableMap(new Coord(15, 15));
             for (int y = 0; y < mapColors.GetLength(0); y++)
             {
                 for (int x = 0; x < mapColors.GetLength(1); x++)

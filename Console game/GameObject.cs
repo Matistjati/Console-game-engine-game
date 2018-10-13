@@ -1,8 +1,12 @@
-﻿namespace Console_game
+﻿using System.Drawing;
+
+namespace Console_game
 {
     public class GameObject
     {
-		internal static float _timeDelta;
+        public Coord Position { get; set; } = new Coord();
+
+        internal static float _timeDelta;
 		internal static float _time;
 
         public static float TimeDelta => _timeDelta;

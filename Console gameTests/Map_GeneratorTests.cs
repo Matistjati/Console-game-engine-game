@@ -14,7 +14,7 @@ namespace Console_game.Tests
         {
             float[,] gameMap = Map_Generator.MakeMap(
                 seed: randomGen.Next(),
-                mapSize: new Point(randomGen.Next(1, 100), randomGen.Next(1, 25)),
+                mapSize: new Coord(randomGen.Next(1, 100), randomGen.Next(1, 25)),
                 scale: 1);
 
             // Assuring that the map has been filled
@@ -38,7 +38,7 @@ namespace Console_game.Tests
         {
             float[,] gameMap = Map_Generator.MakeMap(
                 seed: randomGen.Next(-1000, -1),
-                mapSize: new Point(randomGen.Next(1, 100), randomGen.Next(1, 25)),
+                mapSize: new Coord(randomGen.Next(1, 100), randomGen.Next(1, 25)),
                 scale: 1);
 
             // Assuring that the map has been filled
@@ -54,26 +54,6 @@ namespace Console_game.Tests
                     unfilledTiles++;
             }
             Assert.AreNotEqual(unfilledTiles, checkedTiles);
-        }
-
-        [TestMethod()]
-        [ExpectedException(typeof(ArgumentException))]
-        public void MakeMapNegativeXException()
-        {
-            float[,] gameMap = Map_Generator.MakeMap(
-                seed: randomGen.Next(),
-                mapSize: new Point(-20, randomGen.Next(1, 25)),
-                scale: 1);
-        }
-
-        [TestMethod()]
-        [ExpectedException(typeof(ArgumentException))]
-        public void MakeMapNegativeYException()
-        {
-            float[,] gameMap = Map_Generator.MakeMap(
-                seed: randomGen.Next(), 
-                mapSize: new Point(randomGen.Next(1, 25), -50),
-                scale: 1);
         }
     }
 }
