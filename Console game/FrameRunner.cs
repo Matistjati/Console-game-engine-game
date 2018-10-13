@@ -3,24 +3,40 @@ using System.Threading;
 
 namespace Console_game
 {
-    public static class FrameRunner
+    internal static class FrameRunner
     {
         static DateTime lastFrameCall;
         static DateTime start;
 		
 		private static readonly TimeSpan frameWait = new TimeSpan(166667);
 
+        static bool run;
 
+        static bool firstRun = true;
+
+        static DateTime pauseStartTime;
         public static void Pause()
         {
 			run = false;
+            pauseStartTime = DateTime.Now;
         }
 
         public static void Run()
         {
-			start = DateTime.Now;
+            if (firstRun)
+            {
+                start = DateTime.Now;
+                firstRun = false;
+            }
+            else
+            {
+                start += DateTime.Now - pauseStartTime;
+            }
+
 			lastFrameCall = DateTime.Now;
-            while (true)
+
+            run = true;
+            while (run)
             {
                 // Calculating and setting timedelta
                 GameObject._timeDelta = (float)(DateTime.Now - lastFrameCall).TotalSeconds;
@@ -30,7 +46,7 @@ namespace Console_game
                 Input.UpdateInput();
 
                 lastFrameCall = DateTime.Now;
-                frameCallback.Invoke();
+                frameCallback?.Invoke();
 
 
                 Thread.Sleep(frameWait);
@@ -44,15 +60,9 @@ namespace Console_game
             frameCallback += method;
         }
 
-		private static bool run;
-
-		public static void Start()
+        internal static void RemoveFrameSubscriber(Globals.GameMethodSignature method)
         {
-			if (!run)
-			{
-				run = true;
-				Run();
-			}
+            frameCallback -= method;
         }
     }
 }

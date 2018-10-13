@@ -66,6 +66,8 @@
     <Compile Include="PointExtensionsTests.cs" />
     <Compile Include="LogTests.cs" />
     <Compile Include="ConsoleListenerTests.cs" />
+    <Compile Include="FrameRunnerTests.cs" />
+    <Compile Include="GameObjectTests.cs" />
     <Compile Include="Win32ConsoleHelpterTests.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
 ﻿namespace Console_game
 {
-    class GameObject
+    public class GameObject
     {
 		internal static float _timeDelta;
 		internal static float _time;

@@ -8,11 +8,12 @@ namespace Console_game
     class Program
     {
         private static float total;
+        static DateTime start;
         private static void TestTimeAccuracy()
         {
             total += GameObject.TimeDelta;
             Console.Clear();
-            Console.Write($"time: {GameObject.Time}\ntimedelta total: {total}\ntimedelta: {GameObject.TimeDelta}\ndifference: {total -GameObject.Time}");
+            Console.Write($"time: {(DateTime.Now - start).TotalSeconds} \ngameobject time: {GameObject.Time}\ntimedelta total: {total}\ntimedelta: {GameObject.TimeDelta}\ndifference: {total -GameObject.Time}");
         }
 
         private static void TestInputAccuracy()
@@ -45,7 +46,7 @@ namespace Console_game
             Globals.GameMethodSignature frameSubscribers = gameObjectChildren.GetMethodsByString("update");
             Globals.GameMethodSignature gameStartup = gameObjectChildren.GetMethodsByString("start");
             gameStartup.Invoke();
-            frameSubscribers += TestTimeAccuracy;
+            frameSubscribers += TestTimeAccuracy; start = DateTime.Now;
             FrameRunner.AddFrameSubscriber(frameSubscribers);
 
             // Testing
@@ -56,18 +57,17 @@ namespace Console_game
             using (StreamWriter x = File.AppendText("logs/log.txt")) { }
 
             // Starting
-            FrameRunner.Start();
+            FrameRunner.Run();
         }
 
         static void Main(string[] args)
         {
-            /*InternalInput.Start();
-            Console.ReadKey(false);
-            Console.ReadKey(false);
-            Console.ReadKey(false);*/
-            //Console.ReadKey(false);
+            Console.ReadKey(true);
+            Console.ReadKey(true);
+            Console.ReadKey(true);
+            //Console.ReadKey(true);
 
-            //GameSetup();
+            GameSetup();
 
             Console.SetBufferSize(1200, 300);
             //Console.SetWindowSize(599, 149);
@@ -78,7 +78,7 @@ namespace Console_game
 
             PrintMap(thisMap);
 
-            Console.ReadKey(false);
+            Console.ReadKey(true);
         }
 
         private const char blockChar = '█';

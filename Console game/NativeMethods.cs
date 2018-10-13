@@ -66,7 +66,7 @@ namespace Console_game
         {
             public const ushort KEY_EVENT = 0x0001,
                 MOUSE_EVENT = 0x0002,
-                WINDOW_BUFFER_SIZE_EVENT = 0x0004; //more
+                WINDOW_BUFFER_SIZE_EVENT = 0x0004;
             [FieldOffset(0)]
             public ushort EventType;
 
@@ -79,13 +79,14 @@ namespace Console_game
 
             [FieldOffset(2)]
             public WINDOW_BUFFER_SIZE_RECORD WindowBufferSizeEvent;
+
+            /*
+            MENU_EVENT_RECORD MenuEvent;
+            FOCUS_EVENT_RECORD FocusEvent;
+            */
             // MSDN claims that these are used internally and shouldn't be used
             // https://docs.microsoft.com/en-us/windows/console/input-record-str
-            /*
-            and:
-             MENU_EVENT_RECORD MenuEvent;
-             FOCUS_EVENT_RECORD FocusEvent;
-             */
+
         }
 
         [StructLayout(LayoutKind.Explicit)]

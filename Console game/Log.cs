@@ -35,7 +35,7 @@ namespace Console_game
         {
             try
             {
-                if (!File.Exists(filePath))
+                if (!File.Exists(logPath))
                     using (File.Create(logPath)) { }
             }
             catch (DirectoryNotFoundException)
