@@ -1,7 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Numerics;
-using System.Drawing;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Console_game
 {
@@ -13,7 +14,7 @@ namespace Console_game
         {
             total += GameObject.TimeDelta;
             Console.Clear();
-            Console.Write($"time: {(DateTime.Now - start).TotalSeconds} \ngameobject time: {GameObject.Time}\ntimedelta total: {total}\ntimedelta: {GameObject.TimeDelta}\ndifference: {total -GameObject.Time}");
+            Console.Write($"time: {(DateTime.Now - start).TotalSeconds} \ngameobject time: {GameObject.Time}\ntimedelta total: {total}\ntimedelta: {GameObject.TimeDelta}\ndifference: {total - GameObject.Time}");
         }
 
         private static void TestInputAccuracy()
@@ -43,14 +44,23 @@ namespace Console_game
 
             // Getting all classes deriving from gameobject and getting update and start methods
             ReflectiveHelper<GameObject> gameObjectChildren = new ReflectiveHelper<GameObject>();
-            Globals.GameMethodSignature frameSubscribers = gameObjectChildren.GetMethodsByString("update");
-            Globals.GameMethodSignature gameStartup = gameObjectChildren.GetMethodsByString("start");
-            gameStartup.Invoke();
-            frameSubscribers += TestTimeAccuracy; start = DateTime.Now;
-            FrameRunner.AddFrameSubscriber(frameSubscribers);
+            Dictionary<MethodInfo, GameObject> frameSubscribers = gameObjectChildren.GetMethodsByString("update");
 
-            // Testing
-            frameSubscribers += TestTimeAccuracy;
+            // Invoking all start methods on our GameObjects
+            foreach (KeyValuePair<MethodInfo, GameObject> method in gameObjectChildren.GetMethodsByString("start"))
+            {
+                method.Key.Invoke(method.Value, new object[0]);
+            }
+
+            // Sample getting specific method from class and calling it
+            /*
+            KeyValuePair<MethodInfo, Program> methodInfo = ReflectiveHelper<Program>.GetMethodInfo(
+                                                                                        TestTimeAccuracy,
+                                                                                        staticMethod: true);
+            methodInfo.Key.Invoke(methodInfo.Value, new object[0]);
+            */
+
+            FrameRunner.AddFrameSubscriber(frameSubscribers);
 
             // Creating the necessary folders and files
             Directory.CreateDirectory("logs");

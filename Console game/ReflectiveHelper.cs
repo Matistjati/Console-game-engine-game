@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Console_game
@@ -10,32 +11,48 @@ namespace Console_game
         // This is black magic
 
         readonly IEnumerable<Type> gameObjectChildren;
+        List<Type> implementsStart = new List<Type>();
+        List<Type> implementsUpdate = new List<Type>();
+
+        List<Type> instances = new List<Type>();
+
         public ReflectiveHelper()
         {
-            // TODO: Assembly being used by
             gameObjectChildren = Assembly.GetAssembly(typeof(T)).GetTypes()
                 .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(T)));
         }
 
         // For this to work, the class must inherit from GameObject and the method must be public and static
-        public Globals.GameMethodSignature GetMethodsByString(string methodName)
+        public Dictionary<MethodInfo, T> GetMethodsByString(string methodName)
         {
-            List<Delegate> methods = new List<Delegate>();
+            Dictionary<MethodInfo, T> methods = new Dictionary<MethodInfo, T>();
             
             foreach (Type instanceType in gameObjectChildren)
             {
-                if (instanceType.GetMethod(methodName) != null)
+                MethodInfo method = instanceType.GetMethod(methodName,
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.Instance);
+
+                if (method is null)
+                    continue;
+
+                if (method.ReturnType == typeof(void) && method.GetParameters().Length == 0)
                 {
-                    methods.Add(Delegate.CreateDelegate(typeof(Globals.GameMethodSignature), instanceType, methodName, false, true));
+                    methods.Add(method, (T)Activator.CreateInstance(instanceType));
                 }
             }
 
-            Globals.GameMethodSignature joinedSubscribers = new Globals.GameMethodSignature(() => { });
-            for (int i = 0; i < methods.Count; i++)
-            {
-                joinedSubscribers += (Globals.GameMethodSignature)methods[i];
-            }
-            return joinedSubscribers;
+            return methods;
+        }
+
+        public static KeyValuePair<MethodInfo, T> GetMethodInfo(Action method, bool staticMethod = false)
+        {
+            MethodInfo methodInfo = typeof(T).GetMethod(method.Method.Name,
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.Instance | ((staticMethod) ? BindingFlags.Static : 0));
+
+            if (methodInfo is null)
+                throw new Exception("method not found");
+
+            return new KeyValuePair<MethodInfo, T>(methodInfo, (T)Activator.CreateInstance(typeof(T)));
         }
     }
 }

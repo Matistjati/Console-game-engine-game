@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
+using System.Linq;
 
 namespace Console_game
 {
@@ -46,23 +49,45 @@ namespace Console_game
                 Input.UpdateInput();
 
                 lastFrameCall = DateTime.Now;
-                frameCallback?.Invoke();
+
+                foreach (KeyValuePair<MethodInfo, GameObject> method in frameCallback)
+                {
+                    method.Key.Invoke(method.Value, new object[0]);
+                }
+
 
 
                 Thread.Sleep(frameWait);
             }
         }
 		
-		static Globals.GameMethodSignature frameCallback;
+		static Dictionary<MethodInfo, GameObject> frameCallback = new Dictionary<MethodInfo, GameObject>();
 
-        internal static void AddFrameSubscriber(Globals.GameMethodSignature method)
+        internal static void AddFrameSubscriber(KeyValuePair<MethodInfo, GameObject> method)
         {
-            frameCallback += method;
+            if (!frameCallback.Keys.Contains(method.Key))
+            {
+                frameCallback.Add(method.Key, method.Value);
+            }
         }
 
-        internal static void RemoveFrameSubscriber(Globals.GameMethodSignature method)
+        internal static void AddFrameSubscriber(Dictionary<MethodInfo, GameObject> method)
         {
-            frameCallback -= method;
+            foreach (KeyValuePair<MethodInfo, GameObject> methodInfo in method)
+            {
+                if (!frameCallback.Keys.Contains(methodInfo.Key))
+                {
+                    frameCallback.Add(methodInfo.Key, methodInfo.Value);
+                }
+            }
+        }
+
+        internal static void Unsubscribe(MethodInfo method)
+        {
+            if (frameCallback.Keys.Contains(method))
+            {
+                frameCallback.Remove(method);
+            }
         }
     }
 }
