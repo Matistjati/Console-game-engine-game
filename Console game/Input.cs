@@ -49,7 +49,7 @@ namespace Console_game
                     rightMouseButtonPressed = true;
                 }
             }
-            else if (r.dwEventFlags == 0x0001)
+            else if (r.dwEventFlags == MOUSE_EVENT_RECORD.MOUSE_MOVED)
             {
                 mousePosition.X = r.dwMousePosition.X;
                 mousePosition.Y = r.dwMousePosition.Y;

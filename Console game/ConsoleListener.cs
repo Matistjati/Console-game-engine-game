@@ -5,16 +5,17 @@ using static Console_game.NativeMethods;
 
 namespace Console_game
 {
-    public static class ConsoleListener
+    internal static class ConsoleListener
     {
-        internal static event ConsoleMouseEvent MouseEvent;
+        public static event ConsoleMouseEvent MouseEvent;
 
-        internal static event ConsoleKeyEvent KeyEvent;
+        public static event ConsoleKeyEvent KeyEvent;
 
-        internal static event ConsoleWindowBufferSizeEvent WindowBufferSizeEvent;
+        public static event ConsoleWindowBufferSizeEvent WindowBufferSizeEvent;
 
         private static bool Run = false;
         private static bool ThreadExists = false;
+
 
         public static void Start()
         {
@@ -40,6 +41,7 @@ namespace Console_game
                         record[0] = new INPUT_RECORD();
                         ReadConsoleInput(inHandle, record, 1, ref numRead);
                         if (Run)
+                        {
                             switch (record[0].EventType)
                             {
                                 case INPUT_RECORD.MOUSE_EVENT:
@@ -52,6 +54,7 @@ namespace Console_game
                                     WindowBufferSizeEvent?.Invoke(record[0].WindowBufferSizeEvent);
                                     break;
                             }
+                        }
                         else
                         {
                             uint numWritten = 0;
@@ -60,6 +63,7 @@ namespace Console_game
                         }
                     }
                 }).Start();
+
                 ThreadExists = true;
             }
             else

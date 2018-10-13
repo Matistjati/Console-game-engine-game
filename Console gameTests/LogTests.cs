@@ -31,13 +31,13 @@ namespace Console_game.Tests
         }
 
         [TestMethod]
-        public void LogTestConstructorFileExists()
+        public void LogConstructorFileExistsTest()
         {
             Log log = new Log(logName, true, true, true, true);
         }
 
         [TestMethod]
-        public void LogTestConstructorFileDoesntExists()
+        public void LogConstructorFileDoesntExistsTest()
         {
             Log log = new Log("Sample.txt", true, true, true, true);
             Assert.IsTrue(File.Exists("Sample.txt"));
@@ -45,7 +45,7 @@ namespace Console_game.Tests
         }
 
         [TestMethod]
-        public void LogTestConstructorFileTreeDoesntExists()
+        public void LogConstructorFileTreeDoesntExistsTest()
         {
             Log log = new Log("folding/folder/text.txt", true, true, true, true);
             Assert.IsTrue(File.Exists("folding/folder/text.txt"));
@@ -80,7 +80,7 @@ namespace Console_game.Tests
 
 
         [TestMethod]
-        public void LogTestLogInfo()
+        public void Log_LogInfoTest()
         {
             const string loggedString = "hai";
 
@@ -105,7 +105,7 @@ namespace Console_game.Tests
         }
 
         [TestMethod]
-        public void LogTestLogWarning()
+        public void Log_LogWarningTest()
         {
             const string loggedString = "hoiiii";
             bool showMethod = (random.Next(0, 2) == 1) ? true : false;
@@ -128,7 +128,7 @@ namespace Console_game.Tests
         }
 
         [TestMethod]
-        public void LogTestLogError()
+        public void Log_LogErrorTest()
         {
             const string loggedString = "I Rise from the void bringing forth this unreadable piece of code";
             bool showMethod = (random.Next(0, 2) == 1) ? true : false;

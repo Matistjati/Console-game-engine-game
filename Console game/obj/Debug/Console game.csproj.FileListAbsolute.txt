@@ -1,7 +1,6 @@
 C:\Users\Matis\source\repos\Console game\Console game\bin\Debug\Console game test.exe.config
 C:\Users\Matis\source\repos\Console game\Console game\bin\Debug\Console game test.exe
 C:\Users\Matis\source\repos\Console game\Console game\bin\Debug\Console game test.pdb
-C:\Users\Matis\source\repos\Console game\Console game\obj\Debug\Console game.csprojAssemblyReference.cache
 C:\Users\Matis\source\repos\Console game\Console game\obj\Debug\Console game.csproj.CoreCompileInputs.cache
 C:\Users\Matis\source\repos\Console game\Console game\obj\Debug\Console game test.exe
 C:\Users\Matis\source\repos\Console game\Console game\obj\Debug\Console game test.pdb
@@ -11,3 +10,5 @@ C:\Users\Kund\Source\Repos\Console-game-engine-game\Console game\bin\Debug\Conso
 C:\Users\Kund\Source\Repos\Console-game-engine-game\Console game\obj\Debug\Console game.csproj.CoreCompileInputs.cache
 C:\Users\Kund\Source\Repos\Console-game-engine-game\Console game\obj\Debug\Console game test.exe
 C:\Users\Kund\Source\Repos\Console-game-engine-game\Console game\obj\Debug\Console game test.pdb
+C:\Users\Matis\source\repos\Console game\Console game\bin\Debug\Console game test.exe.CodeAnalysisLog.xml
+C:\Users\Matis\source\repos\Console game\Console game\bin\Debug\Console game test.exe.lastcodeanalysissucceeded

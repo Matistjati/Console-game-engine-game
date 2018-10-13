@@ -88,13 +88,13 @@ namespace Console_game.Tests
         [TestMethod]
         public void InputMouseLeftAndRightButtons()
         {
-            mouseEvent.dwButtonState = 0x0001; // Left click
+            mouseEvent.dwButtonState = MOUSE_EVENT_RECORD.FROM_LEFT_1ST_BUTTON_PRESSED;
             InternalInput.MouseEventHandler(mouseEvent);
 
             Input.UpdateInput();
             Assert.IsTrue(Input.GetButtonDown(Input.ButtonPress.left));
 
-            mouseEvent.dwButtonState = 0x0002; // Right click
+            mouseEvent.dwButtonState = MOUSE_EVENT_RECORD.RIGHTMOST_BUTTON_PRESSED;
             InternalInput.MouseEventHandler(mouseEvent);
 
             Input.UpdateInput();
@@ -104,7 +104,7 @@ namespace Console_game.Tests
         [TestMethod]
         public void InputMousePosition()
         {
-            mouseEvent.dwEventFlags = 0x0001; // Mouse movement
+            mouseEvent.dwEventFlags = MOUSE_EVENT_RECORD.MOUSE_MOVED;
             Random rnd = new Random();
 
             int x = rnd.Next(0, short.MaxValue);

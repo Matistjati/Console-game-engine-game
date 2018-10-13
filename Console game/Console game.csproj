@@ -55,6 +55,7 @@
     <Compile Include="FrameRunner.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="Globals.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="ReflectiveHelper.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Map generating\Map Generator.cs" />

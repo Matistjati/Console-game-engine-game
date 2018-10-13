@@ -1,6 +1,6 @@
 ﻿namespace Console_game
 {
-    static class Globals
+    internal static class Globals
     {
         public static readonly string gameName;
 
