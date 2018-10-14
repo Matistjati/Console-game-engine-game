@@ -3,49 +3,43 @@ using System.Globalization;
 
 namespace Console_game
 {
-    public class Coord
+    public class CoordF
     {
-        public static readonly Coord empty = new Coord();
+        public static readonly CoordF empty = new CoordF();
 
-        public uint X { get; set; }
+        public float X { get; set; }
 
-        public uint Y { get; set; }
+        public float Y { get; set; }
 
-        public Coord(uint x, uint y)
-        {
-            X = x;
-            Y = y;
-        }
-
-        public Coord(int x, int y)
+        public CoordF(float x, float y)
         {
             if (x < 0)
                 throw new ArgumentException($"x must be greater than 0. X was {x}");
             if (y < 0)
                 throw new ArgumentException($"y must be greater than 0. X was {y}");
 
-            X = (uint)x;
-            Y = (uint)y;
+            X = x;
+            Y = y;
         }
 
-        public Coord()
+        public CoordF()
         {
             X = 0;
             Y = 0;
         }
 
-        public static explicit operator CoordF(Coord coord)
+        public static explicit operator Coord(CoordF coordF)
         {
-            return new CoordF((float)coord.X, (float)coord.Y);
+            return new Coord((uint)coordF.X, (uint)coordF.Y);
         }
 
         public void Clamp(Coord min, Coord max)
         {
-            uint X = this.X;
+            float X = this.X;
             X = (X > max.X) ? max.X : X;
             X = (X < min.X) ? min.X : X;
 
-            uint Y = this.Y;
+            float Y = this.Y;
             Y = (Y > max.Y) ? max.Y : Y;
             Y = (Y < min.Y) ? min.Y : Y;
 
@@ -53,27 +47,27 @@ namespace Console_game
             this.Y = Y;
         }
 
-        public static bool operator ==(Coord left, Coord right)
+        public static bool operator ==(CoordF left, CoordF right)
         {
             return left.X == right.X && left.Y == right.Y;
         }
 
-        public static bool operator !=(Coord left, Coord right)
+        public static bool operator !=(CoordF left, CoordF right)
         {
             return !(left == right);
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Coord))
+            if (!(obj is CoordF))
                 return false;
-            Coord coord = (Coord)obj;
+            CoordF coord = (CoordF)obj;
             return coord.X == this.X && coord.Y == this.Y;
         }
 
         public override int GetHashCode()
         {
-            return (int)(X ^ Y);
+            return X.GetHashCode();
         }
 
         public override string ToString()

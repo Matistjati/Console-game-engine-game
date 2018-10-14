@@ -44,15 +44,26 @@ namespace Console_game
             return methods;
         }
 
-        public static KeyValuePair<MethodInfo, T> GetMethodInfo(Action method, bool staticMethod = false)
+        public static MethodInfo GetMethodInfoFromInstance<TClassType>(string method)
         {
-            MethodInfo methodInfo = typeof(T).GetMethod(method.Method.Name,
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.Instance | ((staticMethod) ? BindingFlags.Static : 0));
+            MethodInfo methodInfo = typeof(TClassType).GetMethod(method,
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.Instance);
 
             if (methodInfo is null)
                 throw new Exception("method not found");
 
-            return new KeyValuePair<MethodInfo, T>(methodInfo, (T)Activator.CreateInstance(typeof(T)));
+            return methodInfo;
+        }
+
+        public static MethodInfo GetMethodInfoFromInstance<TClassType>(Action method)
+        {
+            MethodInfo methodInfo = typeof(TClassType).GetMethod(method.Method.Name,
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.Instance);
+
+            if (methodInfo is null)
+                throw new Exception("method not found");
+
+            return methodInfo;
         }
     }
 }

@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="ConsoleListener.cs" />
     <Compile Include="Coord.cs" />
+    <Compile Include="CoordF.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="Map generating\Fastnoise.cs" />
     <Compile Include="FrameRunner.cs" />

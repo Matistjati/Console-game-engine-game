@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 
 namespace Console_game.Tests
@@ -7,12 +9,6 @@ namespace Console_game.Tests
     [TestClass]
     public class FrameRunnerTests
     {
-        private static float totalTime;
-        private static void TestTimeAccuracy()
-        {
-            totalTime += GameObject.TimeDelta;
-        }
-
         static DateTime start;
 
         [TestMethod]
@@ -20,7 +16,12 @@ namespace Console_game.Tests
         {
             // This test is slow as we need to sleep for it to work
 
-            FrameRunner.AddFrameSubscriber(TestTimeAccuracy);
+            SampleGameObject sampleGameObj = new SampleGameObject();
+            MethodInfo methodInfo = ReflectiveHelper<GameObject>.GetMethodInfoFromInstance<SampleGameObject>(
+                                                                                       sampleGameObj.TestTimeAccuracy);
+            FrameRunner.UnsubscribeAll();
+            FrameRunner.AddFrameSubscriber(methodInfo, sampleGameObj);
+
             start = DateTime.Now;
             // Let's avoid getting in an infinite loop, shall we?
             new Thread(() =>
@@ -31,7 +32,7 @@ namespace Console_game.Tests
             }).Start();
             FrameRunner.Run();
 
-            FrameRunner.RemoveFrameSubscriber(TestTimeAccuracy);
+            FrameRunner.Unsubscribe(methodInfo);
 
             // Make this value higher for a better test
             Thread.Sleep(17);
@@ -42,9 +43,9 @@ namespace Console_game.Tests
             }).Start();
             FrameRunner.Run();
 
-            double time = Math.Round(totalTime + 0.0017, 3) - Math.Round(GameObject.Time, 3);
+            double time = Math.Round(sampleGameObj.total + 0.0017, 3) - Math.Round(GameObject.Time, 3);
 
-            Assert.IsTrue(time <= 0.002);
+            Assert.IsTrue(time <= 0.003);
         }
     }
 }

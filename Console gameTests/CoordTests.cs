@@ -57,5 +57,15 @@ namespace Console_game.Tests
         {
             Coord coord = new Coord(40, -20);
         }
+
+        [TestMethod()]
+        public void CoordToCoordF()
+        {
+            Coord testPoint = new Coord(rnd.Next(), rnd.Next());
+            CoordF testVector = (CoordF)testPoint;
+
+            Assert.AreEqual(testVector.X, testPoint.X);
+            Assert.AreEqual(testVector.Y, testPoint.Y);
+        }
     }
 }

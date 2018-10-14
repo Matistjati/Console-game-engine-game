@@ -82,12 +82,25 @@ namespace Console_game
             }
         }
 
+        internal static void AddFrameSubscriber(MethodInfo method, object instance)
+        {
+            if (!frameCallback.Keys.Contains(method))
+            {
+                frameCallback.Add(method, (GameObject)instance);
+            }
+        }
+
         internal static void Unsubscribe(MethodInfo method)
         {
             if (frameCallback.Keys.Contains(method))
             {
                 frameCallback.Remove(method);
             }
+        }
+
+        public static void UnsubscribeAll()
+        {
+            frameCallback.Clear();
         }
     }
 }
