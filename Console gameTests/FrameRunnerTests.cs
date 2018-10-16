@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
@@ -16,8 +15,8 @@ namespace Console_game.Tests
         {
             // This test is slow as we need to sleep for it to work
 
-            SampleGameObject sampleGameObj = new SampleGameObject();
-            MethodInfo methodInfo = ReflectiveHelper<GameObject>.GetMethodInfoFromInstance<SampleGameObject>(
+            SampleComponent sampleGameObj = new SampleComponent();
+            MethodInfo methodInfo = ReflectiveHelper<GameObject>.GetMethodInfo<SampleComponent>(
                                                                                        sampleGameObj.TestTimeAccuracy);
             FrameRunner.UnsubscribeAll();
             FrameRunner.AddFrameSubscriber(methodInfo, sampleGameObj);

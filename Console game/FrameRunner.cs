@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Threading;
 using System.Linq;
+using System.Reflection;
 
 namespace Console_game
 {
@@ -10,8 +9,6 @@ namespace Console_game
     {
         static DateTime lastFrameCall;
         static DateTime start;
-		
-		private static readonly TimeSpan frameWait = new TimeSpan(166667);
 
         static bool run;
 
@@ -20,7 +17,7 @@ namespace Console_game
         static DateTime pauseStartTime;
         public static void Pause()
         {
-			run = false;
+            run = false;
             pauseStartTime = DateTime.Now;
         }
 
@@ -36,7 +33,7 @@ namespace Console_game
                 start += DateTime.Now - pauseStartTime;
             }
 
-			lastFrameCall = DateTime.Now;
+            lastFrameCall = DateTime.Now;
 
             run = true;
             while (run)
@@ -50,20 +47,18 @@ namespace Console_game
 
                 lastFrameCall = DateTime.Now;
 
-                foreach (KeyValuePair<MethodInfo, GameObject> method in frameCallback)
+                foreach (KeyValuePair<MethodInfo, Component> method in frameCallback)
                 {
-                    method.Key.Invoke(method.Value, new object[0]);
+                    method.Value.Invoke(method.Key);
                 }
 
 
-
-                Thread.Sleep(frameWait);
             }
         }
-		
-		static Dictionary<MethodInfo, GameObject> frameCallback = new Dictionary<MethodInfo, GameObject>();
 
-        internal static void AddFrameSubscriber(KeyValuePair<MethodInfo, GameObject> method)
+        static Dictionary<MethodInfo, Component> frameCallback = new Dictionary<MethodInfo, Component>();
+
+        internal static void AddFrameSubscriber(KeyValuePair<MethodInfo, Component> method)
         {
             if (!frameCallback.Keys.Contains(method.Key))
             {
@@ -71,9 +66,9 @@ namespace Console_game
             }
         }
 
-        internal static void AddFrameSubscriber(Dictionary<MethodInfo, GameObject> method)
+        internal static void AddFrameSubscriber(Dictionary<MethodInfo, Component> method)
         {
-            foreach (KeyValuePair<MethodInfo, GameObject> methodInfo in method)
+            foreach (KeyValuePair<MethodInfo, Component> methodInfo in method)
             {
                 if (!frameCallback.Keys.Contains(methodInfo.Key))
                 {
@@ -86,7 +81,7 @@ namespace Console_game
         {
             if (!frameCallback.Keys.Contains(method))
             {
-                frameCallback.Add(method, (GameObject)instance);
+                frameCallback.Add(method, (Component)instance);
             }
         }
 

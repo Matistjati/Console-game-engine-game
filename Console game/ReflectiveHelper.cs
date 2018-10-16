@@ -9,45 +9,115 @@ namespace Console_game
     internal class ReflectiveHelper<T> where T : class
     {
         // This is black magic
+        // Which i will try to explain
 
-        readonly IEnumerable<Type> gameObjectChildren;
-        List<Type> implementsStart = new List<Type>();
-        List<Type> implementsUpdate = new List<Type>();
+        public int ClassCount { get; internal set; }
 
-        List<Type> instances = new List<Type>();
+        readonly IEnumerable<Type> TChildren;
 
         public ReflectiveHelper()
         {
-            gameObjectChildren = Assembly.GetAssembly(typeof(T)).GetTypes()
+            TChildren = Assembly.GetAssembly(typeof(T)).GetTypes()
                 .Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(T)));
+
+            ClassCount = TChildren.Count();
         }
 
-        // For this to work, the class must inherit from GameObject and the method must be public and static
-        public Dictionary<MethodInfo, T> GetMethodsByString(string methodName)
+        List<T> TInstances = new List<T>();
+    
+        /// <summary>
+        /// Instantiates all classes in the assembly that derives from T
+        /// </summary>
+        /// <returns>
+        /// An array instances of classes in the assembly that derive from T
+        /// </returns>
+        public List<T> GetTInstance()
         {
-            Dictionary<MethodInfo, T> methods = new Dictionary<MethodInfo, T>();
-            
-            foreach (Type instanceType in gameObjectChildren)
+            if (TInstances.Count != 0)
             {
-                MethodInfo method = instanceType.GetMethod(methodName,
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.Instance);
-
-                if (method is null)
-                    continue;
-
-                if (method.ReturnType == typeof(void) && method.GetParameters().Length == 0)
+                return TInstances;
+            }
+            else
+            {
+                List<T> instances = new List<T>();
+                foreach (Type instanceType in TChildren)
                 {
-                    methods.Add(method, (T)Activator.CreateInstance(instanceType));
+                    instances.Add((T)Activator.CreateInstance(instanceType));
+                }
+                TInstances = instances;
+                return instances;
+            }
+
+        }
+
+        const BindingFlags defaultBindingFlags = BindingFlags.Public |
+            BindingFlags.NonPublic |
+            BindingFlags.Instance |
+            BindingFlags.IgnoreCase;
+
+        /// <summary>
+        /// Instantiates all classes in the assembly that derives from T and implements a method
+        /// </summary>
+        /// <returns>
+        /// An array instances of classes in the assembly that derive from T and implements a method
+        /// </returns>
+        /// <param name="component">The component to get the methodinfo from.</param>
+        /// <param name="methodName">The method that the classes need to implement.</param>
+        /// <param name="methodInfo">The methodinfo that will be supplied if the components implements the method.</param>
+        public static bool TryGetMethodFromComponent(Component component, string methodName, out MethodInfo methodInfo)
+        {
+            return TryGetMethodFromComponent(component, methodName, defaultBindingFlags, out methodInfo);
+        }
+
+        /// <summary>
+        /// Instantiates all classes in the assembly that derives from T and implements a method
+        /// </summary>
+        /// <returns>
+        /// An array instances of classes in the assembly that derive from T and implements a method
+        /// </returns>
+        /// <param name="component">The component to get the methodinfo from.</param>
+        /// <param name="methodName">The method that the classes need to implement.</param>
+        /// <param name="methodInfo">The methodinfo that will be supplied if the components implements the method.</param>
+        public static bool TryGetMethodFromComponent(Component component, string methodName,
+            BindingFlags bindingFlags, out MethodInfo methodInfo)
+        {
+            MethodInfo ComponentMethodInfo = component.GetType().GetMethod(methodName, defaultBindingFlags);
+            methodInfo = ComponentMethodInfo;
+
+            return (ComponentMethodInfo is null) ? false : true;
+        }
+
+        public Dictionary<MethodInfo, Component> GetComponentMethodAndInstance(string methodName)
+        {
+            return GetComponentMethodAndInstance(methodName, defaultBindingFlags);
+        }
+
+        public Dictionary<MethodInfo, Component> GetComponentMethodAndInstance(string methodName, BindingFlags bindingFlags)
+        {
+            if (typeof(T) != typeof(GameObject))
+            {
+                throw new ArgumentException("This method only works when T is GameObject");
+            }
+
+            Dictionary<MethodInfo, Component> methodAndComponent = new Dictionary<MethodInfo, Component>();
+            foreach (T gameObject in TInstances)
+            {
+                foreach (Component component in (gameObject as GameObject).Components)
+                {
+                    if (TryGetMethodFromComponent(component, methodName, bindingFlags, out MethodInfo method))
+                    {
+                        methodAndComponent.Add(method, component);
+                    }
                 }
             }
 
-            return methods;
+            return methodAndComponent;
         }
 
-        public static MethodInfo GetMethodInfoFromInstance<TClassType>(string method)
+        public static MethodInfo GetMethodInfo<TClassType>(string method)
         {
             MethodInfo methodInfo = typeof(TClassType).GetMethod(method,
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.Instance);
+                defaultBindingFlags);
 
             if (methodInfo is null)
                 throw new Exception("method not found");
@@ -55,7 +125,7 @@ namespace Console_game
             return methodInfo;
         }
 
-        public static MethodInfo GetMethodInfoFromInstance<TClassType>(Action method)
+        public static MethodInfo GetMethodInfo<TClassType>(Action method)
         {
             MethodInfo methodInfo = typeof(TClassType).GetMethod(method.Method.Name,
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.IgnoreCase | BindingFlags.Instance);

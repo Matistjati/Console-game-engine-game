@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -36,7 +37,7 @@ namespace Console_game
         static void GameSetup()
         {
             // Set the console's title to a preset gamename
-            NativeMethods.SetConsoleTitle(Globals.gameName);
+            NativeMethods.SetConsoleTitle(ConfigurationManager.AppSettings["Game Name"]);
             Win32ConsoleHelper.SetConsoleFontSize(18, 18);
 
             // Set up input handlelers
@@ -44,23 +45,23 @@ namespace Console_game
 
             // Getting all classes deriving from gameobject and getting update and start methods
             ReflectiveHelper<GameObject> gameObjectChildren = new ReflectiveHelper<GameObject>();
-            Dictionary<MethodInfo, GameObject> frameSubscribers = gameObjectChildren.GetMethodsByString("update");
+            List<GameObject> gameObjects = gameObjectChildren.GetTInstance();
 
             // Invoking all start methods on our GameObjects
-            foreach (KeyValuePair<MethodInfo, GameObject> method in gameObjectChildren.GetMethodsByString("start"))
+            foreach (GameObject gameObject in gameObjects)
             {
-                method.Key.Invoke(method.Value, new object[0]);
+                foreach (Component component in gameObject.Components)
+                {
+                    if (ReflectiveHelper<Type>.TryGetMethodFromComponent(component, "start", out MethodInfo method))
+                    {
+                        method.Invoke(component, null);
+                    }
+                }
             }
 
-            // Sample getting specific method from class and calling it
-            /*
-            KeyValuePair<MethodInfo, Program> methodInfo = ReflectiveHelper<Program>.GetMethodInfo(
-                                                                                        TestTimeAccuracy,
-                                                                                        staticMethod: true);
-            methodInfo.Key.Invoke(methodInfo.Value, new object[0]);
-            */
+            Dictionary<MethodInfo, Component> methodAndComponent = gameObjectChildren.GetComponentMethodAndInstance("update");
 
-            FrameRunner.AddFrameSubscriber(frameSubscribers);
+            FrameRunner.AddFrameSubscriber(methodAndComponent);
 
             // Creating the necessary folders and files
             Directory.CreateDirectory("logs");

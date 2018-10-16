@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-
 using static Console_game.NativeMethods;
 
 namespace Console_game

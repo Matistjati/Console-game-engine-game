@@ -1,17 +1,16 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 
 namespace Console_game.Tests
 {
-    public class SampleGameObject : GameObject
+    public class SampleComponent : Component
     {
         public float total;
         public void TestTimeAccuracy()
         {
-            total += TimeDelta;
+            total += GameObject.TimeDelta;
         }
     }
 
@@ -25,9 +24,9 @@ namespace Console_game.Tests
         {
 
             // This test is slow as we need to sleep for it to work
-            SampleGameObject gameObject = new SampleGameObject();
+            SampleComponent gameObject = new SampleComponent();
 
-            MethodInfo methodInfo = ReflectiveHelper<GameObject>.GetMethodInfoFromInstance<SampleGameObject>(
+            MethodInfo methodInfo = ReflectiveHelper<GameObject>.GetMethodInfo<SampleComponent>(
                                                                                        gameObject.TestTimeAccuracy);
 
             FrameRunner.AddFrameSubscriber(methodInfo, gameObject);
