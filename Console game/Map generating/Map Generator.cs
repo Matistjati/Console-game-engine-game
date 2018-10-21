@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 
 namespace Console_game
 {
@@ -8,7 +7,7 @@ namespace Console_game
         public static float[,] MakeMap(int seed, Coord mapSize, float scale)
         {
             if (scale <= 0)
-                throw new ArgumentException($"Scale: {scale} was negative");
+                throw new ArgumentOutOfRangeException($"Scale: {scale} was negative");
 
             float[,] map = new float[mapSize.X, mapSize.Y];
 

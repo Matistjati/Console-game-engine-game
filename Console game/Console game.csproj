@@ -49,11 +49,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data Structures\Sprite.cs" />
     <Compile Include="GameEntity\Component.cs" />
+    <Compile Include="GameEntity\SpriteDisplayer.cs" />
     <Compile Include="Input\ConsoleListener.cs" />
     <Compile Include="Data Structures\Coord.cs" />
     <Compile Include="Data Structures\CoordF.cs" />
     <Compile Include="Input\Input.cs" />
+    <Compile Include="IsPrefabAttribute.cs" />
     <Compile Include="Map generating\Fastnoise.cs" />
     <Compile Include="FrameRunner.cs" />
     <Compile Include="GameEntity\GameObject.cs" />

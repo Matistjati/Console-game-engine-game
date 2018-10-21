@@ -45,14 +45,14 @@ namespace Console_game.Tests
         }
 
         [TestMethod()]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void CoordXNegativeException()
         {
             Coord coord = new Coord(-20, 40);
         }
 
         [TestMethod()]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void CoordYNegativeException()
         {
             Coord coord = new Coord(40, -20);

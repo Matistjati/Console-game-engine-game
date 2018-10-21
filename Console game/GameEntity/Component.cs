@@ -4,6 +4,9 @@ namespace Console_game
 {
     public class Component
     {
+        public PhysicalState physicalState;
+        public GameObject gameObject;
+
         internal bool isInvoking = false;
 
         const BindingFlags defaultBindingFlags = BindingFlags.Public |

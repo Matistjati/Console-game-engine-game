@@ -7,9 +7,11 @@ namespace Console_game
     {
         public GameObjectTest()
         {
-            Components.Add(physicalState);
-            Components.Add(new ComponentTest());
-            Components.Add(new SampleComponent());
+            SpriteDisplayer componentTest = AddComponent<SpriteDisplayer>();
+            physicalState.Position = new CoordF(10f, 10f);
+            physicalState.Scale = 1f;
+            componentTest.SetImage("sample.png");
+            SampleComponent sampleTest = AddComponent<SampleComponent>();
         }
     }
 }

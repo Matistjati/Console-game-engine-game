@@ -31,7 +31,7 @@ namespace Console_game
         /// <returns>
         /// An array instances of classes in the assembly that derive from T
         /// </returns>
-        public List<T> GetTInstance()
+        public List<T> GetTInstanceNonPrefab()
         {
             if (TInstances.Count != 0)
             {
@@ -42,7 +42,10 @@ namespace Console_game
                 List<T> instances = new List<T>();
                 foreach (Type instanceType in TChildren)
                 {
-                    instances.Add((T)Activator.CreateInstance(instanceType));
+                    if (Attribute.GetCustomAttribute(instanceType, typeof(IsPrefabAttribute)) is null)
+                    {
+                        instances.Add((T)Activator.CreateInstance(instanceType));
+                    }
                 }
                 TInstances = instances;
                 return instances;
@@ -96,13 +99,13 @@ namespace Console_game
         {
             if (typeof(T) != typeof(GameObject))
             {
-                throw new ArgumentException("This method only works when T is GameObject");
+                throw new ArgumentOutOfRangeException("This method only works when T is GameObject");
             }
 
             Dictionary<MethodInfo, Component> methodAndComponent = new Dictionary<MethodInfo, Component>();
             foreach (T gameObject in TInstances)
             {
-                foreach (Component component in (gameObject as GameObject).Components)
+                foreach (Component component in (gameObject as GameObject).components)
                 {
                     if (TryGetMethodFromComponent(component, methodName, bindingFlags, out MethodInfo method))
                     {

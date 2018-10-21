@@ -24,14 +24,14 @@ namespace Console_game
             set
             {
                 if (value.X <= 2)
-                    throw new ArgumentException($"X was too small. X was {value}");
+                    throw new ArgumentOutOfRangeException($"X was too small. X was {value}");
                 if (value.Y <= 2)
-                    throw new ArgumentException($"Y was too small. Y was {value}");
+                    throw new ArgumentOutOfRangeException($"Y was too small. Y was {value}");
 
                 if (value.X * 2 > MapSize.X)
-                    throw new ArgumentException($"Y was too big. {value} * 2 > {MapSize.X}(mapsize)");
+                    throw new ArgumentOutOfRangeException($"Y was too big. {value} * 2 > {MapSize.X}(mapsize)");
                 if (value.Y * 2 > MapSize.Y)
-                    throw new ArgumentException($"Y was too big. {value} * 2 > {MapSize.Y}(mapsize)");
+                    throw new ArgumentOutOfRangeException($"Y was too big. {value} * 2 > {MapSize.Y}(mapsize)");
 
                 _playerViewRange = value;
             }
@@ -49,11 +49,10 @@ namespace Console_game
         public Map(int seed, uint mapSizeX, uint mapSizeY, float scale)
         {
             if (scale <= 0)
-                throw new ArgumentException($"Scale: {scale} was negative");
+                throw new ArgumentOutOfRangeException($"Scale: {scale} was negative");
 
             this.Seed = seed;
-            this.MapSize.Y = mapSizeY;
-            this.MapSize.X = mapSizeX;
+            this.MapSize = new Coord(mapSizeY, mapSizeX);
             maxMapPosition = new Coord(MapSize.X, MapSize.X);
             map = Map_Generator.MakeMap(seed, MapSize, scale);
         }
@@ -64,8 +63,8 @@ namespace Console_game
         public Rectangle GetSeenMap(Coord position)
         {
             // Setting the position to the top left
-            position.X = (position.X - PlayerViewRange.X > 0) ? position.X - PlayerViewRange.X : 0;
-            position.Y = (position.Y - PlayerViewRange.Y > 0) ? position.Y - PlayerViewRange.Y : 0;
+            position.SetX((position.X - PlayerViewRange.X > 0) ? position.X - PlayerViewRange.X : 0); 
+            position.SetY((position.Y - PlayerViewRange.Y > 0) ? position.Y - PlayerViewRange.Y : 0);
 
             // Assuring that we're inside the map
             position.Clamp(minMapPosition, maxMapPosition);
@@ -75,12 +74,12 @@ namespace Console_game
 
             if (position.X + width > MapSize.X)
             {
-                position.X -= position.X + width - MapSize.X;
+                position.SetX(position.X - (position.X + width - MapSize.X));
             }
 
             if (position.Y + heigth > MapSize.Y)
             {
-                position.Y -= position.Y + heigth - MapSize.Y;
+                position.SetY(position.Y - (position.Y + heigth - MapSize.Y));
             }
 
             return new Rectangle(

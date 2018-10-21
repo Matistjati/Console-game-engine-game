@@ -20,7 +20,7 @@ namespace Console_game.Tests
         [TestMethod]
         public void ReflectiveHelperGetTinstanceGameObjectTest()
         {
-            List<GameObject> localGameObjects = gameObjects.GetTInstance();
+            List<GameObject> localGameObjects = gameObjects.GetTInstanceNonPrefab();
             Assert.IsFalse(localGameObjects.Count == 0);
             if (localGameObjects[0].GetType() == typeof(ComponentTest))
             {
@@ -31,7 +31,7 @@ namespace Console_game.Tests
         [TestMethod]
         public void ReflectiveHelperTryGetMethodFromComponentTestSuccess()
         {
-            List<GameObject> localGameObjects = gameObjects.GetTInstance();
+            List<GameObject> localGameObjects = gameObjects.GetTInstanceNonPrefab();
             Assert.IsTrue(ReflectiveHelper<GameObject>.TryGetMethodFromComponent(
                 localGameObjects[0].GetComponent<ComponentTest>(),
                 "methodfound",
@@ -41,7 +41,7 @@ namespace Console_game.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ReflectiveHelperGetComponentMethodAndInstanceTestThrow()
         {
             ReflectiveHelper<ReflectiveHelperTests> expectedEmpty = new ReflectiveHelper<ReflectiveHelperTests>();
@@ -65,7 +65,7 @@ namespace Console_game.Tests
         [TestMethod]
         public void ReflectiveHelperGetMethodInfoTestSuccess()
         {
-            List<GameObject> localGameObjects = gameObjects.GetTInstance();
+            List<GameObject> localGameObjects = gameObjects.GetTInstanceNonPrefab();
             MethodInfo method = ReflectiveHelper<Type>.GetMethodInfo<ComponentTest>("methodFound");
             Assert.IsTrue((bool)method.Invoke(localGameObjects[0].GetComponent<ComponentTest>(), null));
         }

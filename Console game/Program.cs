@@ -1,23 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Drawing;
 using System.IO;
-using System.Linq.Expressions;
+using System.Linq;
 using System.Reflection;
 
 namespace Console_game
 {
     class Program
     {
-        private static float total;
-        static DateTime start;
-        private static void TestTimeAccuracy()
-        {
-            total += GameObject.TimeDelta;
-            Console.Clear();
-            Console.Write($"time: {(DateTime.Now - start).TotalSeconds} \ngameobject time: {GameObject.Time}\ntimedelta total: {total}\ntimedelta: {GameObject.TimeDelta}\ndifference: {total - GameObject.Time}");
-        }
-
         private static void TestInputAccuracy()
         {
             if (Input.GetKeyDown('a'))
@@ -45,12 +37,23 @@ namespace Console_game
 
             // Getting all classes deriving from gameobject and getting update and start methods
             ReflectiveHelper<GameObject> gameObjectChildren = new ReflectiveHelper<GameObject>();
-            List<GameObject> gameObjects = gameObjectChildren.GetTInstance();
+            List<GameObject> gameObjects = gameObjectChildren.GetTInstanceNonPrefab();
+
+
+            // Adding physicalstate to all gameObjects
+            foreach (GameObject gameObject in gameObjects)
+            {
+                gameObject.AddComponent(gameObject.physicalState);
+            }
+
+            // Setting up all gameobjects who we might want to render
+            FrameRunner.RenderedGameObjects = gameObjects.
+                Where(gameObject => !(gameObject.GetComponent<SpriteDisplayer>() is null)).ToList();
 
             // Invoking all start methods on our GameObjects
             foreach (GameObject gameObject in gameObjects)
             {
-                foreach (Component component in gameObject.Components)
+                foreach (Component component in gameObject.components)
                 {
                     if (ReflectiveHelper<Type>.TryGetMethodFromComponent(component, "start", out MethodInfo method))
                     {
@@ -67,6 +70,11 @@ namespace Console_game
             Directory.CreateDirectory("logs");
             using (StreamWriter x = File.AppendText("logs/log.txt")) { }
 
+            // Activating escape sequences
+            uint mode = 0;
+            NativeMethods.GetConsoleMode(NativeMethods.GetStdHandle(NativeMethods.StdHandle.OutputHandle), ref mode);
+            NativeMethods.SetConsoleMode(NativeMethods.GetStdHandle(NativeMethods.StdHandle.OutputHandle), mode | 0x4);
+
             // Starting
             FrameRunner.Run();
         }
@@ -74,8 +82,8 @@ namespace Console_game
         static void Main(string[] args)
         {
             Console.ReadKey(true);
-            Console.ReadKey(true);
-            Console.ReadKey(true);
+            //Console.ReadKey(true);
+            //Console.ReadKey(true);
             //Console.ReadKey(true);
 
             GameSetup();
@@ -83,8 +91,7 @@ namespace Console_game
             Console.SetBufferSize(1200, 300);
             //Console.SetWindowSize(599, 149);
             Map thisMap = new Map(5000, 1500);
-            thisMap.PlayerViewRange.X = 600;
-            thisMap.PlayerViewRange.X = 150;
+            thisMap.PlayerViewRange = new Coord(600, 150);
 
 
 

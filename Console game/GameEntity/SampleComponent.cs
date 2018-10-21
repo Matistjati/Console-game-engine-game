@@ -10,7 +10,7 @@ namespace Console_game
     {
         void update()
         {
-            Console.Write("b");
+           //physicalState.Position = new CoordF(physicalState.Position.X + 10 * GameObject.TimeDelta, physicalState.Position.Y + 3 * GameObject.TimeDelta);
         }
     }
 }

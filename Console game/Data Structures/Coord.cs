@@ -3,13 +3,41 @@ using System.Globalization;
 
 namespace Console_game
 {
-    public class Coord
+    public struct Coord
     {
         public static readonly Coord empty = new Coord();
 
-        public uint X { get; set; }
+        public uint X { get; private set; }
 
-        public uint Y { get; set; }
+        public uint Y { get; private set; }
+
+        public void Set(uint X, uint Y) { this.X = X; this.Y = Y;}
+        public void SetX(uint X) => this.X = X;
+        public void SetY(uint Y) => this.Y = Y;
+
+        public void Set(int X, int Y)
+        {
+            if (X < 0)
+                throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {X}");
+            if (Y < 0)
+                throw new ArgumentOutOfRangeException($"y must be greater than 0. X was {Y}");
+            this.X = (uint)X;
+            this.Y = (uint)Y;
+        }
+
+        public void SetX(int X)
+        {
+            if (X < 0)
+                throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {X}");
+            this.X = (uint)X;
+        }
+
+        public void SetY(int Y)
+        {
+            if (Y < 0)
+                throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {Y}");
+            this.Y = (uint)Y;
+        }
 
         public Coord(uint x, uint y)
         {
@@ -20,18 +48,12 @@ namespace Console_game
         public Coord(int x, int y)
         {
             if (x < 0)
-                throw new ArgumentException($"x must be greater than 0. X was {x}");
+                throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {x}");
             if (y < 0)
-                throw new ArgumentException($"y must be greater than 0. X was {y}");
+                throw new ArgumentOutOfRangeException($"y must be greater than 0. X was {y}");
 
             X = (uint)x;
             Y = (uint)y;
-        }
-
-        public Coord()
-        {
-            X = 0;
-            Y = 0;
         }
 
         public static explicit operator CoordF(Coord coord)

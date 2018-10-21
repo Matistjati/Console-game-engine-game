@@ -22,8 +22,8 @@ namespace Console_game
         {
             leftMouseButtonPressed = false;
             rightMouseButtonPressed = false;
-            mousePosition.X = 0;
-            mousePosition.Y = 0;
+            mousePosition.Set(0, 0);
+
             pressedChars.Clear();
             heldChars.Clear();
             Input.charsMayRelease.Clear();
@@ -51,8 +51,7 @@ namespace Console_game
             }
             else if (r.dwEventFlags == MOUSE_EVENT_RECORD.MOUSE_MOVED)
             {
-                mousePosition.X = (uint)r.dwMousePosition.X;
-                mousePosition.Y = (uint)r.dwMousePosition.Y;
+                mousePosition.Set((uint)r.dwMousePosition.X, (uint)r.dwMousePosition.Y);
             }
         }
 
@@ -127,8 +126,7 @@ namespace Console_game
             rightMouseButtonPressed = InternalInput.rightMouseButtonPressed;
             InternalInput.rightMouseButtonPressed = false;
 
-            mousePosition.X = InternalInput.mousePosition.X;
-            mousePosition.Y = InternalInput.mousePosition.Y;
+            mousePosition.Set(InternalInput.mousePosition.X, InternalInput.mousePosition.Y);
         }
 
         public static bool GetKeyDown(char key) => pressedChars.Contains(key);

@@ -3,29 +3,47 @@ using System.Globalization;
 
 namespace Console_game
 {
-    public class CoordF
+    public struct CoordF
     {
         public static readonly CoordF empty = new CoordF();
 
-        public float X { get; set; }
+        public float X { get; private set; }
 
-        public float Y { get; set; }
+        public float Y { get; private set; }
+
+        public void Set(float X, float Y)
+        {
+            if (X < 0)
+                throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {X}");
+            if (Y < 0)
+                throw new ArgumentOutOfRangeException($"y must be greater than 0. X was {Y}");
+            this.X = X;
+            this.Y = Y;
+        }
+
+        public void SetX(float X)
+        {
+            if (X < 0)
+                throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {X}");
+            this.X = X;
+        }
+
+        public void SetY(float Y)
+        {
+            if (Y < 0)
+                throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {Y}");
+            this.Y = Y;
+        }
 
         public CoordF(float x, float y)
         {
             if (x < 0)
-                throw new ArgumentException($"x must be greater than 0. X was {x}");
+                throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {x}");
             if (y < 0)
-                throw new ArgumentException($"y must be greater than 0. X was {y}");
+                throw new ArgumentOutOfRangeException($"y must be greater than 0. X was {y}");
 
             X = x;
             Y = y;
-        }
-
-        public CoordF()
-        {
-            X = 0;
-            Y = 0;
         }
 
         public static explicit operator Coord(CoordF coordF)
