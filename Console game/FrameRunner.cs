@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Threading;
+using static Console_game.NativeMethods;
 
 namespace Console_game
 {
@@ -22,8 +25,8 @@ namespace Console_game
             pauseStartTime = DateTime.Now;
         }
 
-        private static string[,] displayArea;
         static Coord displaySize;
+        static readonly Color emptyColor = Color.FromArgb(0, 0, 0, 0);
 
         public static void Run()
         {
@@ -39,20 +42,20 @@ namespace Console_game
 
             lastFrameCall = DateTime.Now;
 
-            displayArea = new string[Console.WindowWidth, Console.WindowHeight];
-            displaySize = new Coord(displayArea.GetLength(0), displayArea.GetLength(1));
+            displaySize = new Coord((uint)Console.WindowWidth, (uint)Console.WindowHeight);
 
             run = true;
             while (run)
             {
-                // Calculating and setting timedelta
+                // Time Calculations
                 GameObject._timeDelta = (float)(DateTime.Now - lastFrameCall).TotalSeconds;
 
                 GameObject._time = (float)(DateTime.Now - start).TotalSeconds;
 
-                Input.UpdateInput();
-
                 lastFrameCall = DateTime.Now;
+
+                // Setting the public input api
+                Input.UpdateInput();
 
                 // Calling update
                 foreach (KeyValuePair<MethodInfo, Component> method in updateCallBack)
@@ -61,59 +64,88 @@ namespace Console_game
                 }
 
 
-                // Rendering
-                Console.Clear();
-                for (int y = 0; y < displaySize.Y; y++)
-                {
-                    for (int x = 0; x < displaySize.X; x++)
-                    {
+                // Each member represents an x-row on the console
+                List<StringBuilder> rows = new List<StringBuilder>((int)displaySize.Y);
 
-                        displayArea[x, y] = " ";
-                    }
-                }
 
                 for (int i = 0; i < renderedGameObjects.Count; i++)
                 {
-                    if (spriteDisplayers[i].IsVisible)
+                    // Only render the visible ones
+                    if (!spriteDisplayers[i].IsVisible)
+                        continue;
+
+                    // Caching the position of the object to be rendered 
+                    Coord position = (Coord)renderedGameObjects[i].physicalState.Position;
+
+                    // Checking that the sprite is on-screen
+                    if (position.X > displaySize.X && position.Y > displaySize.Y)
+                        continue;
+
+                    // Caching the size of the sprite
+                    Coord colorMapSize = new Coord(spriteDisplayers[i].ColorMap.GetLength(0), spriteDisplayers[i].ColorMap.GetLength(0));
+
+                    // Assuring we won't go out of bounds
+                    if (colorMapSize.X > displaySize.X)
+                        colorMapSize.SetX(displaySize.X);
+
+                    if (colorMapSize.Y > displaySize.Y)
+                        colorMapSize.SetY(displaySize.Y);
+
+                    // Displaychar is always of length one, but char has trouble representing unicode chars
+                    // Try to fix somehow? Lack of knowledge?
+                    string displayChar = spriteDisplayers[i].PrintedChar;
+
+                    for (int x = 0; x < colorMapSize.X; x++)
                     {
-                        Coord position = (Coord)renderedGameObjects[i].physicalState.Position;
-                        Coord consoleSize = new Coord(displayArea.GetLength(0), displayArea.GetLength(1));
-                        Coord colorMapSize = new Coord(spriteDisplayers[i].ColorMap.GetLength(0), spriteDisplayers[i].ColorMap.GetLength(0));
-                        if (position.X < consoleSize.X && position.Y < consoleSize.Y)
+                        StringBuilder currentRow = new StringBuilder((int)position.X);
+
+                        // Adding the spacing according to the sprite's position
+                        // Around 2x faster than string.Concat(Enumerable.Repeat(...))
+                        for (int whiteSpaces = 0; whiteSpaces < position.X; whiteSpaces++)
                         {
-                            string displayChar = spriteDisplayers[i].PrintedChar;
-                            for (int x = 0; x < colorMapSize.X; x++)
+                            currentRow.Append(" ");
+                        }
+
+                        for (int y = 0; y < colorMapSize.Y; y++)
+                        {
+                            Color color = spriteDisplayers[i].ColorMap[y, x];
+                            if (color != emptyColor)
                             {
-                                for (int y = 0; y < colorMapSize.Y; y++)
-                                {
-                                    if (x < consoleSize.X && y < consoleSize.Y && x + position.X < displaySize.X && y + position.Y < displaySize.Y)
-                                    {
-                                        Color color = spriteDisplayers[i].ColorMap[x, y];
-                                        displayArea[x + position.X, y + position.Y] = $"\x1b[38;2;{color.R};{color.G};{color.B}m" + displayChar;
-                                    }
-                                }
+                                currentRow.Append($"\x1b[38;2;{color.R};{color.G};{color.B}m" + displayChar);
+                            }
+                            else
+                            {
+                                currentRow.Append(" ");
                             }
                         }
 
-                        for (uint y = position.Y; y < position.Y + colorMapSize.Y; y++)
-                        {
-                            if (y < displaySize.Y)
-                            {
-                                displayArea[displaySize.X - 1, y] += Environment.NewLine;
-                            }
-                        }
+                        currentRow.Append(Environment.NewLine);
+
+                        rows.Add(currentRow);
                     }
                 }
 
-                for (int y = 0; y < displaySize.Y; y++)
+                IntPtr stdOutHandle = GetStdHandle(StdHandle.OutputHandle);
+
+                // Joining all the rows
+                // This works because we append a newline onto the end of each row
+                StringBuilder allRows = new StringBuilder();
+                foreach (StringBuilder row in rows)
                 {
-                    for (int x = 0; x < displaySize.X; x++)
-                    {
-                        Console.Write(displayArea[x, y]);
-                    }
+                    allRows.Append(row);
                 }
 
-                //Thread.Sleep(100);
+                // Writing all the rows to the console
+                Console.Clear();
+                WriteConsoleW(
+                    stdOutHandle,
+                    allRows,
+                    allRows.Length,
+                    out int charsWritten,
+                    IntPtr.Zero);
+
+                // This is to avoid the console flickering randomly
+                Thread.Sleep(10);
             }
         }
 

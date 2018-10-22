@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Console_game
 {
@@ -223,5 +225,14 @@ namespace Console_game
         [DllImport("kernel32")]
         public static extern bool FlushConsoleInputBuffer(
             IntPtr hConsoleInput);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern bool WriteConsoleW(
+            IntPtr hConsoleOutput,
+            StringBuilder lpBuffer,
+            int nNumberOfCharsToWrite,
+            out int lpNumberOfCharsWritten,
+            IntPtr lpReservedMustBeNull);
     }
 }

@@ -75,6 +75,10 @@ namespace Console_game
             NativeMethods.GetConsoleMode(NativeMethods.GetStdHandle(NativeMethods.StdHandle.OutputHandle), ref mode);
             NativeMethods.SetConsoleMode(NativeMethods.GetStdHandle(NativeMethods.StdHandle.OutputHandle), mode | 0x4);
 
+            // We won't have to deal with the white boi
+            Console.CursorVisible = false;
+
+
             // Starting
             FrameRunner.Run();
         }
