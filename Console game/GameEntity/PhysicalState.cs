@@ -16,9 +16,13 @@ namespace Console_game
                 {
                     throw new ArgumentOutOfRangeException($"Scale must be greater than 0. Scale was {value}");
                 }
+                float oldValue = scale;
                 scale = value;
+                if (oldValue != value)
+                {
+                    gameObject?.RecalculateSpriteSize();
+                }
             }
         }
-
     }
 }

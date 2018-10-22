@@ -63,6 +63,20 @@ namespace Console_game
             }
         }
 
+        internal void RecalculateSpriteSize()
+        {
+            if (GetComponent<SpriteDisplayer>() is SpriteDisplayer sprite)
+            {
+                sprite.RecalculateSpriteSize();
+            }
+        }
+
+        public static void Destroy(GameObject gameObject)
+        {
+            // The only way to do this really is to kill all references to the objects
+            FrameRunner.destructionQueue.Enqueue(gameObject);
+        }
+
         internal static float _timeDelta;
         internal static float _time;
 

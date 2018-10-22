@@ -90,26 +90,26 @@ namespace Console_game
             return (ComponentMethodInfo is null) ? false : true;
         }
 
-        public Dictionary<MethodInfo, Component> GetComponentMethodAndInstance(string methodName)
+        public Dictionary<Component, MethodInfo> GetComponentMethodAndInstance(string methodName)
         {
             return GetComponentMethodAndInstance(methodName, defaultBindingFlags);
         }
 
-        public Dictionary<MethodInfo, Component> GetComponentMethodAndInstance(string methodName, BindingFlags bindingFlags)
+        public Dictionary<Component, MethodInfo> GetComponentMethodAndInstance(string methodName, BindingFlags bindingFlags)
         {
             if (typeof(T) != typeof(GameObject))
             {
                 throw new ArgumentOutOfRangeException("This method only works when T is GameObject");
             }
 
-            Dictionary<MethodInfo, Component> methodAndComponent = new Dictionary<MethodInfo, Component>();
+            Dictionary<Component, MethodInfo> methodAndComponent = new Dictionary<Component, MethodInfo>();
             foreach (T gameObject in TInstances)
             {
                 foreach (Component component in (gameObject as GameObject).components)
                 {
                     if (TryGetMethodFromComponent(component, methodName, bindingFlags, out MethodInfo method))
                     {
-                        methodAndComponent.Add(method, component);
+                        methodAndComponent.Add(component, method);
                     }
                 }
             }

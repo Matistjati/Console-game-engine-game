@@ -33,38 +33,48 @@ namespace Console_game
             Win32ConsoleHelper.SetConsoleFontSize(18, 18);
 
             // Set up input handlelers
+
             InternalInput.Start();
 
-            // Getting all classes deriving from gameobject and getting update and start methods
-            ReflectiveHelper<GameObject> gameObjectChildren = new ReflectiveHelper<GameObject>();
-            List<GameObject> gameObjects = gameObjectChildren.GetTInstanceNonPrefab();
-
-
-            // Adding physicalstate to all gameObjects
-            foreach (GameObject gameObject in gameObjects)
+            // Declaring new scope to ensure that gameObjects and gameObjectChildren gets collected
             {
-                gameObject.AddComponent(gameObject.physicalState);
-            }
+                // Getting all classes deriving from gameobject and getting update and start methods
+                ReflectiveHelper<GameObject> gameObjectChildren = new ReflectiveHelper<GameObject>();
+                List<GameObject> gameObjects = gameObjectChildren.GetTInstanceNonPrefab();
 
-            // Setting up all gameobjects who we might want to render
-            FrameRunner.RenderedGameObjects = gameObjects.
-                Where(gameObject => !(gameObject.GetComponent<SpriteDisplayer>() is null)).ToList();
 
-            // Invoking all start methods on our GameObjects
-            foreach (GameObject gameObject in gameObjects)
-            {
-                foreach (Component component in gameObject.components)
+                // Adding physicalstate to all gameObjects
+                foreach (GameObject gameObject in gameObjects)
                 {
-                    if (ReflectiveHelper<Type>.TryGetMethodFromComponent(component, "start", out MethodInfo method))
+                    gameObject.AddComponent(gameObject.physicalState);
+                }
+
+                // Setting up all gameobjects who we might want to render
+                foreach (GameObject gameObject in gameObjects)
+                {
+                    if (gameObject.GetComponent<SpriteDisplayer>() is SpriteDisplayer sprite)
                     {
-                        method.Invoke(component, null);
+                        FrameRunner.RenderedGameObjects.Add(sprite);
                     }
                 }
+
+                // Invoking all start methods on our GameObjects
+                foreach (GameObject gameObject in gameObjects)
+                {
+                    foreach (Component component in gameObject.components)
+                    {
+                        if (ReflectiveHelper<Type>.TryGetMethodFromComponent(component, "start", out MethodInfo method))
+                        {
+                            method.Invoke(component, null);
+                        }
+                    }
+                }
+
+                Dictionary<Component, MethodInfo> methodAndComponent = gameObjectChildren.GetComponentMethodAndInstance("update");
+
+                FrameRunner.AddFrameSubscriber(methodAndComponent);
             }
 
-            Dictionary<MethodInfo, Component> methodAndComponent = gameObjectChildren.GetComponentMethodAndInstance("update");
-
-            FrameRunner.AddFrameSubscriber(methodAndComponent);
 
             // Creating the necessary folders and files
             Directory.CreateDirectory("logs");

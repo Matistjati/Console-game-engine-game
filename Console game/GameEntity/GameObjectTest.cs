@@ -8,8 +8,7 @@ namespace Console_game
         public GameObjectTest()
         {
             SpriteDisplayer componentTest = AddComponent<SpriteDisplayer>();
-            //physicalState.Position = new CoordF(10f, 10f);
-            physicalState.Scale = 1f;
+            physicalState.Scale = 1.5f;
             componentTest.SetImage("sample.png");
             SampleComponent sampleTest = AddComponent<SampleComponent>();
         }

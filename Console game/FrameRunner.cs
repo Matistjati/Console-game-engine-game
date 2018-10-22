@@ -28,6 +28,38 @@ namespace Console_game
         static Coord displaySize;
         static readonly Color emptyColor = Color.FromArgb(0, 0, 0, 0);
 
+        internal static void destroyGameObjects()
+        {
+            // The only way to do this really is to kill all references to the objects
+            for (int i = 0; i < destructionQueue.Count; i++)
+            {
+                GameObject gameObject = destructionQueue.Dequeue();
+                List<Component> componentsToRemove = new List<Component>();
+                foreach (Component componentToDestroy in updateCallBack.Keys.Where(component => component.gameObject == gameObject))
+                {
+                    componentsToRemove.Add(componentToDestroy);
+                }
+                for (int o = 0; o < componentsToRemove.Count; o++)
+                {
+                    updateCallBack.Remove(componentsToRemove[i]);
+                }
+
+                foreach (Component component in gameObject.components)
+                {
+                    if (component.GetType() == typeof(SpriteDisplayer))
+                    {
+                        RenderedGameObjects.Remove((SpriteDisplayer)component);
+                    }
+
+                    component.gameObject = null;
+                    component.physicalState = null;
+                }
+                gameObject.physicalState = null;
+                gameObject.components.Clear();
+                gameObject.components = null;
+            }
+        }
+
         public static void Run()
         {
             if (firstRun)
@@ -58,9 +90,9 @@ namespace Console_game
                 Input.UpdateInput();
 
                 // Calling update
-                foreach (KeyValuePair<MethodInfo, Component> method in updateCallBack)
+                foreach (KeyValuePair<Component, MethodInfo> method in updateCallBack)
                 {
-                    method.Value.Invoke(method.Key);
+                    method.Key.Invoke(method.Value);
                 }
 
 
@@ -68,21 +100,21 @@ namespace Console_game
                 List<StringBuilder> rows = new List<StringBuilder>((int)displaySize.Y);
 
 
-                for (int i = 0; i < renderedGameObjects.Count; i++)
+                for (int i = 0; i < RenderedGameObjects.Count; i++)
                 {
                     // Only render the visible ones
-                    if (!spriteDisplayers[i].IsVisible)
+                    if (!RenderedGameObjects[i].IsVisible)
                         continue;
 
                     // Caching the position of the object to be rendered 
-                    Coord position = (Coord)renderedGameObjects[i].physicalState.Position;
+                    Coord position = (Coord)RenderedGameObjects[i].physicalState.Position;
 
                     // Checking that the sprite is on-screen
                     if (position.X > displaySize.X && position.Y > displaySize.Y)
                         continue;
 
                     // Caching the size of the sprite
-                    Coord colorMapSize = new Coord(spriteDisplayers[i].ColorMap.GetLength(0), spriteDisplayers[i].ColorMap.GetLength(0));
+                    Coord colorMapSize = new Coord(RenderedGameObjects[i].ColorMap.GetLength(0), RenderedGameObjects[i].ColorMap.GetLength(0));
 
                     // Assuring we won't go out of bounds
                     if (colorMapSize.X > displaySize.X)
@@ -93,7 +125,7 @@ namespace Console_game
 
                     // Displaychar is always of length one, but char has trouble representing unicode chars
                     // Try to fix somehow? Lack of knowledge?
-                    string displayChar = spriteDisplayers[i].PrintedChar;
+                    string displayChar = RenderedGameObjects[i].PrintedChar;
 
                     for (int x = 0; x < colorMapSize.X; x++)
                     {
@@ -108,7 +140,7 @@ namespace Console_game
 
                         for (int y = 0; y < colorMapSize.Y; y++)
                         {
-                            Color color = spriteDisplayers[i].ColorMap[y, x];
+                            Color color = RenderedGameObjects[i].ColorMap[y, x];
                             if (color != emptyColor)
                             {
                                 currentRow.Append($"\x1b[38;2;{color.R};{color.G};{color.B}m" + displayChar);
@@ -144,28 +176,21 @@ namespace Console_game
                     out int charsWritten,
                     IntPtr.Zero);
 
+                // Destroying all gameobjects from destructionQueue
+                destroyGameObjects();
+
                 // This is to avoid the console flickering randomly
                 Thread.Sleep(10);
             }
         }
 
-
-        static List<SpriteDisplayer> spriteDisplayers = new List<SpriteDisplayer>();
-        static List<GameObject> renderedGameObjects;
-        public static List<GameObject> RenderedGameObjects
-        {
-            internal get => renderedGameObjects ?? null;
-            set
-            {
-                spriteDisplayers.AddRange(value.Select(x => x.GetComponent<SpriteDisplayer>()));
-                renderedGameObjects = value;
-            }
-        }
+        internal static Queue<GameObject> destructionQueue = new Queue<GameObject>();
+        public static List<SpriteDisplayer> RenderedGameObjects { internal get; set; } = new List<SpriteDisplayer>();
 
 
-        public static Dictionary<MethodInfo, Component> updateCallBack = new Dictionary<MethodInfo, Component>();
+        public static Dictionary<Component, MethodInfo> updateCallBack = new Dictionary<Component, MethodInfo>();
 
-        internal static void AddFrameSubscriber(KeyValuePair<MethodInfo, Component> method)
+        internal static void AddFrameSubscriber(KeyValuePair<Component, MethodInfo> method)
         {
             if (!updateCallBack.Keys.Contains(method.Key))
             {
@@ -173,9 +198,9 @@ namespace Console_game
             }
         }
 
-        internal static void AddFrameSubscriber(Dictionary<MethodInfo, Component> method)
+        internal static void AddFrameSubscriber(Dictionary<Component, MethodInfo> method)
         {
-            foreach (KeyValuePair<MethodInfo, Component> methodInfo in method)
+            foreach (KeyValuePair<Component, MethodInfo> methodInfo in method)
             {
                 if (!updateCallBack.Keys.Contains(methodInfo.Key))
                 {
@@ -186,17 +211,17 @@ namespace Console_game
 
         internal static void AddFrameSubscriber(MethodInfo method, object instance)
         {
-            if (!updateCallBack.Keys.Contains(method))
+            if (!updateCallBack.Keys.Contains(instance))
             {
-                updateCallBack.Add(method, (Component)instance);
+                updateCallBack.Add((Component)instance, method);
             }
         }
 
-        internal static void Unsubscribe(MethodInfo method)
+        internal static void Unsubscribe(Component component)
         {
-            if (updateCallBack.Keys.Contains(method))
+            if (updateCallBack.Keys.Contains(component))
             {
-                updateCallBack.Remove(method);
+                updateCallBack.Remove(component);
             }
         }
 

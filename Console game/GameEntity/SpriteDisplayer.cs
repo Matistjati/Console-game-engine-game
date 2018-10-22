@@ -11,13 +11,16 @@ namespace Console_game
             get { return !(Sprite.colorValues is null); }
         }
 
+        public void RecalculateSpriteSize()
+        {
+            Sprite = new Sprite(imageBase, physicalState.Scale);
+        }
 
         Sprite Sprite { get; set; }
 
         // More overloads for setting pic
         // Max length 1
         public string PrintedChar { get; set; } = "█";
-        Color[,] colorBase;
 
         public int Width { get => (int)Sprite.Size.X; }
         public int Heigth { get => (int)Sprite.Size.Y; }
@@ -25,16 +28,6 @@ namespace Console_game
         public Color[,] ColorMap
         {
             get => Sprite.colorValues;
-        }
-
-        internal Color[,] ColorBase
-        {
-            get => colorBase;
-            set
-            {
-                colorBase = value;
-                ColorBaseChanged();
-            }
         }
 
         Bitmap imageBase;
@@ -58,20 +51,7 @@ namespace Console_game
 
         void ImageBaseChanged()
         {
-            Sprite = new Sprite(ImageBase, '█', physicalState.Scale);
-        }
-
-        public void SetImage(Color[,] image) => colorBase = image;
-
-        public void SetImage(Color[,] image, string printedChar)
-        {
-            colorBase = image;
-            PrintedChar = printedChar;
-        }
-
-        void ColorBaseChanged()
-        {
-            Sprite = new Sprite(ColorBase, '█');
+            Sprite = new Sprite(ImageBase, physicalState.Scale);
         }
     }
 }

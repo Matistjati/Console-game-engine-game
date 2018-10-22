@@ -14,16 +14,17 @@ namespace Console_game
         public readonly float Scale;
 
 
-        public Sprite(string image, char printedChar) : this((Bitmap)Image.FromFile(image), printedChar, 1f)
+        public Sprite(string image) : this((Bitmap)Image.FromFile(image), 1f)
         { }
 
-        public Sprite(Image image, char printedChar) : this(new Bitmap(image), printedChar, 1f)
+        public Sprite(Image image) : this(new Bitmap(image), 1f)
         { }
 
-        public Sprite(Bitmap image, char printedChar, float scale)
+        public Sprite(Bitmap image, float scale)
         {
             if (scale != 1)
             {
+                Log.DefaultLogger.LogInfo(scale);
                 image = ResizeImage(image, new Size((int)(image.Width * scale), (int)(image.Width * scale)));
             }
 
@@ -39,7 +40,10 @@ namespace Console_game
                 }
             }
 
-            image.Dispose();
+            if (scale != 1)
+            {
+                image.Dispose();
+            }
         }
 
         public Sprite(Color[,] image, char printedChar)
@@ -51,6 +55,9 @@ namespace Console_game
 
         public static Bitmap ResizeImage(Bitmap imgToResize, Size size)
         {
+            if (size.Width <= 0 && size.Height <= 0)
+                throw new ArgumentException($"Size was less than or equal to zero. Size was X: {size.Width} Y: {size.Height}");
+
             return new Bitmap(imgToResize, size);
         }
     }
