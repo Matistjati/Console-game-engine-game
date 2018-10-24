@@ -15,13 +15,13 @@ namespace Console_game.Tests
 		[ClassInitialize()]
 		public static void SetUp(TestContext context)
 		{
-			cmd = Process.Start("cmd.exe");
+			//cmd = Process.Start("cmd.exe");
 		}
 
 		[ClassCleanup]
 		public static void TearDown()
 		{
-			cmd.Kill();
+			//cmd.Kill();
 		}
 
 		private readonly Coord[] ConsoleFontSizes = new Coord[]
@@ -32,6 +32,9 @@ namespace Console_game.Tests
 		[TestMethod()]
 		public void SetConsoleFontSizeNormalUsage()
 		{
+			Win32ConsoleHelper.SetConsoleFont(Win32ConsoleHelper.ConsoleFont.Lucida_console);
+
+
 			for (int i = 0; i < ConsoleFontSizes.Length; i++)
 			{
 				ushort x = (ushort)ConsoleFontSizes[i].X;
@@ -93,9 +96,12 @@ namespace Console_game.Tests
 			else
 				Assert.AreEqual(consolasString, consoleFontInfo.FaceName);
 
+			CONSOLE_FONT_INFOEX consoleFontInfo2 = new CONSOLE_FONT_INFOEX();
+			consoleFontInfo2.cbSize = (uint)Marshal.SizeOf(consoleFontInfo2);
+
 			Win32ConsoleHelper.SetConsoleFont(Win32ConsoleHelper.ConsoleFont.Lucida_console);
-			GetCurrentConsoleFontEx(GetStdHandle(StdHandle.OutputHandle), false, ref consoleFontInfo);
-			Assert.AreEqual(luicidaConsoleString, consoleFontInfo.FaceName);
+			GetCurrentConsoleFontEx(GetStdHandle(StdHandle.OutputHandle), false, ref consoleFontInfo2);
+			Assert.AreEqual(luicidaConsoleString, consoleFontInfo2.FaceName);
 		}
 	}
 }

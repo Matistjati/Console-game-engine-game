@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Console_game.NativeMethods;
@@ -15,6 +16,7 @@ namespace Console_game.Tests
 		public static void SetUp(TestContext context)
 		{
 			cmd = Process.Start("cmd.exe");
+			InternalInput.Start();
 		}
 
 		[ClassCleanup]
@@ -36,30 +38,34 @@ namespace Console_game.Tests
 				MOUSE_EVENT_RECORD.FROM_LEFT_1ST_BUTTON_PRESSED :
 				(uint)MOUSE_EVENT_RECORD.RIGHTMOST_BUTTON_PRESSED;
 
-
 			INPUT_RECORD[] record = new INPUT_RECORD[1];
 			record[0] = new INPUT_RECORD
 			{
 				EventType = INPUT_RECORD.MOUSE_EVENT,
+
 				MouseEvent = new MOUSE_EVENT_RECORD
 				{
-					dwMousePosition = new COORD(xCoord, yCoord),
-					dwButtonState = buttonPressed
+					dwMousePositionX = xCoord,
+					dwMousePositionY = yCoord,
+					dwButtonState = buttonPressed,
+					dwEventFlags = 0x0004,
+					dwControlKeyState = 0x0010
 				}
 			};
-
-			ConsoleListener.Start();
+			
 			ConsoleListener.MouseEvent += ButtonDown;
+			ConsoleListener.Start();
 
+			FlushConsoleInputBuffer(GetStdHandle(StdHandle.InputHandle));
 			uint recordsWritten = 0;
 			WriteConsoleInput(GetStdHandle(StdHandle.InputHandle), record, 1, ref recordsWritten);
 
 			// Giving time for buttondown to be called
-			Thread.Sleep(1);
+			Thread.Sleep(100);
 
 			Assert.IsTrue(buttonDownCalled);
-			Assert.AreEqual(xCoord, mouseEvent.dwMousePosition.X);
-			Assert.AreEqual(yCoord, mouseEvent.dwMousePosition.Y);
+			Assert.AreEqual(xCoord, mouseEvent.dwMousePositionX);
+			Assert.AreEqual(yCoord, mouseEvent.dwMousePositionY);
 			Assert.AreEqual(buttonPressed, mouseEvent.dwButtonState);
 		}
 
@@ -93,9 +99,8 @@ namespace Console_game.Tests
 				}
 			};
 
-
-			ConsoleListener.Start();
 			ConsoleListener.KeyEvent += KeyDown;
+			ConsoleListener.Start();
 
 			uint recordsWritten = 0;
 			WriteConsoleInput(GetStdHandle(StdHandle.InputHandle), record, 1, ref recordsWritten);
@@ -136,9 +141,8 @@ namespace Console_game.Tests
 				}
 			};
 
-
-			ConsoleListener.Start();
 			ConsoleListener.WindowBufferSizeEvent += BufferSizeChanged;
+			ConsoleListener.Start();
 
 			uint recordsWritten = 0;
 			WriteConsoleInput(GetStdHandle(StdHandle.InputHandle), record, 1, ref recordsWritten);

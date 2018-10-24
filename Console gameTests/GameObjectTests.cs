@@ -29,7 +29,7 @@ namespace Console_game.Tests
 			MethodInfo methodInfo = ReflectiveHelper<GameObject>.GetMethodInfo<SampleComponent>(
 																					   gameObject.TestTimeAccuracy);
 
-			FrameRunner.AddFrameSubscriber(methodInfo, gameObject);
+			FrameRunner.AddFrameSubscriber(gameObject, methodInfo);
 			start = DateTime.Now;
 			// Let's avoid getting in an infinite loop, shall we?
 			new Thread(() =>

@@ -17,10 +17,10 @@ namespace Console_game
 				physicalState.Scale = 1.5f;
 				reps++;
 			}
-			physicalState.Scale -= 1f * GameObject.TimeDelta;
+			//physicalState.Scale -= 1f * GameObject.TimeDelta;
 			if (reps > 5)
 			{
-				GameObject.Destroy(gameObject);
+				//GameObject.Destroy(gameObject);
 			}
 		}
 	}

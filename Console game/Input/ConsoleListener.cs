@@ -22,7 +22,7 @@ namespace Console_game
             {
                 Run = true;
 
-                IntPtr inHandle = GetStdHandle(STD_INPUT_HANDLE);
+                IntPtr inHandle = GetStdHandle(StdHandle.InputHandle);
 				uint mode = 0;
 				// Setting some shit
 				GetConsoleMode(inHandle, ref mode);

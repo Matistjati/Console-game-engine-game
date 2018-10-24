@@ -87,7 +87,9 @@ namespace Console_game
 			ConsoleFontInfo.FaceName = newFontString;
 
 
-			SetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
+			bool SUCCess = SetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
+
+			GetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
 
 			Marshal.FreeHGlobal(outPutHandle);
 		}

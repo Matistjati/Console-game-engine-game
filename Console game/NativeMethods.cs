@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Collections;
 
 namespace Console_game
 {
@@ -11,7 +12,7 @@ namespace Console_game
 		public static extern bool SetConsoleTitle(
 			string lpConsoleTitle);
 
-		[DllImport("Kernel32.dll", SetLastError = true)]
+		[DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
 		public static extern bool SetCurrentConsoleFontEx(
 			IntPtr hConsoleOutput,
 			bool bMaximumWindow,
@@ -35,10 +36,12 @@ namespace Console_game
 		[DllImport("kernel32")]
 		public static extern IntPtr GetStdHandle(StdHandle index);
 
-		[StructLayout(LayoutKind.Sequential)]
+		[StructLayout(LayoutKind.Explicit)]
 		public struct COORD
 		{
+			[FieldOffset(0)]
 			public short X;
+			[FieldOffset(2)]
 			public short Y;
 
 			public COORD(short x, short y)
@@ -91,11 +94,17 @@ namespace Console_game
 
 		}
 
+		
 		[StructLayout(LayoutKind.Explicit)]
 		public struct MOUSE_EVENT_RECORD
 		{
 			[FieldOffset(0)]
-			public COORD dwMousePosition;
+			public short dwMousePositionY;
+
+			[FieldOffset(2)]
+			public short dwMousePositionX;
+			//public COORD dwMousePosition;
+
 
 			public const int DOUBLE_CLICK = 0x0002,
 				MOUSE_HWHEELED = 0x0008,
@@ -168,10 +177,6 @@ namespace Console_game
 			public COORD dwFontSize;
 		}
 
-		public const uint STD_INPUT_HANDLE = unchecked((uint)-10),
-			STD_OUTPUT_HANDLE = unchecked((uint)-11),
-			STD_ERROR_HANDLE = unchecked((uint)-12);
-
 		[DllImport("kernel32.dll")]
 		public static extern IntPtr GetStdHandle(uint nStdHandle);
 
@@ -192,14 +197,14 @@ namespace Console_game
 			uint dwMode);
 
 
-		[DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 		public static extern bool ReadConsoleInput(
 			IntPtr hConsoleInput,
 			[Out] INPUT_RECORD[] lpBuffer,
 			uint nLength,
 			ref uint lpNumberOfEventsRead);
 
-		[DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 		public static extern bool WriteConsoleInput(
 			IntPtr hConsoleInput,
 			INPUT_RECORD[] lpBuffer,

@@ -19,7 +19,7 @@ namespace Console_game.Tests
 			MethodInfo methodInfo = ReflectiveHelper<GameObject>.GetMethodInfo<SampleComponent>(
 																					   sampleGameObj.TestTimeAccuracy);
 			FrameRunner.UnsubscribeAll();
-			FrameRunner.AddFrameSubscriber(methodInfo, sampleGameObj);
+			FrameRunner.AddFrameSubscriber(sampleGameObj, methodInfo);
 
 			start = DateTime.Now;
 			// Let's avoid getting in an infinite loop, shall we?
@@ -31,7 +31,7 @@ namespace Console_game.Tests
 			}).Start();
 			FrameRunner.Run();
 
-			FrameRunner.Unsubscribe(methodInfo);
+			FrameRunner.Unsubscribe(sampleGameObj);
 
 			// Make this value higher for a better test
 			Thread.Sleep(17);

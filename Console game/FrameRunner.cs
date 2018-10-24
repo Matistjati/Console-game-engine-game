@@ -209,7 +209,7 @@ namespace Console_game
 			}
 		}
 
-		internal static void AddFrameSubscriber(MethodInfo method, object instance)
+		internal static void AddFrameSubscriber(object instance, MethodInfo method)
 		{
 			if (!updateCallBack.Keys.Contains(instance))
 			{

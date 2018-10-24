@@ -26,6 +26,9 @@ namespace Console_game
 
 		static void GameSetup()
 		{
+			Console.BufferWidth = Console.WindowWidth;
+			Console.BufferHeight = Console.WindowHeight;
+
 			// Set the console's title to a preset gamename
 			NativeMethods.SetConsoleTitle(ConfigurationManager.AppSettings["Game Name"]);
 			Win32ConsoleHelper.SetConsoleFontSize(18, 18);

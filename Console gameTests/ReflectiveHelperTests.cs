@@ -53,11 +53,11 @@ namespace Console_game.Tests
 		[TestMethod]
 		public void ReflectiveHelperGetComponentMethodAndInstanceTestSuccess()
 		{
-			Dictionary<MethodInfo, Component> methodAndInstance = gameObjects.GetComponentMethodAndInstance("update");
+			Dictionary<Component, MethodInfo> methodAndInstance = gameObjects.GetComponentMethodAndInstance("update");
 			Assert.AreEqual(2, methodAndInstance.Count, "Less than two components on GameObjectTest Implements update");
-			foreach (KeyValuePair<MethodInfo, Component> method in methodAndInstance)
+			foreach (KeyValuePair<Component, MethodInfo> method in methodAndInstance)
 			{
-				method.Key.Invoke(method.Value, null);
+				method.Value.Invoke(method.Key, null);
 			}
 		}
 

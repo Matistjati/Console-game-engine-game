@@ -51,7 +51,8 @@ namespace Console_game
             }
             else if (r.dwEventFlags == MOUSE_EVENT_RECORD.MOUSE_MOVED)
             {
-                mousePosition.Set((uint)r.dwMousePosition.X, (uint)r.dwMousePosition.Y);
+                //mousePosition.Set((uint)r.dwMousePosition.X, (uint)r.dwMousePosition.Y);
+                mousePosition.Set((uint)r.dwMousePositionX, (uint)r.dwMousePositionY);
             }
         }
 
