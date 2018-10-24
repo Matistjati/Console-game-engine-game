@@ -2,23 +2,23 @@
 
 namespace Console_game
 {
-    class ComponentTest : Component
-    {
-        public int i = 10;
-        public int health = 420;
-        void update()
-        {
-            Console.Write(i);
-        }
+	class ComponentTest : Component
+	{
+		public int i = 10;
+		public int health = 420;
+		void update()
+		{
+			Console.Write(i);
+		}
 
-        void start()
-        {
-            Console.Write("hoi");
-        }
+		void start()
+		{
+			Console.Write("hoi");
+		}
 
-        bool methodFound()
-        {
-            return true;
-        }
-    }
+		bool methodFound()
+		{
+			return true;
+		}
+	}
 }

@@ -2,8 +2,8 @@
 
 namespace Console_game
 {
-    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    class IsPrefabAttribute : Attribute
-    {
-    }
+	[AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
+	class IsPrefabAttribute : Attribute
+	{
+	}
 }
