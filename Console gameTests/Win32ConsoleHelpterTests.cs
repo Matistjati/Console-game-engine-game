@@ -15,13 +15,13 @@ namespace Console_game.Tests
 		[ClassInitialize()]
 		public static void SetUp(TestContext context)
 		{
-			//cmd = Process.Start("cmd.exe");
+			cmd = Process.Start("cmd.exe");
 		}
 
 		[ClassCleanup]
 		public static void TearDown()
 		{
-			//cmd.Kill();
+			cmd.Kill();
 		}
 
 		private readonly Coord[] ConsoleFontSizes = new Coord[]

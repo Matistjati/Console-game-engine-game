@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Console_game.Tests
 {
-	public class SampleComponent : Component
+	public class SampleComponentTest : Component
 	{
 		public float total;
 		public void TestTimeAccuracy()
@@ -24,13 +24,13 @@ namespace Console_game.Tests
 		{
 
 			// This test is slow as we need to sleep for it to work
-			SampleComponent gameObject = new SampleComponent();
+			SampleComponentTest gameObject = new SampleComponentTest();
 
-			MethodInfo methodInfo = ReflectiveHelper<GameObject>.GetMethodInfo<SampleComponent>(
-																					   gameObject.TestTimeAccuracy);
+			Action methodInfo = ReflectiveHelper<GameObject>.GetAction("TestTimeAccuracy", gameObject);
 
-			FrameRunner.AddFrameSubscriber(gameObject, methodInfo);
+			FrameRunner.AddFrameSubscriber(methodInfo);
 			start = DateTime.Now;
+
 			// Let's avoid getting in an infinite loop, shall we?
 			new Thread(() =>
 			{

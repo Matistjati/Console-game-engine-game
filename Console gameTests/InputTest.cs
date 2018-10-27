@@ -15,15 +15,14 @@ namespace Console_game.Tests
 		[ClassInitialize()]
 		public static void SetUp(TestContext context)
 		{
-			//cmd = Process.Start("cmd.exe");
-			//InternalInput.Start();
+			cmd = Process.Start("cmd.exe");
+			InternalInput.Start();
 		}
 
 		[ClassCleanup]
 		public static void TearDown()
 		{
-			//cmd.Kill();
-			//InternalInput.Stop();
+			cmd.Kill();
 		}
 
 		static KEY_EVENT_RECORD keyEvent = new KEY_EVENT_RECORD();
@@ -36,8 +35,8 @@ namespace Console_game.Tests
 			keyEvent.bKeyDown = false;
 			keyEvent.wRepeatCount = 0;
 			mouseEvent.dwEventFlags = 0;
-			mouseEvent.dwMousePositionX = 0;
-			mouseEvent.dwMousePositionY = 0;
+			mouseEvent.dwMousePosition.X = 0;
+			mouseEvent.dwMousePosition.Y = 0;
 		}
 
 		[TestMethod()]
@@ -110,8 +109,8 @@ namespace Console_game.Tests
 			int x = rnd.Next(0, short.MaxValue);
 			int y = rnd.Next(0, short.MaxValue);
 
-			mouseEvent.dwMousePositionX = (short)x;
-			mouseEvent.dwMousePositionY = (short)y;
+			mouseEvent.dwMousePosition.X = (short)x;
+			mouseEvent.dwMousePosition.Y = (short)y;
 
 
 			InternalInput.MouseEventHandler(mouseEvent);

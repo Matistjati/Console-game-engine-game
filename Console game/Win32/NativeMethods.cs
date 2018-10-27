@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace Console_game
 {
-	internal static class NativeMethods
+	static class NativeMethods
 	{
 		[DllImport("Kernel32.dll", CharSet = CharSet.Unicode)]
 		public static extern bool SetConsoleTitle(
@@ -36,12 +36,12 @@ namespace Console_game
 		[DllImport("kernel32")]
 		public static extern IntPtr GetStdHandle(StdHandle index);
 
-		[StructLayout(LayoutKind.Explicit)]
+		[StructLayout(LayoutKind.Sequential)]
 		public struct COORD
 		{
-			[FieldOffset(0)]
+
 			public short X;
-			[FieldOffset(2)]
+
 			public short Y;
 
 			public COORD(short x, short y)
@@ -95,22 +95,17 @@ namespace Console_game
 		}
 
 		
-		[StructLayout(LayoutKind.Explicit)]
+		[StructLayout(LayoutKind.Sequential)]
 		public struct MOUSE_EVENT_RECORD
 		{
-			[FieldOffset(0)]
-			public short dwMousePositionY;
-
-			[FieldOffset(2)]
-			public short dwMousePositionX;
-			//public COORD dwMousePosition;
+			public COORD dwMousePosition;
 
 
 			public const int DOUBLE_CLICK = 0x0002,
 				MOUSE_HWHEELED = 0x0008,
 				MOUSE_MOVED = 0x0001,
 				MOUSE_WHEELED = 0x0004;
-			[FieldOffset(4)]
+
 			public uint dwButtonState;
 
 			public const int CAPSLOCK_ON = 0x0080,
@@ -122,7 +117,7 @@ namespace Console_game
 				RIGHT_CTRL_PRESSED = 0x0004,
 				SCROLLLOCK_ON = 0x0040,
 				SHIFT_PRESSED = 0x0010;
-			[FieldOffset(8)]
+
 			public uint dwControlKeyState;
 
 			public const int FROM_LEFT_1ST_BUTTON_PRESSED = 0x0001,
@@ -130,25 +125,26 @@ namespace Console_game
 				FROM_LEFT_3RD_BUTTON_PRESSED = 0x0008,
 				FROM_LEFT_4TH_BUTTON_PRESSED = 0x0010,
 				RIGHTMOST_BUTTON_PRESSED = 0x0002;
-			[FieldOffset(12)]
+
 			public uint dwEventFlags;
 		}
 
-		[StructLayout(LayoutKind.Explicit, CharSet = CharSet.Unicode)]
+		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 		public struct KEY_EVENT_RECORD
 		{
-			[FieldOffset(0)]
 			public bool bKeyDown;
-			[FieldOffset(4)]
+
 			public ushort wRepeatCount;
-			[FieldOffset(6)]
+
 			public ushort wVirtualKeyCode;
-			[FieldOffset(8)]
+
 			public ushort wVirtualScanCode;
-			[FieldOffset(10)]
+
 			public char UnicodeChar;
-			[FieldOffset(10)]
+
 			public byte AsciiChar;
+
+			public uint dwControlKeyState;
 
 			public const int CAPSLOCK_ON = 0x0080,
 				ENHANCED_KEY = 0x0100,
@@ -159,14 +155,11 @@ namespace Console_game
 				RIGHT_CTRL_PRESSED = 0x0004,
 				SCROLLLOCK_ON = 0x0040,
 				SHIFT_PRESSED = 0x0010;
-			[FieldOffset(12)]
-			public uint dwControlKeyState;
 		}
 
-		[StructLayout(LayoutKind.Explicit)]
+		[StructLayout(LayoutKind.Sequential)]
 		public struct WINDOW_BUFFER_SIZE_RECORD
 		{
-			[FieldOffset(0)]
 			public COORD dwSize;
 		}
 

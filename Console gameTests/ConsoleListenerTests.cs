@@ -45,8 +45,7 @@ namespace Console_game.Tests
 
 				MouseEvent = new MOUSE_EVENT_RECORD
 				{
-					dwMousePositionX = xCoord,
-					dwMousePositionY = yCoord,
+					dwMousePosition = new COORD(xCoord, yCoord),
 					dwButtonState = buttonPressed,
 					dwEventFlags = 0x0004,
 					dwControlKeyState = 0x0010
@@ -64,8 +63,8 @@ namespace Console_game.Tests
 			Thread.Sleep(100);
 
 			Assert.IsTrue(buttonDownCalled);
-			Assert.AreEqual(xCoord, mouseEvent.dwMousePositionX);
-			Assert.AreEqual(yCoord, mouseEvent.dwMousePositionY);
+			Assert.AreEqual(xCoord, mouseEvent.dwMousePosition.X);
+			Assert.AreEqual(yCoord, mouseEvent.dwMousePosition.Y);
 			Assert.AreEqual(buttonPressed, mouseEvent.dwButtonState);
 		}
 

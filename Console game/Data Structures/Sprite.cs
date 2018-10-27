@@ -1,7 +1,10 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+
+#if DEBUG
 using System.Text;
+#endif
 
 namespace Console_game
 {
@@ -53,6 +56,7 @@ namespace Console_game
 			colorValues = image;
 		}
 
+#if DEBUG
 		public override string ToString()
 		{
 			StringBuilder sprite = new StringBuilder(colorValues.GetLength(0) * colorValues.GetLength(1));
@@ -74,6 +78,7 @@ namespace Console_game
 			}
 			return sprite.ToString();
 		}
+#endif
 
 		/// <summary>
 		/// Resize the image to the specified width and height.

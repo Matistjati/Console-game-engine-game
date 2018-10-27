@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -15,11 +14,11 @@ namespace Console_game.Tests
 		{
 			// This test is slow as we need to sleep for it to work
 
-			SampleComponent sampleGameObj = new SampleComponent();
-			MethodInfo methodInfo = ReflectiveHelper<GameObject>.GetMethodInfo<SampleComponent>(
-																					   sampleGameObj.TestTimeAccuracy);
+			SampleComponentTest sampleGameObj = new SampleComponentTest();
+			Action action = ReflectiveHelper<GameObject>.GetAction("TestTimeAccuracy", sampleGameObj);
+
 			FrameRunner.UnsubscribeAll();
-			FrameRunner.AddFrameSubscriber(sampleGameObj, methodInfo);
+			FrameRunner.AddFrameSubscriber(action);
 
 			start = DateTime.Now;
 			// Let's avoid getting in an infinite loop, shall we?
@@ -31,7 +30,7 @@ namespace Console_game.Tests
 			}).Start();
 			FrameRunner.Run();
 
-			FrameRunner.Unsubscribe(sampleGameObj);
+			FrameRunner.Unsubscribe(action);
 
 			// Make this value higher for a better test
 			Thread.Sleep(17);

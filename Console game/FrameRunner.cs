@@ -31,14 +31,15 @@ namespace Console_game
 			{
 				GameObject gameObject = destructionQueue.Dequeue();
 				List<Component> componentsToRemove = new List<Component>();
-				foreach (Component componentToDestroy in updateCallBack.Keys.Where(component => component.gameObject == gameObject))
+				var a = updateCallBack.GetMethodInfo();
+				/*foreach (Component componentToDestroy in updateCallBack.Where(component => component.gameObject == gameObject))
 				{
 					componentsToRemove.Add(componentToDestroy);
 				}
 				for (int o = 0; o < componentsToRemove.Count; o++)
 				{
 					updateCallBack.Remove(componentsToRemove[i]);
-				}
+				}*/
 
 				foreach (Component component in gameObject.components)
 				{
@@ -68,6 +69,7 @@ namespace Console_game
 
 		static StringBuilder allRows;
 
+#if DEBUG
 		public static void ColorMapPrint()
 		{
 			StringBuilder sprite = new StringBuilder(colors.GetLength(0) * colors.GetLength(1));
@@ -89,6 +91,7 @@ namespace Console_game
 			}
 			Console.Write(sprite);
 		}
+#endif
 
 		public static void Run()
 		{
@@ -124,10 +127,7 @@ namespace Console_game
 				Input.UpdateInput();
 
 				// Calling update
-				foreach (KeyValuePair<Component, MethodInfo> method in updateCallBack)
-				{
-					method.Key.Invoke(method.Value);
-				}
+				updateCallBack?.Invoke();
 
 				// Note to self:
 				// If two objects overlap, make sure that the bigger one has the lowest layer
@@ -157,11 +157,10 @@ namespace Console_game
 
 					// Assuring we won't go out of bounds
 					if (colorMapSize.X + position.X > displaySize.X)
-						colorMapSize.SetX(displaySize.X - position.X);
+						colorMapSize.SetX(colorMapSize.X - (colorMapSize.X + position.X - displaySize.X) - 1);
 
 					if (colorMapSize.Y + position.Y > displaySize.Y)
-						//colorMapSize.SetY(displaySize.Y - (displaySize.Y + position.Y - displaySize.Y));
-						colorMapSize.SetY(displaySize.Y - position.Y);
+						colorMapSize.SetY(colorMapSize.Y - (colorMapSize.Y + position.Y - displaySize.Y) - 1);
 
 					spritePositions.Insert(0, new SmallRectangle(
 						(ushort)position.X,
@@ -290,47 +289,23 @@ namespace Console_game
 		internal static Queue<GameObject> destructionQueue = new Queue<GameObject>();
 		public static List<SpriteDisplayer> RenderedGameObjects { internal get; set; } = new List<SpriteDisplayer>();
 
+		static void DoNothing() {	}
+		static Action updateCallBack = new Action(DoNothing);
 
-		public static Dictionary<Component, MethodInfo> updateCallBack = new Dictionary<Component, MethodInfo>();
-
-		internal static void AddFrameSubscriber(KeyValuePair<Component, MethodInfo> method)
+		internal static void AddFrameSubscriber(Action method)
 		{
-			if (!updateCallBack.Keys.Contains(method.Key))
-			{
-				updateCallBack.Add(method.Key, method.Value);
-			}
+			updateCallBack += method;
 		}
 
-		internal static void AddFrameSubscriber(Dictionary<Component, MethodInfo> method)
+		internal static void Unsubscribe(Action method)
 		{
-			foreach (KeyValuePair<Component, MethodInfo> methodInfo in method)
-			{
-				if (!updateCallBack.Keys.Contains(methodInfo.Key))
-				{
-					updateCallBack.Add(methodInfo.Key, methodInfo.Value);
-				}
-			}
-		}
-
-		internal static void AddFrameSubscriber(object instance, MethodInfo method)
-		{
-			if (!updateCallBack.Keys.Contains(instance))
-			{
-				updateCallBack.Add((Component)instance, method);
-			}
-		}
-
-		internal static void Unsubscribe(Component component)
-		{
-			if (updateCallBack.Keys.Contains(component))
-			{
-				updateCallBack.Remove(component);
-			}
+			updateCallBack -= method;
 		}
 
 		public static void UnsubscribeAll()
 		{
-			updateCallBack.Clear();
+			updateCallBack = new Action(DoNothing);
+			updateCallBack -= DoNothing;
 		}
 	}
 }

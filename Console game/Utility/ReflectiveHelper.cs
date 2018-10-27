@@ -89,32 +89,53 @@ namespace Console_game
 			return (ComponentMethodInfo is null) ? false : true;
 		}
 
-		public Dictionary<Component, MethodInfo> GetComponentMethodAndInstance(string methodName)
+		public Action GetComponentAction(string methodName)
 		{
-			return GetComponentMethodAndInstance(methodName, defaultBindingFlags);
+			return GetComponentAction(methodName, defaultBindingFlags);
 		}
 
-		public Dictionary<Component, MethodInfo> GetComponentMethodAndInstance(string methodName, BindingFlags bindingFlags)
+		private void DoNothing() { }
+
+		public Action GetComponentAction(string methodName, BindingFlags bindingFlags)
 		{
 			if (typeof(T) != typeof(GameObject))
 			{
+				Log.DefaultLogger.LogError($"T in reflectivehlper: {typeof(T)} was not gameobject");
 				throw new ArgumentOutOfRangeException("This method only works when T is GameObject");
 			}
 
-			Dictionary<Component, MethodInfo> methodAndComponent = new Dictionary<Component, MethodInfo>();
+			Action methods = new Action(DoNothing);
+
 			foreach (T gameObject in TInstances)
 			{
 				foreach (Component component in (gameObject as GameObject).components)
 				{
 					if (TryGetMethodFromComponent(component, methodName, bindingFlags, out MethodInfo method))
 					{
-						methodAndComponent.Add(component, method);
+						Action action = (Action)method.CreateDelegate(typeof(Action), component);
+						if (action is null)
+						{
+							// Handle??
+						}
+						methods += action;
 					}
 				}
 			}
 
-			return methodAndComponent;
+			methods -= DoNothing;
+			return methods;
 		}
+
+		public static Action GetAction(string method, object target)
+		{
+			MethodInfo methodInfo = target.GetType().GetMethod(method,
+				defaultBindingFlags);
+
+			return (Action)methodInfo.CreateDelegate(typeof(Action), target);
+		}
+
+		public static Action GetAction(MethodInfo method, object target) => (Action)method.CreateDelegate(typeof(Action), target);
+
 
 		public static MethodInfo GetMethodInfo<TClassType>(string method)
 		{

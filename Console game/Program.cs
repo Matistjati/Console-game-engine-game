@@ -28,7 +28,7 @@ namespace Console_game
 
 		static void GameSetup()
 		{
-			Win32ConsoleHelper.SetConsoleFontSize(10, 10);
+			Win32ConsoleHelper.SetConsoleFontSize(1, 1);
 			Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
 			Console.BufferWidth = Console.WindowWidth;
 			Console.BufferHeight = Console.WindowHeight;
@@ -47,7 +47,7 @@ namespace Console_game
 				ReflectiveHelper<GameObject> gameObjectChildren = new ReflectiveHelper<GameObject>();
 				List<GameObject> gameObjects = gameObjectChildren.GetTInstanceNonPrefab();
 
-
+				
 				// Adding physicalstate to all gameObjects
 				foreach (GameObject gameObject in gameObjects)
 				{
@@ -75,11 +75,12 @@ namespace Console_game
 					}
 				}
 
-				Dictionary<Component, MethodInfo> methodAndComponent = gameObjectChildren.GetComponentMethodAndInstance("update");
 
-				FrameRunner.AddFrameSubscriber(methodAndComponent);
+
+				Action updateMethod = gameObjectChildren.GetComponentAction("update");
+
+				FrameRunner.AddFrameSubscriber(updateMethod);
 			}
-
 
 			// Creating the necessary folders and files
 			Directory.CreateDirectory("logs");

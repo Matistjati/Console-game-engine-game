@@ -46,19 +46,17 @@ namespace Console_game.Tests
 		{
 			ReflectiveHelper<ReflectiveHelperTests> expectedEmpty = new ReflectiveHelper<ReflectiveHelperTests>();
 			Assert.AreEqual(0, expectedEmpty.ClassCount, "There is a class inheriting from ReflectiveHelperTests");
-			expectedEmpty.GetComponentMethodAndInstance("sample");
+
+			expectedEmpty.GetComponentAction("sample");
 		}
 
 		// Todo passing wrong arg for exception 
 		[TestMethod]
 		public void ReflectiveHelperGetComponentMethodAndInstanceTestSuccess()
 		{
-			Dictionary<Component, MethodInfo> methodAndInstance = gameObjects.GetComponentMethodAndInstance("update");
-			Assert.AreEqual(2, methodAndInstance.Count, "Less than two components on GameObjectTest Implements update");
-			foreach (KeyValuePair<Component, MethodInfo> method in methodAndInstance)
-			{
-				method.Value.Invoke(method.Key, null);
-			}
+			Action action = gameObjects.GetComponentAction("update");
+			Assert.AreEqual(1, action.Target, "Less than one components on GameObjectTest Implements update");
+			action.Invoke();
 		}
 
 
