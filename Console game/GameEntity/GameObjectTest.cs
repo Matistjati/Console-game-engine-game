@@ -5,11 +5,14 @@ namespace Console_game
 {
 	class GameObjectTest : GameObject
 	{
+		int GameObjectTestt;
 		public GameObjectTest()
 		{
-			SpriteDisplayer componentTest = AddComponent<SpriteDisplayer>();
+			SpriteDisplayer sprite = AddComponent<SpriteDisplayer>();
 			physicalState.Scale = 1.5f;
-			componentTest.SetImage("sample.png");
+			sprite.SetImage("sample.png");
+			sprite.Layer = 0;
+
 			SampleComponent sampleTest = AddComponent<SampleComponent>();
 		}
 	}

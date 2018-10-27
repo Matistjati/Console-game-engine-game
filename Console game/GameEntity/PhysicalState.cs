@@ -4,7 +4,7 @@ namespace Console_game
 {
 	public class PhysicalState : Component
 	{
-		public CoordF Position { get; set; } = CoordF.empty;
+		public CoordF Position = CoordF.empty;
 
 		private float scale = 1f;
 		public float Scale

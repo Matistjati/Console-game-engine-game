@@ -8,24 +8,27 @@ namespace Console_game
 
 		public bool IsInitialized
 		{
-			get { return !(Sprite.colorValues is null); }
+			get { return !((Sprite?.colorValues ?? null) is null); }
 		}
+
+		public int Layer { get; set; }
 
 		public void RecalculateSpriteSize()
 		{
 			Sprite = new Sprite(imageBase, physicalState.Scale);
 		}
 
-		Sprite Sprite { get; set; }
+	 	internal Sprite Sprite { get; set; }
 
 		// More overloads for setting pic
 		// Max length 1
+		// Unnecessary
 		public string PrintedChar { get; set; } = "█";
 
 		public int Width { get => (int)Sprite.Size.X; }
 		public int Heigth { get => (int)Sprite.Size.Y; }
 
-		public Color[,] ColorMap
+		public RGB[,] ColorMap
 		{
 			get => Sprite.colorValues;
 		}

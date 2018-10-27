@@ -1,0 +1,235 @@
+[33mcommit 1c885eb45f02211942a74cbc2769194084bf968c[m[33m ([m[1;36mHEAD[m[33m)[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Fri Oct 26 16:11:07 2018 +0200
+
+    Trying to fix problems with displaying multiple gameObjects
+
+[33mcommit 3bf7e5038d179a6a12c67a78d0d30d1497728514[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Wed Oct 24 13:04:28 2018 +0200
+
+    Changed from spaces to tabs
+
+[33mcommit 5838cf3b92676c66511ad9cd2ee5e662d9118436[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Mon Oct 22 19:07:36 2018 +0200
+
+    Added method for destroying gameobject
+
+[33mcommit 81b5f0ef2e67ecf978ed82f9f1b4de4aa12e1c38[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Mon Oct 22 17:13:24 2018 +0200
+
+    No more flickering on sprites, taking position into account
+
+[33mcommit 17e9146a2bb610af9c73934a487b3595ae0fd6ba[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Sun Oct 21 21:31:10 2018 +0200
+
+    Incomplete rendering system
+
+[33mcommit c577b70c4ec2acfae2381897738d8bc422f3fee6[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Tue Oct 16 20:43:07 2018 +0200
+
+    +Gameobject, component, more reflectivehelper
+
+[33mcommit 8e11048b004fb0d901e8ff55a08cbbed14b50e66[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Sun Oct 14 16:08:23 2018 +0200
+
+    Added reflection support for compile-time known methods
+
+[33mcommit 21189b1fcf913bf1c58748a8b245cddc7ffe92ce[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Sat Oct 13 23:35:06 2018 +0200
+
+    Improved reflection usage
+
+[33mcommit 68ac0ce292cda6e000c88b2736de8f17639366e9[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Sat Oct 13 20:30:03 2018 +0200
+
+    Changed from point to custom that uses uint
+
+[33mcommit 86eb7f45a388cd778b39f3449d1e60cf01395896[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Sat Oct 13 18:48:53 2018 +0200
+
+    Tests for gameobject and framerunner. Slow because sleep is used
+
+[33mcommit a9f5a995f7121ed54edf7b4d137fcd4db067b566[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Sat Oct 13 15:07:29 2018 +0200
+
+    Nativemethods fixed, has its own file, Consolelistener tests done
+
+[33mcommit c9d2990b8d73241f47586f2c2a74016ae574e222[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Fri Oct 12 21:42:12 2018 +0200
+
+    Log tests complete
+
+[33mcommit a0a803c2aac39ab7cc3253af7cc824a6d719a0b3[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Fri Oct 12 19:04:27 2018 +0200
+
+    Log test started
+
+[33mcommit cea51075b6466f0a293d10fd4a71ad72b779bfb5[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Fri Oct 12 15:38:30 2018 +0200
+
+    All unit test are passing, getseenmap expected result changed
+
+[33mcommit a916bb6c9ecdc025097ef6c41f1430747048a643[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Thu Oct 11 21:29:02 2018 +0200
+
+    Changed from vector2int to point, todo: fix maptests failing
+
+[33mcommit 278f4f35f0cc79a5e93f7f13351bf58d63653d01[m
+Author: Matistjati <38278628+Matistjati@users.noreply.github.com>
+Date:   Mon Oct 8 07:56:53 2018 +0200
+
+    Fixed stupid map generating bug
+
+[33mcommit 6f8a285740d66be13e1c3704340c2f5a688dca78[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Sun Oct 7 19:15:42 2018 +0200
+
+    Improving test, rewriting getseenmap and vector2int. Unstable
+
+[33mcommit d0563a9a897df1f17df841e385219602dbe19356[m
+Author: Matistjati <matistjati@outlook.com>
+Date:   Sat Oct 6 18:14:23 2018 +0200
+
+    Cleaned code and more tests
+
+[33mcommit e96f0ce22894966146759a5886dc4f94acdf9645[m
+Author: Matistjati <matistjati@outlook.com>
+Date:   Fri Oct 5 23:13:36 2018 +0200
+
+    Tests for win32consolehelper and fixes
+
+[33mcommit a93d9bafc56ff00ef66a0b6a6f1305997edca05e[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Wed Oct 3 18:37:28 2018 +0200
+
+    tests for win32consolehelper setconsoletitle
+
+[33mcommit 37ae6d2dd1c9893beb0e208d8154f4bc8fc5a9aa[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Tue Oct 2 21:34:20 2018 +0200
+
+    Main functionality established, time for some unittests
+
+[33mcommit 0efa7858438c42e8184030f90c3ce4bd3193d4d5[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Tue Oct 2 17:20:25 2018 +0200
+
+    Made the latest commit stable
+
+[33mcommit 0d4a5d4a573e2b5bb2913a69815ab584c883ad20[m
+Author: Matistjati <38278628+Matistjati@users.noreply.github.com>
+Date:   Tue Oct 2 13:44:30 2018 +0200
+
+    Reorganized some stuff. Unstable build
+
+[33mcommit 9aa76e533e03157e70b7b9785e2a44eaf36e62cf[m
+Author: Matistjati <38278628+Matistjati@users.noreply.github.com>
+Date:   Tue Oct 2 10:30:56 2018 +0200
+
+    Getdefaultlogger start
+
+[33mcommit 8ef6dc5302111489a3a0db8e306ff3bcac9c761a[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Mon Oct 1 21:29:54 2018 +0200
+
+    input and time calculations should be working
+
+[33mcommit 7d3d9a92421346e82c8db0af6f59a1135652043d[m
+Author: Matistjati <38278628+Matistjati@users.noreply.github.com>
+Date:   Mon Oct 1 13:50:21 2018 +0200
+
+    Input should hopefully work now
+
+[33mcommit c9644d9d740bab38f0a978d8d113f38f0b1bf700[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Sun Sep 30 21:57:04 2018 +0200
+
+    Working in the input class
+
+[33mcommit e2f0f668e74fbf1791d20ebb72f089346e514512[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Sat Sep 29 11:40:22 2018 +0200
+
+    Added a class for input, going to implement frame and input system
+
+[33mcommit 2b67bc3238badaeba7eca7b0cdfe221039bdbf19[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Thu Sep 27 21:36:52 2018 +0200
+
+    Get methods by name who inherit from generic class T
+
+[33mcommit 8bf6658ced969936e5569075e5d7466795508f24[m
+Merge: cfbc735 77a4bd8
+Author: Jaushau <matistjati@outlook.com>
+Date:   Thu Sep 27 17:25:47 2018 +0200
+
+    Merge branch 'master' of https://github.com/Matistjati/Console-game-engine-game
+
+[33mcommit cfbc7355bccabb40800d27728d7981640dcc863a[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Thu Sep 27 17:25:11 2018 +0200
+
+    Better frame system
+
+[33mcommit 77a4bd8c63197a3a8a7396fa1d1cdbad555ca9dc[m
+Author: Matistjati <38278628+Matistjati@users.noreply.github.com>
+Date:   Mon Sep 24 21:37:24 2018 +0200
+
+    Update README.md
+
+[33mcommit 152405a15a96aec3fdd8712fc3653b073f85798b[m
+Author: Matistjati <38278628+Matistjati@users.noreply.github.com>
+Date:   Mon Sep 24 21:37:04 2018 +0200
+
+    Update README.md
+
+[33mcommit 4092f40929562ff9507f62c2a8f24bfb58b3e678[m
+Author: Matistjati <38278628+Matistjati@users.noreply.github.com>
+Date:   Mon Sep 24 21:36:46 2018 +0200
+
+    Update README.md
+
+[33mcommit 60e5c46187083a81f5e02c88cf19530b5eef2206[m
+Author: Matistjati <38278628+Matistjati@users.noreply.github.com>
+Date:   Mon Sep 24 21:36:00 2018 +0200
+
+    Update README.md
+
+[33mcommit 5e93050840bdafdf949a048e1d62286d5df5eb58[m
+Author: Matistjati <38278628+Matistjati@users.noreply.github.com>
+Date:   Mon Sep 24 21:35:47 2018 +0200
+
+    Update README.md
+
+[33mcommit 987b67098b4bd0dc55198b18a31b5e862d918476[m
+Merge: c1b2cfa bdf74d1
+Author: Jaushau <matistjati@outlook.com>
+Date:   Mon Sep 24 21:31:03 2018 +0200
+
+    Merge branch 'master' of https://github.com/Matistjati/Console-game-engine-game
+
+[33mcommit c1b2cfa39cf9fd24e253c45ab6fc21148b7d84bf[m
+Author: Jaushau <matistjati@outlook.com>
+Date:   Mon Sep 24 21:23:43 2018 +0200
+
+    First commit
+
+[33mcommit bdf74d10c05bbd890a63c4fa4d1e35c61d15dea1[m
+Author: Matistjati <38278628+Matistjati@users.noreply.github.com>
+Date:   Mon Sep 24 21:17:18 2018 +0200
+
+    Initial commit

@@ -16,7 +16,12 @@ namespace Console_game
 
 		public bool IsInvoking { get => isInvoking; }
 
-		public void Invoke(MethodInfo method) => Invoke(method, null);
+		public void Invoke(MethodInfo method)
+		{
+			isInvoking = true;
+			method.Invoke(this, null);
+			isInvoking = false;
+		}
 
 		public void Invoke(MethodInfo method, object[] parameters)
 		{

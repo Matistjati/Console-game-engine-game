@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Console_game
 {
@@ -26,12 +28,14 @@ namespace Console_game
 
 		static void GameSetup()
 		{
+			Win32ConsoleHelper.SetConsoleFontSize(10, 10);
+			Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
 			Console.BufferWidth = Console.WindowWidth;
 			Console.BufferHeight = Console.WindowHeight;
+			Console.SetWindowPosition(0, 0);
 
 			// Set the console's title to a preset gamename
 			NativeMethods.SetConsoleTitle(ConfigurationManager.AppSettings["Game Name"]);
-			Win32ConsoleHelper.SetConsoleFontSize(18, 18);
 
 			// Set up input handlelers
 
@@ -53,7 +57,7 @@ namespace Console_game
 				// Setting up all gameobjects who we might want to render
 				foreach (GameObject gameObject in gameObjects)
 				{
-					if (gameObject.GetComponent<SpriteDisplayer>() is SpriteDisplayer sprite)
+					if (gameObject.GetComponent<SpriteDisplayer>() is SpriteDisplayer sprite && sprite.IsInitialized)
 					{
 						FrameRunner.RenderedGameObjects.Add(sprite);
 					}
@@ -105,8 +109,10 @@ namespace Console_game
 
 			Console.SetBufferSize(1200, 300);
 			//Console.SetWindowSize(599, 149);
-			Map thisMap = new Map(5000, 1500);
-			thisMap.PlayerViewRange = new Coord(600, 150);
+			Map thisMap = new Map(5000, 1500)
+			{
+				PlayerViewRange = new Coord(600, 150)
+			};
 
 
 

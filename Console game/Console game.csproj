@@ -49,8 +49,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data Structures\RGB.cs" />
+    <Compile Include="Data Structures\SmallRectangle.cs" />
     <Compile Include="Data Structures\Sprite.cs" />
     <Compile Include="GameEntity\Component.cs" />
+    <Compile Include="GameEntity\SampleGameObj.cs" />
     <Compile Include="GameEntity\SpriteDisplayer.cs" />
     <Compile Include="Input\ConsoleListener.cs" />
     <Compile Include="Data Structures\Coord.cs" />

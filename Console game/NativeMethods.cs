@@ -227,7 +227,7 @@ namespace Console_game
 			bool bMaximumWindow,
 			ref CONSOLE_FONT_INFO lpConsoleCurrentFont);
 
-		[DllImport("kernel32")]
+		[DllImport("kernel32.dll")]
 		public static extern bool FlushConsoleInputBuffer(
 			IntPtr hConsoleInput);
 
@@ -239,5 +239,23 @@ namespace Console_game
 			int nNumberOfCharsToWrite,
 			out int lpNumberOfCharsWritten,
 			IntPtr lpReservedMustBeNull);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern bool FillConsoleOutputCharacter(
+			IntPtr hConsoleOutput,
+			char character,
+			int nLength,
+			COORD dwWriteCoord,
+			out int pNumCharsWritten);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern bool FillConsoleOutputAttribute(
+			IntPtr hConsoleOutput,
+			short wColorAttribute,
+			int numCells,
+			COORD startCoord,
+			out int pNumBytesWritten);
 	}
 }

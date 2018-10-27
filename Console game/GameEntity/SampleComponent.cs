@@ -12,6 +12,7 @@ namespace Console_game
 		void update()
 		{
 			//physicalState.Position = new CoordF(physicalState.Position.X + 100 * GameObject.TimeDelta, physicalState.Position.Y + 3 * GameObject.TimeDelta);
+			//physicalState.Position = new CoordF(physicalState.Position.X + 100 * GameObject.TimeDelta, physicalState.Position.Y);
 			if (physicalState.Scale < 1)
 			{
 				physicalState.Scale = 1.5f;
