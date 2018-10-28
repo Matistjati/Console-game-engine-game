@@ -10,11 +10,20 @@ namespace Console_game
 
 		internal List<Component> components = new List<Component>();
 
+		internal static bool isStartUpPhase = true;
+
 		public void AddComponent(Component component)
 		{
-			component.physicalState = physicalState;
-			component.gameObject = this;
-			components.Add(component);
+			if (isStartUpPhase)
+			{
+				component.physicalState = physicalState;
+				component.gameObject = this;
+				components.Add(component);
+			}
+			else
+			{
+				throw new Exception("Cannot add a component from a component");
+			}
 		}
 
 		public TComponent AddComponent<TComponent>() where TComponent : Component

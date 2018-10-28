@@ -26,6 +26,61 @@ namespace Console_game
 			}
 		}
 
+		static void GameObjectSetup()
+		{
+			// Note:
+			// Lots of things here get assigned to null
+			// This is to ensure that gameobjects can be destroyed and have their memory freed up during runtime
+
+			// Getting all classes deriving from gameobject and getting update and start methods
+			ReflectiveHelper<GameObject> gameObjectChildren = new ReflectiveHelper<GameObject>();
+			List<GameObject> gameObjects = gameObjectChildren.GetTInstanceNonPrefab();
+
+
+			// Adding physicalstate to all gameObjects
+			foreach (GameObject gameObject in gameObjects)
+			{
+				gameObject.AddComponent(gameObject.physicalState);
+			}
+
+			// Setting up all gameobjects who we might want to render
+			foreach (GameObject gameObject in gameObjects)
+			{
+				if (gameObject.GetComponent<SpriteDisplayer>() is SpriteDisplayer sprite && sprite.IsInitialized)
+				{
+					FrameRunner.RenderedGameObjects.Add(sprite);
+					// Leave no references hanging, see top of method
+					sprite = null;
+				}
+			}
+
+			// Invoking all start methods on our GameObjects
+			foreach (GameObject gameObject in gameObjects)
+			{
+				foreach (Component component in gameObject.components)
+				{
+					if (ReflectiveHelper<Type>.TryGetMethodFromComponent(component, "start", out MethodInfo method))
+					{
+						method.Invoke(component, null);
+						// Leave no references hanging, see top of method
+						method = null;
+					}
+				}
+			}
+
+
+			FrameRunner.AddFrameSubscriber(gameObjectChildren.GetComponentAction("update"));
+
+			// Killing references
+			gameObjectChildren.TChildren = null;
+			gameObjectChildren = null;
+			for (int i = 0; i < gameObjects.Count; i++)
+			{
+				gameObjects[i] = null;
+			}
+			gameObjects = null;
+		}
+
 		static void GameSetup()
 		{
 			Win32ConsoleHelper.SetConsoleFontSize(1, 1);
@@ -41,46 +96,7 @@ namespace Console_game
 
 			InternalInput.Start();
 
-			// Declaring new scope to ensure that gameObjects and gameObjectChildren gets collected
-			{
-				// Getting all classes deriving from gameobject and getting update and start methods
-				ReflectiveHelper<GameObject> gameObjectChildren = new ReflectiveHelper<GameObject>();
-				List<GameObject> gameObjects = gameObjectChildren.GetTInstanceNonPrefab();
-
-				
-				// Adding physicalstate to all gameObjects
-				foreach (GameObject gameObject in gameObjects)
-				{
-					gameObject.AddComponent(gameObject.physicalState);
-				}
-
-				// Setting up all gameobjects who we might want to render
-				foreach (GameObject gameObject in gameObjects)
-				{
-					if (gameObject.GetComponent<SpriteDisplayer>() is SpriteDisplayer sprite && sprite.IsInitialized)
-					{
-						FrameRunner.RenderedGameObjects.Add(sprite);
-					}
-				}
-
-				// Invoking all start methods on our GameObjects
-				foreach (GameObject gameObject in gameObjects)
-				{
-					foreach (Component component in gameObject.components)
-					{
-						if (ReflectiveHelper<Type>.TryGetMethodFromComponent(component, "start", out MethodInfo method))
-						{
-							method.Invoke(component, null);
-						}
-					}
-				}
-
-
-
-				Action updateMethod = gameObjectChildren.GetComponentAction("update");
-
-				FrameRunner.AddFrameSubscriber(updateMethod);
-			}
+			GameObjectSetup();
 
 			// Creating the necessary folders and files
 			Directory.CreateDirectory("logs");
@@ -91,11 +107,12 @@ namespace Console_game
 			NativeMethods.GetConsoleMode(NativeMethods.GetStdHandle(NativeMethods.StdHandle.OutputHandle), ref mode);
 			NativeMethods.SetConsoleMode(NativeMethods.GetStdHandle(NativeMethods.StdHandle.OutputHandle), mode | 0x4);
 
-			// We won't have to deal with the white boi
+			// We won't have to deal with the console cursor
 			Console.CursorVisible = false;
 
-
+			GameObject.isStartUpPhase = false;
 			// Starting
+
 			FrameRunner.Run();
 		}
 

@@ -12,7 +12,7 @@ namespace Console_game
 
 		public int ClassCount { get; internal set; }
 
-		readonly IEnumerable<Type> TChildren;
+		public IEnumerable<Type> TChildren;
 
 		public ReflectiveHelper()
 		{

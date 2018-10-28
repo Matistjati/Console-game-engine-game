@@ -15,3 +15,5 @@ C:\Users\Matis\source\repos\Console game\Console gameTests\obj\Debug\Console gam
 C:\Users\Matis\source\repos\Console game\Console gameTests\obj\Debug\Console gameTests.csproj.CopyComplete
 C:\Users\Matis\source\repos\Console game\Console gameTests\obj\Debug\Console gameTests.dll
 C:\Users\Matis\source\repos\Console game\Console gameTests\obj\Debug\Console gameTests.pdb
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Console gameTests.dll.CodeAnalysisLog.xml
+C:\Users\Matis\source\repos\Console game\Console gameTests\bin\Debug\Console gameTests.dll.lastcodeanalysissucceeded
