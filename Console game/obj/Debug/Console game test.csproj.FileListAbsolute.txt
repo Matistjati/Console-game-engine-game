@@ -1,7 +1,0 @@
-C:\Users\Matis\source\repos\Console game test\Console game test\obj\Debug\Console game test.csprojAssemblyReference.cache
-C:\Users\Matis\source\repos\Console game test\Console game test\obj\Debug\Console game test.csproj.CoreCompileInputs.cache
-C:\Users\Matis\source\repos\Console game test\Console game test\bin\Debug\Console game test.exe.config
-C:\Users\Matis\source\repos\Console game test\Console game test\bin\Debug\Console game test.exe
-C:\Users\Matis\source\repos\Console game test\Console game test\bin\Debug\Console game test.pdb
-C:\Users\Matis\source\repos\Console game test\Console game test\obj\Debug\Console game test.exe
-C:\Users\Matis\source\repos\Console game test\Console game test\obj\Debug\Console game test.pdb
