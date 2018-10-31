@@ -3,6 +3,7 @@ using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Uncoal.Engine;
 using Uncoal.Internal;
+using Uncoal.Runner;
 
 namespace Uncoal.Tests
 {
@@ -14,6 +15,7 @@ namespace Uncoal.Tests
 			total += GameObject.TimeDelta;
 		}
 	}
+
 
 	[TestClass]
 	public class GameObjectTests

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<VSTemplate Version="2.0.0" Type="Item">
+	<TemplateData>
+		<Name>Component</Name>
+		<Description>An item that can be added to gameobject to describe their behaviour</Description>
+		<Icon>Class.ico</Icon>
+		<ProjectType>CSharp</ProjectType>
+		<DefaultName>MyComponent.cs</DefaultName>
+	</TemplateData>
+	<TemplateContent>
+		<ProjectItem ReplaceParameters="true">ComponentTemplate.cs</ProjectItem>
+	</TemplateContent>
+</VSTemplate>

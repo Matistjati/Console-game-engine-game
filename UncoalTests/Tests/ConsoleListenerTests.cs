@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Uncoal.Engine;
+using Uncoal.Internal;
 using static Uncoal.Internal.NativeMethods;
 
 namespace Uncoal.Tests

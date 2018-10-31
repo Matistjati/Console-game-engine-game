@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<VSTemplate Version="2.0.0" Type="Item">
+	<TemplateData>
+		<Name>GameObject</Name>
+		<Description>An entity in the game world who has components describing its behaviour</Description>
+		<Icon>Class.ico</Icon>
+		<ProjectType>CSharp</ProjectType>
+		<DefaultName>MyGameObject.cs</DefaultName>
+	</TemplateData>
+	<TemplateContent>
+		<ProjectItem ReplaceParameters="true">GameObjectTemplate.cs</ProjectItem>
+	</TemplateContent>
+</VSTemplate>
