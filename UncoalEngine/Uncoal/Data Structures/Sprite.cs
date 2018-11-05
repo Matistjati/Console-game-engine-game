@@ -5,7 +5,6 @@ using Uncoal.Internal;
 
 #if DEBUG
 using System.Text;
-using Uncoal.Internal;
 #endif
 
 namespace Uncoal.Engine
@@ -73,7 +72,7 @@ namespace Uncoal.Engine
 					}
 					else
 					{
-						sprite.Append($"\x1b[38;2;{rgb.R};{rgb.G};{rgb.B}m█");
+						sprite.Append(rgb.escapeSequence);
 					}
 				}
 				sprite.Append('\n');

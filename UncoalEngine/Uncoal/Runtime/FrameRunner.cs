@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Uncoal.Engine;
 using static Uncoal.Internal.NativeMethods;
 
@@ -9,18 +11,15 @@ namespace Uncoal.Runner
 {
 	internal static class FrameRunner
 	{
-		static DateTime lastFrameCall;
-		static DateTime start;
+		static TimeSpan lastFrameCall;
+		static Stopwatch frameMeasurer = new Stopwatch();
 
 		static bool run;
 
-		static bool firstRun = true;
-
-		static DateTime pauseStartTime;
 		public static void Pause()
 		{
 			run = false;
-			pauseStartTime = DateTime.Now;
+			frameMeasurer.Stop();
 		}
 
 		internal static void DestroyGameObjects()
@@ -76,7 +75,7 @@ namespace Uncoal.Runner
 					}
 					else
 					{
-						sprite.Append($"\x1b[38;2;{rgb.R};{rgb.G};{rgb.B}m█");
+						sprite.Append(rgb.escapeSequence);
 					}
 				}
 				sprite.Append('\n');
@@ -87,19 +86,20 @@ namespace Uncoal.Runner
 
 		internal static int framesBetweenDraws = 2;
 
+		private static float total;
+		private static void TestTimeAccuracy()
+		{
+			total += GameObject.TimeDelta;
+			Console.Clear();
+			Console.Write($"time: {GameObject.Time}\n" +
+				$"timedelta total: {total}\n" +
+				$"timedelta: {GameObject.TimeDelta}\n" +
+				$"difference: {total - GameObject.Time}");
+		}
+
 		public static void Run()
 		{
-			if (firstRun)
-			{
-				start = DateTime.Now;
-				firstRun = false;
-			}
-			else
-			{
-				start += DateTime.Now - pauseStartTime;
-			}
-
-			lastFrameCall = DateTime.Now;
+			lastFrameCall = new TimeSpan();
 
 			displaySize = new Coord((uint)Console.BufferWidth, (uint)Console.BufferHeight);
 
@@ -109,15 +109,19 @@ namespace Uncoal.Runner
 
 			run = true;
 
+			frameMeasurer.Start();
 			int framesSinceLastDraw = 0;
+			//updateCallBack += TestTimeAccuracy;
 			while (run)
 			{
 				// Time Calculations
-				GameObject._timeDelta = (float)(DateTime.Now - lastFrameCall).TotalSeconds;
 
-				GameObject._time = (float)(DateTime.Now - start).TotalSeconds;
+				TimeSpan elapsed = frameMeasurer.Elapsed;
+				GameObject._timeDelta = (float)(elapsed - lastFrameCall).TotalSeconds;
 
-				lastFrameCall = DateTime.Now;
+				GameObject._time = (float)elapsed.TotalSeconds;
+
+				lastFrameCall = elapsed;
 
 				// Updating the public input api
 				Input.UpdateInput();
@@ -192,10 +196,10 @@ namespace Uncoal.Runner
 
 				// Assuring we won't go out of bounds
 				if (colorMapSize.X + position.X > displaySize.X)
-					colorMapSize.SetX(colorMapSize.X - (colorMapSize.X + position.X - displaySize.X) - 1);
+					colorMapSize.SetX(displaySize.X - position.X);
 
 				if (colorMapSize.Y + position.Y > displaySize.Y)
-					colorMapSize.SetY(colorMapSize.Y - (colorMapSize.Y + position.Y - displaySize.Y) - 1);
+					colorMapSize.SetY(displaySize.Y - position.Y);
 
 				// Storing the position and dimensions of the sprite for later use
 				spritePositions.Insert(0, new SmallRectangle(
@@ -260,7 +264,7 @@ namespace Uncoal.Runner
 						for (int x = 0; x < rowInfo.Width; x++)
 						{
 							RGB rgb = colors[x + rowInfo.X, y];
-							if (rgb is null)
+							if (rgb is null || rgb.isEmpty)
 							{
 								allRows.Append(whiteSpace);
 							}
@@ -271,13 +275,7 @@ namespace Uncoal.Runner
 								// For more info, check
 								// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
-								allRows.Append(escapeStartRGB);
-								allRows.Append(rgb.R);
-								allRows.Append(colorSeparator);
-								allRows.Append(rgb.G);
-								allRows.Append(colorSeparator);
-								allRows.Append(rgb.B);
-								allRows.Append(escapeEnd);
+								allRows.Append(rgb.escapeSequence);
 							}
 						}
 						allRows.Append(Environment.NewLine);

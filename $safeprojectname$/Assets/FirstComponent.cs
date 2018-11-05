@@ -1,18 +1,18 @@
-﻿using Uncoal.Engine;
+﻿//using Uncoal.Engine;
 
-namespace $safeprojectname$
-{
-	class FirstComponent : Component
-	{
-		// Object initialization
-		void Start()
-		{
-		}
+//namespace $safeprojectname$
+//{
+//	class FirstComponent : Component
+//	{
+//		// Object initialization
+//		void Start()
+//		{
+//		}
 
-		// Called every frame
-		void Update()
-		{
-		}
-	}
-}
+//		// Called every frame
+//		void Update()
+//		{
+//		}
+//	}
+//}
 

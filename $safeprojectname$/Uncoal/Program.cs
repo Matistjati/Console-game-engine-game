@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Configuration;
 
-namespace $safeprojectname$
+namespace Uncoal
 {
 	class Program
 	{
