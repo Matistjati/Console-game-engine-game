@@ -23,7 +23,7 @@ namespace Uncoal.Engine
 		public int Width { get => (int)Sprite.Size.X; }
 		public int Heigth { get => (int)Sprite.Size.Y; }
 
-		public RGB[,] ColorMap => Sprite.colorValues;
+		public string[,] ColorMap => Sprite.colorValues;
 
 		Bitmap imageBase;
 		internal Bitmap ImageBase

@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\%24safeprojectname%24\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -53,7 +53,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Uncoal\Data Structures\RGB.cs" />
     <Compile Include="Uncoal\Data Structures\SmallRectangle.cs" />
     <Compile Include="Uncoal\Data Structures\Sprite.cs" />
     <Compile Include="Uncoal\GameEntity\Component\Component.cs" />

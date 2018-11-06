@@ -6,6 +6,7 @@ using System.Reflection;
 using Uncoal.Engine;
 using Uncoal.MapGenerating;
 using Uncoal.Internal;
+using System.Runtime.InteropServices;
 
 namespace Uncoal.Runner
 {
@@ -105,9 +106,26 @@ namespace Uncoal.Runner
 
 
 			// Activating escape sequences
+
+			IntPtr bufferHandle = NativeMethods.GetStdHandle(NativeMethods.StdHandle.OutputHandle);
+
+			if (bufferHandle == NativeMethods.INVALID_HANDLE_VALUE)
+			{
+				Log.DefaultLogger.LogError($"Win32Error calling GetStdHandle (invalid handle): {Marshal.GetLastWin32Error()}");
+			}
+
 			uint mode = 0;
-			NativeMethods.GetConsoleMode(NativeMethods.GetStdHandle(NativeMethods.StdHandle.OutputHandle), ref mode);
-			NativeMethods.SetConsoleMode(NativeMethods.GetStdHandle(NativeMethods.StdHandle.OutputHandle), mode | 0x4); // 0x4 is escape sequences
+
+			bool succ = NativeMethods.GetConsoleMode(bufferHandle, ref mode);
+
+			mode = mode | 0x4; // 0x4 is escape sequences
+
+			bool success = NativeMethods.SetConsoleMode(bufferHandle, mode); 
+
+			if (!success)
+			{
+				Log.DefaultLogger.LogError($"Win32Error calling setconsolemode: {Marshal.GetLastWin32Error()}");
+			}
 
 			// Set up input handlelers
 			InternalInput.Start();

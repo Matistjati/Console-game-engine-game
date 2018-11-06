@@ -183,7 +183,7 @@ namespace Uncoal.Internal
 			IntPtr hConsoleInput,
 			ref uint lpMode);
 
-		[DllImport("kernel32.dll")]
+		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleMode(
 			IntPtr hConsoleInput,
 			uint dwMode);

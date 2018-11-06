@@ -11,12 +11,17 @@ namespace Uncoal.Engine
 {
 	public class Sprite
 	{
-		public readonly RGB[,] colorValues;
+		public readonly string[,] colorValues;
 		public readonly Coord Size;
 		// This assumes that the fontsize is 6 * 10
 		readonly Coord standardFontSize = new Coord(6, 10);
 		public readonly float Scale;
 
+		// Used for building colorValues
+		const string whiteSpace = " ";
+		const string escapeStartRGB = "\x1b[38;2;";
+		const string escapeEnd = "m█";
+		const char colorSeparator = ';';
 
 		public Sprite(string image) : this((Bitmap)Image.FromFile(image), 1f)
 		{ }
@@ -24,23 +29,47 @@ namespace Uncoal.Engine
 		public Sprite(Image image) : this(new Bitmap(image), 1f)
 		{ }
 
+		static StringBuilder colorStringBuilder = new StringBuilder(24);
+
 		public Sprite(Bitmap image, float scale)
 		{
 			if (scale != 1)
 			{
-				Log.DefaultLogger.LogInfo(scale);
 				image = ResizeImage(image, (int)(image.Width * scale), (int)(image.Width * scale));
 			}
 
 			Scale = scale;
 			Size = new Coord(image.Width, image.Height);
-			colorValues = new RGB[Size.X, Size.Y];
+			colorValues = new string[Size.X, Size.Y];
 
 			for (int x = 0; x < Size.X; x++)
 			{
 				for (int y = 0; y < Size.Y; y++)
 				{
-					colorValues[x, y] = new RGB(image.GetPixel(x, y));
+					Color rgb = image.GetPixel(x, y);
+
+					if (rgb.R == 0 && rgb.G == 0 && rgb.B == 0)
+					{
+						colorValues[x, y] = whiteSpace;
+					}
+					else
+					{
+						// I know, it looks messy but it's the fastest
+						// An escape sequence telling the console what color to display
+						// For more info, check
+						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
+
+						colorStringBuilder.Append(escapeStartRGB);
+						colorStringBuilder.Append(rgb.R);
+						colorStringBuilder.Append(colorSeparator);
+						colorStringBuilder.Append(rgb.G);
+						colorStringBuilder.Append(colorSeparator);
+						colorStringBuilder.Append(rgb.B);
+						colorStringBuilder.Append(escapeEnd);
+
+						colorValues[x, y] = colorStringBuilder.ToString();
+						colorStringBuilder.Clear();
+					}
 				}
 			}
 
@@ -50,7 +79,7 @@ namespace Uncoal.Engine
 			}
 		}
 
-		public Sprite(RGB[,] image, char printedChar)
+		public Sprite(string[,] image)
 		{
 			Size = new Coord(image.GetLength(0), image.GetLength(1));
 
@@ -65,15 +94,7 @@ namespace Uncoal.Engine
 			{
 				for (int x = 0; x < colorValues.GetLength(0); x++)
 				{
-					RGB rgb = colorValues[x, y];
-					if (rgb is null)
-					{
-						sprite.Append(" ");
-					}
-					else
-					{
-						sprite.Append(rgb.escapeSequence);
-					}
+					sprite.Append(colorValues[x, y]);
 				}
 				sprite.Append('\n');
 			}

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using Uncoal.Engine;
 using static Uncoal.Internal.NativeMethods;
 
@@ -68,15 +67,7 @@ namespace Uncoal.Runner
 			{
 				for (int x = 0; x < colors.GetLength(0); x++)
 				{
-					RGB rgb = colors[x, y];
-					if (rgb is null)
-					{
-						sprite.Append(" ");
-					}
-					else
-					{
-						sprite.Append(rgb.escapeSequence);
-					}
+					sprite.Append(colors[x, y]);
 				}
 				sprite.Append('\n');
 			}
@@ -103,7 +94,7 @@ namespace Uncoal.Runner
 
 			displaySize = new Coord((uint)Console.BufferWidth, (uint)Console.BufferHeight);
 
-			colors = new RGB[displaySize.X, displaySize.Y];
+			colors = new string[displaySize.X, displaySize.Y];
 
 			allRows = new StringBuilder(RenderedGameObjects.Count * 32 * 32);
 
@@ -161,9 +152,8 @@ namespace Uncoal.Runner
 		static List<SmallRectangle> spritePositions = new List<SmallRectangle>();
 		static List<SmallRectangle> spritePositionsCopy = new List<SmallRectangle>();
 
-		static RGB[,] colors;
+		static string[,] colors;
 		static Coord displaySize;
-		static readonly RGB emptyColor = new RGB(0, 0, 0);
 
 		static StringBuilder allRows;
 
@@ -208,16 +198,19 @@ namespace Uncoal.Runner
 					(ushort)colorMapSize.X,
 					(ushort)colorMapSize.Y));
 
-				// Filling our internal array (colors) representing the console
+				// Filling our internal array (strings representing colors) representing the console
 				for (int y = 0; y < colorMapSize.Y; y++)
 				{
 					for (int x = 0; x < colorMapSize.X; x++)
 					{
-						RGB rgb = RenderedGameObjects[i].ColorMap[x, y];
-						if (rgb.isEmpty)
-							continue;
+						string cellColor = RenderedGameObjects[i].ColorMap[x, y];
 
-						colors[x + position.X, y + position.Y] = rgb;
+						if (string.IsNullOrWhiteSpace(cellColor))
+							if (!(colors[x + position.X, y + position.Y] is null))
+								continue;
+
+
+						colors[x + position.X, y + position.Y] = cellColor;
 					}
 				}
 			}
@@ -263,20 +256,11 @@ namespace Uncoal.Runner
 
 						for (int x = 0; x < rowInfo.Width; x++)
 						{
-							RGB rgb = colors[x + rowInfo.X, y];
-							if (rgb is null || rgb.isEmpty)
-							{
-								allRows.Append(whiteSpace);
-							}
-							else
-							{
-								// I know, it looks messy but it's the fastest
-								// An escape sequence telling the console what color to display
-								// For more info, check
-								// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
+							// An escape sequence telling the console what color to display
+							// For more info, check
+							// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
-								allRows.Append(rgb.escapeSequence);
-							}
+							allRows.Append(colors[x + rowInfo.X, y]);
 						}
 						allRows.Append(Environment.NewLine);
 					}
