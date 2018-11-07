@@ -83,9 +83,9 @@ namespace Uncoal.Engine
 
 		internal static Queue<char> charsMayRelease = new Queue<char>();
 
-		internal static List<char> heldChars = new List<char>();
-		internal static List<char> releasedChars = new List<char>();
-		internal static List<char> pressedChars = new List<char>();
+		internal static HashSet<char> heldChars = new HashSet<char>();
+		internal static HashSet<char> releasedChars = new HashSet<char>();
+		internal static HashSet<char> pressedChars = new HashSet<char>();
 
 		internal static void UpdateInput()
 		{
