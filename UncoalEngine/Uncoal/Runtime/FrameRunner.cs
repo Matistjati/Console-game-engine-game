@@ -75,9 +75,9 @@ namespace Uncoal.Runner
 		}
 #endif
 
-		internal static int framesBetweenDraws = 2;
-
+#if DEBUG
 		private static float total;
+		private static DateTime startDate;
 		private static void TestTimeAccuracy()
 		{
 			total += GameObject.TimeDelta;
@@ -85,8 +85,12 @@ namespace Uncoal.Runner
 			Console.Write($"time: {GameObject.Time}\n" +
 				$"timedelta total: {total}\n" +
 				$"timedelta: {GameObject.TimeDelta}\n" +
-				$"difference: {total - GameObject.Time}");
+				$"difference: {total - GameObject.Time}\n" +
+				$"Actual time: {(DateTime.UtcNow - startDate).TotalSeconds}");
 		}
+#endif
+
+		internal static int framesBetweenDraws = 2;
 
 		public static void Run()
 		{
@@ -102,7 +106,11 @@ namespace Uncoal.Runner
 
 			frameMeasurer.Start();
 			int framesSinceLastDraw = 0;
+
+			// Debug time calculation accuracy
 			//updateCallBack += TestTimeAccuracy;
+			//startDate = DateTime.UtcNow;
+
 			while (run)
 			{
 				// Time Calculations
@@ -126,7 +134,7 @@ namespace Uncoal.Runner
 
 				if (framesSinceLastDraw >= framesBetweenDraws)
 				{
-					RenderSprites();
+					//RenderSprites();
 					framesSinceLastDraw = 0;
 				}
 				else
@@ -205,7 +213,9 @@ namespace Uncoal.Runner
 					{
 						string cellColor = RenderedGameObjects[i].ColorMap[x, y];
 
-						if (string.IsNullOrWhiteSpace(cellColor))
+						// Faster than cellColor.Length == " "
+						// cellcolor will only have length 1 if it is whitespace
+						if (cellColor.Length == 1)
 							if (!(colors[x + position.X, y + position.Y] is null))
 								continue;
 
@@ -223,12 +233,16 @@ namespace Uncoal.Runner
 			// 
 
 			// Hashing the y positions
-			Dictionary<ushort, SmallRectangle> yFilledRows = new Dictionary<ushort, SmallRectangle>(spritePositions.Count);
-			for (int i = 0; i < spritePositions.Count; i++)
+			Dictionary<ushort, List<SmallRectangle>> yFilledRows = new Dictionary<ushort, List<SmallRectangle>>(spritePositions.Count);
+			for (ushort i = 0; i < spritePositions.Count; i++)
 			{
-				if (!yFilledRows.ContainsKey(spritePositions[i].Y))
+				if (yFilledRows.ContainsKey(spritePositions[i].Y))
 				{
-					yFilledRows.Add(spritePositions[i].Y, spritePositions[i]);
+					yFilledRows[spritePositions[i].Y].Add(spritePositions[i]);
+				}
+				else
+				{
+					yFilledRows.Add(spritePositions[i].Y, new List<SmallRectangle> { spritePositions[i] });
 				}
 			}
 
@@ -240,27 +254,50 @@ namespace Uncoal.Runner
 			{
 				// Checking if there is an object on this row
 				// Otherwise, we sipmly append a newline
-				if (yFilledRows.TryGetValue(y, out SmallRectangle rowInfo))
+				if (yFilledRows.TryGetValue(y, out List<SmallRectangle> rowInfo))
 				{
-					// Here, we iterate through the sprite height and increment the outer y manually
-					for (int spriteY = 0; spriteY < rowInfo.Height; spriteY++)
+					ushort maxWidth = 0;
+					ushort maxHeight = 0;
+					ushort minX = ushort.MaxValue;
+					for (ushort i = 0; i < rowInfo.Count; i++)
 					{
-						y++;
+						if (rowInfo[i].Width > maxWidth)
+						{
+							maxWidth = rowInfo[i].Width;
+						}
 
+						if (rowInfo[i].Height > maxHeight)
+						{
+							maxHeight = rowInfo[i].Height;
+						}
+
+						if (rowInfo[i].X < minX)
+						{
+							minX = rowInfo[i].X;
+						}
+					}
+
+					// Here, we iterate through the sprite height and increment the outer y manually
+					for (int spriteY = 0; spriteY < maxHeight; spriteY++)
+					{
+						// Incrementing the outer loop variable, as we are still traversing the array here
+						y++;
+						
+											   
 						// Spacing from left to the start of the sprite
 						// Uses an escape sequence
 						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#cursor-positioning
 
 						allRows.Append(escapeStartNormal);
-						allRows.Append(rowInfo.X + "C");
+						allRows.Append(minX + "C");
 
-						for (int x = 0; x < rowInfo.Width; x++)
+						for (int x = 0; x < maxWidth; x++)
 						{
 							// An escape sequence telling the console what color to display
 							// For more info, check
 							// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
-							allRows.Append(colors[x + rowInfo.X, y]);
+							allRows.Append(colors[x + minX, y]);
 						}
 						allRows.Append(Environment.NewLine);
 					}
