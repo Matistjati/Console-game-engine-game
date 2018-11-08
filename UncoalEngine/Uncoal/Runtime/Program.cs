@@ -108,23 +108,24 @@ namespace Uncoal.Runner
 			// Activating escape sequences
 
 			IntPtr bufferHandle = NativeMethods.GetStdHandle(NativeMethods.StdHandle.OutputHandle);
+			int handleResult = Marshal.GetLastWin32Error();
 
-			if (bufferHandle == NativeMethods.INVALID_HANDLE_VALUE)
+			if (bufferHandle == NativeMethods.INVALID_HANDLE_VALUE || handleResult != 0)
 			{
-				Log.DefaultLogger.LogError($"Win32Error calling GetStdHandle (invalid handle): {Marshal.GetLastWin32Error()}");
+				Log.DefaultLogger.LogError($"Win32Error calling GetStdHandle (invalid handle): {handleResult}");
 			}
 
 			uint mode = 0;
 
-			bool succ = NativeMethods.GetConsoleMode(bufferHandle, ref mode);
+			NativeMethods.GetConsoleMode(bufferHandle, ref mode);
 
-			mode = mode | 0x4; // 0x4 is escape sequences
+			
+			NativeMethods.SetConsoleMode(bufferHandle, mode | 0x4); // 0x4 is enable escape sequences
+			int setConsoleResult = Marshal.GetLastWin32Error();
 
-			bool success = NativeMethods.SetConsoleMode(bufferHandle, mode); 
-
-			if (!success)
+			if (setConsoleResult != 0)
 			{
-				Log.DefaultLogger.LogError($"Win32Error calling setconsolemode: {Marshal.GetLastWin32Error()}");
+				Log.DefaultLogger.LogError($"Win32Error calling setconsolemode: {setConsoleResult}");
 			}
 
 			// Set up input handlelers

@@ -1,11 +1,7 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using Uncoal.Internal;
-
-#if DEBUG
 using System.Text;
-#endif
 
 namespace Uncoal.Engine
 {
@@ -14,7 +10,6 @@ namespace Uncoal.Engine
 		public readonly string[,] colorValues;
 		public readonly Coord Size;
 		// This assumes that the fontsize is 6 * 10
-		readonly Coord standardFontSize = new Coord(6, 10);
 		public readonly float Scale;
 
 		// Used for building colorValues
