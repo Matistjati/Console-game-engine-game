@@ -64,8 +64,8 @@ namespace Uncoal.MapGenerating
 		public Rectangle GetSeenMap(Coord position)
 		{
 			// Setting the position to the top left
-			position.SetX((position.X - PlayerViewRange.X > 0) ? position.X - PlayerViewRange.X : 0);
-			position.SetY((position.Y - PlayerViewRange.Y > 0) ? position.Y - PlayerViewRange.Y : 0);
+			position.X = ((position.X - PlayerViewRange.X > 0) ? position.X - PlayerViewRange.X : 0);
+			position.Y = ((position.Y - PlayerViewRange.Y > 0) ? position.Y - PlayerViewRange.Y : 0);
 
 			// Assuring that we're inside the map
 			position.Clamp(minMapPosition, maxMapPosition);
@@ -75,12 +75,12 @@ namespace Uncoal.MapGenerating
 
 			if (position.X + width > MapSize.X)
 			{
-				position.SetX(position.X - (position.X + width - MapSize.X));
+				position.X = (MapSize.X - width);
 			}
 
 			if (position.Y + heigth > MapSize.Y)
 			{
-				position.SetY(position.Y - (position.Y + heigth - MapSize.Y));
+				position.Y = (MapSize.Y - heigth);
 			}
 
 			return new Rectangle(

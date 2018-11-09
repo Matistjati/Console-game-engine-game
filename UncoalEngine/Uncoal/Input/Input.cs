@@ -22,7 +22,8 @@ namespace Uncoal.Engine
 		{
 			leftMouseButtonPressed = false;
 			rightMouseButtonPressed = false;
-			mousePosition.Set(0, 0);
+			mousePosition.X = 0;
+			mousePosition.Y = 0;
 
 			pressedChars.Clear();
 			heldChars.Clear();
@@ -52,7 +53,8 @@ namespace Uncoal.Engine
 			else if (r.dwEventFlags == MOUSE_EVENT_RECORD.MOUSE_MOVED)
 			{
 				//mousePosition.Set((uint)r.dwMousePosition.X, (uint)r.dwMousePosition.Y);
-				mousePosition.Set((uint)r.dwMousePosition.X, (uint)r.dwMousePosition.Y);
+				mousePosition.X = (uint)r.dwMousePosition.X;
+				mousePosition.Y = (uint)r.dwMousePosition.Y;
 			}
 		}
 
@@ -127,7 +129,8 @@ namespace Uncoal.Engine
 			rightMouseButtonPressed = InternalInput.rightMouseButtonPressed;
 			InternalInput.rightMouseButtonPressed = false;
 
-			mousePosition.Set(InternalInput.mousePosition.X, InternalInput.mousePosition.Y);
+			mousePosition.X = InternalInput.mousePosition.X;
+			mousePosition.Y = InternalInput.mousePosition.Y;
 		}
 
 		public static bool GetKeyDown(char key) => pressedChars.Contains(key);

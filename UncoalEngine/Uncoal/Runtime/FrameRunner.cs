@@ -134,7 +134,7 @@ namespace Uncoal.Runner
 
 				if (framesSinceLastDraw >= framesBetweenDraws)
 				{
-					//RenderSprites();
+					RenderSprites();
 					framesSinceLastDraw = 0;
 				}
 				else
@@ -176,6 +176,8 @@ namespace Uncoal.Runner
 			// Sort the render order based on layer
 			RenderedGameObjects.Sort((x, y) => x.Layer.CompareTo(y.Layer));
 
+
+
 			for (int i = RenderedGameObjects.Count - 1; i >= 0; i--)
 			{
 				// Only render the visible ones
@@ -194,10 +196,27 @@ namespace Uncoal.Runner
 
 				// Assuring we won't go out of bounds
 				if (colorMapSize.X + position.X > displaySize.X)
-					colorMapSize.SetX(displaySize.X - position.X);
+					colorMapSize.X = (displaySize.X - position.X);
 
 				if (colorMapSize.Y + position.Y > displaySize.Y)
-					colorMapSize.SetY(displaySize.Y - position.Y);
+					colorMapSize.Y = (displaySize.Y - position.Y);
+
+				int xOffset = (int)colorMapSize.X / 2;
+				int yOffset = (int)colorMapSize.Y / 2;
+
+				int realXPosition;
+				int realYPosition;
+
+
+				position.X = ((realXPosition = (int)position.X - xOffset) < 0)
+					? 0
+					: position.X - (uint)xOffset;
+
+				
+				position.Y = ((realYPosition = (int)position.Y - yOffset) < 0)
+					? 0
+					: position.Y - (uint)yOffset;
+
 
 				// Storing the position and dimensions of the sprite for later use
 				spritePositions.Insert(0, new SmallRectangle(
@@ -206,6 +225,7 @@ namespace Uncoal.Runner
 					(ushort)colorMapSize.X,
 					(ushort)colorMapSize.Y));
 
+
 				// Filling our internal array (strings representing colors) representing the console
 				for (int y = 0; y < colorMapSize.Y; y++)
 				{
@@ -213,14 +233,23 @@ namespace Uncoal.Runner
 					{
 						string cellColor = RenderedGameObjects[i].ColorMap[x, y];
 
+						int xIndex = x + realXPosition;
+
+						if (xIndex < 0)
+							continue;
+
+						int yIndex = y + realYPosition;
+
+						if (yIndex < 0)
+							continue;
+
 						// Faster than cellColor.Length == " "
 						// cellcolor will only have length 1 if it is whitespace
 						if (cellColor.Length == 1)
-							if (!(colors[x + position.X, y + position.Y] is null))
+							if (!(colors[xIndex, yIndex] is null))
 								continue;
 
-
-						colors[x + position.X, y + position.Y] = cellColor;
+						colors[xIndex, yIndex] = cellColor;
 					}
 				}
 			}
@@ -350,7 +379,7 @@ namespace Uncoal.Runner
 						stdOut,     // Output buffer handle
 						whiteSpace, // The character we replace stuff with
 						spritePositionsCopy[i].Width, // Amount of times to replace character
-						position,   // The are to start writing
+						position,   // The position to start writing
 						out int lpNumberOfCharsWritten);
 
 					position.Y++;
