@@ -55,12 +55,22 @@ namespace Uncoal.Engine
 			return (!components.OfType<T>().Any()) ? true : false;
 		}
 
-		public GameObject Instantiate<TPrefab>() where TPrefab : GameObject
+		public static GameObject Instantiate<TPrefab>() where TPrefab : GameObject
 		{
-			return Instantiate<TPrefab>(new Coord(0, 0));
+			return Instantiate<TPrefab>(new Coord(0, 0), null);
 		}
 
-		public GameObject Instantiate<TPrefab>(Coord location) where TPrefab : GameObject
+		public static GameObject Instantiate<TPrefab>(Coord position) where TPrefab : GameObject
+		{
+			return Instantiate<TPrefab>(position, null);
+		}
+
+		public static GameObject Instantiate<TPrefab>(object[] args) where TPrefab : GameObject
+		{
+			return Instantiate<TPrefab>(new Coord(0, 0), args);
+		}
+
+		public static GameObject Instantiate<TPrefab>(Coord location, object[] args) where TPrefab : GameObject
 		{
 			// Checking if the TPrefab type is marked with the isprefab attribute
 			if (!(Attribute.GetCustomAttribute(typeof(TPrefab), typeof(IsPrefabAttribute)) is null))
@@ -70,7 +80,7 @@ namespace Uncoal.Engine
 				// This is to ensure that gameobjects can be destroyed and have their memory freed up during runtime
 
 				// Creating a new instance of the gameobject
-				GameObject newGameObject = (GameObject)Activator.CreateInstance(typeof(TPrefab));
+				GameObject newGameObject = (GameObject)Activator.CreateInstance(typeof(TPrefab), args);
 
 				// Setting the position of the gameobject
 				newGameObject.physicalState.Position = (CoordF)location;
