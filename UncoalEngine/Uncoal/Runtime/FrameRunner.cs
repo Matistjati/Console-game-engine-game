@@ -302,18 +302,18 @@ namespace Uncoal.Runner
 				// Filling our internal array (strings representing colors) representing the console
 
 				// X and Y are for the array of the gameobject, which are then added to (xIndex and yIndex) to get the index of colors
+				
 				for (int x = 0; x < colorMapSize.X; x++)
 				{
+					if ((xIndex = x + position.X) < 0)
+						continue;
+
 					for (int y = 0; y < colorMapSize.Y; y++)
 					{
 						string cellColor = RenderedGameObjects[i].ColorMap[x, y];
 
-						if ((xIndex = x + position.X) < 0)
-							continue;
-
 						if ((yIndex = y + position.Y) < 0)
 							continue;
-
 
 						// cellcolor will only have length 1 if it is whitespace (due to the way cellcolor is assigned)
 						// This can be found in sprite.cs under ctor: public Sprite(Bitmap image, float scale)
