@@ -12,6 +12,8 @@ namespace Uncoal.Tests
 	{
 		static DateTime start;
 
+		const int sleepTime = 17;
+
 		[TestMethod]
 		public void FrameRunnerTimePauseResumeTest()
 		{
@@ -28,23 +30,27 @@ namespace Uncoal.Tests
 			new Thread(() =>
 			{
 				// Make this value higher for a better test
-				Thread.Sleep(17 * 3);
+				Thread.Sleep(sleepTime * 3);
 				FrameRunner.Pause();
 			}).Start();
+
 			FrameRunner.Run();
 
 			FrameRunner.Unsubscribe(action);
 
 			// Make this value higher for a better test
-			Thread.Sleep(17);
+			Thread.Sleep(sleepTime);
+
 			new Thread(() =>
 			{
 				Thread.Sleep(1);
 				FrameRunner.Pause();
 			}).Start();
+
 			FrameRunner.Run();
 
-			double time = Math.Round(sampleGameObj.total + 0.0017, 3) - Math.Round(GameObject.Time, 3);
+
+			double time = Math.Round(sampleGameObj.total + sleepTime / 10000f, 3) - Math.Round(GameObject.Time, 3);
 
 			Assert.IsTrue(time <= 0.003);
 		}

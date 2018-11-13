@@ -5,50 +5,21 @@ namespace Uncoal.Engine
 {
 	public struct CoordF
 	{
-		public static readonly CoordF empty = new CoordF();
+		internal static readonly CoordF empty = new CoordF();
 
-		public float X { get; private set; }
+		public float X;
 
-		public float Y { get; private set; }
-
-		public void Set(float X, float Y)
-		{
-			if (X < 0)
-				throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {X}");
-			if (Y < 0)
-				throw new ArgumentOutOfRangeException($"y must be greater than 0. X was {Y}");
-			this.X = X;
-			this.Y = Y;
-		}
-
-		public void SetX(float X)
-		{
-			if (X < 0)
-				throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {X}");
-			this.X = X;
-		}
-
-		public void SetY(float Y)
-		{
-			if (Y < 0)
-				throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {Y}");
-			this.Y = Y;
-		}
+		public float Y;
 
 		public CoordF(float x, float y)
 		{
-			if (x < 0)
-				throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {x}");
-			if (y < 0)
-				throw new ArgumentOutOfRangeException($"y must be greater than 0. X was {y}");
-
 			X = x;
 			Y = y;
 		}
 
 		public static explicit operator Coord(CoordF coordF)
 		{
-			return new Coord((uint)coordF.X, (uint)coordF.Y);
+			return new Coord((int)coordF.X, (int)coordF.Y);
 		}
 
 		public void Clamp(Coord min, Coord max)

@@ -18,8 +18,8 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\%24safeprojectname%24\bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;CODE_ANALYSIS;DEBUGOBJECTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
@@ -31,7 +31,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\%24safeprojectname%24\bin\Debug\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -95,4 +95,11 @@
     <Content Include="Uncoal\GameEntity\ItemTemplate\GameObject\.vstemplate" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(SolutionDir)\UncoalEngine\bin\Debug" "C:\Users\Matis\source\repos\CmdOsu\Uncoal\Resources" /s /i /y
+xcopy "$(SolutionDir)\UncoalEngine\bin\Debug" "C:\Users\Matis\source\repos\CmdOsu\bin\Debug" /s /i /y
+xcopy "$(SolutionDir)\UncoalEngine\bin\Debug" "$(SolutionDir)\UncoalTests\bin\Debug" /s /i /y
+xcopy "$(SolutionDir)\UncoalEngine\bin\Debug" "$(SolutionDir)\$safeprojectname$\bin\Debug" /s /i /y
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

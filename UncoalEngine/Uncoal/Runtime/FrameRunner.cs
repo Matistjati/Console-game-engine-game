@@ -24,7 +24,7 @@ namespace Uncoal.Runner
 		internal static void DestroyGameObjects()
 		{
 			// The only way to do kill an objects is to kill all references to it
-			Delegate[] methods = updateCallBack.GetInvocationList();
+			Delegate[] methods = updateCallBack?.GetInvocationList();
 			while (destructionQueue.Count != 0)
 			{
 				// Removing components from update
@@ -73,11 +73,39 @@ namespace Uncoal.Runner
 			}
 			Console.Write(sprite);
 		}
-#endif
 
-#if DEBUG
+		public static bool IsColorsAllNull()
+		{
+			for (int y = 0; y < colors.GetLength(1); y++)
+			{
+				for (int x = 0; x < colors.GetLength(0); x++)
+				{
+					if (colors[x, y] != null)
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		public static bool IsColorsAllWhiteSpaceOrNull()
+		{
+			for (int y = 0; y < colors.GetLength(1); y++)
+			{
+				for (int x = 0; x < colors.GetLength(0); x++)
+				{
+					if (!string.IsNullOrWhiteSpace(colors[x, y]))
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
 		private static float total;
-		private static DateTime startDate;
+		private static readonly DateTime startDate;
 		private static void TestTimeAccuracy()
 		{
 			total += GameObject.TimeDelta;
@@ -91,12 +119,13 @@ namespace Uncoal.Runner
 #endif
 
 		internal static int framesBetweenDraws = 2;
+		internal static int framesSinceLastDraw;
 
 		public static void Run()
 		{
 			lastFrameCall = new TimeSpan();
 
-			displaySize = new Coord((uint)Console.BufferWidth, (uint)Console.BufferHeight);
+			displaySize = new Coord(Console.BufferWidth, Console.BufferHeight);
 
 			colors = new string[displaySize.X, displaySize.Y];
 
@@ -105,7 +134,7 @@ namespace Uncoal.Runner
 			run = true;
 
 			frameMeasurer.Start();
-			int framesSinceLastDraw = 0;
+			framesSinceLastDraw = 0;
 
 			// Debug time calculation accuracy
 			//updateCallBack += TestTimeAccuracy;
@@ -164,6 +193,7 @@ namespace Uncoal.Runner
 		static Coord displaySize;
 
 		static StringBuilder allRows;
+		static int oldRenderedGameObjectsCount = 0;
 
 		static void RenderSprites()
 		{
@@ -173,12 +203,44 @@ namespace Uncoal.Runner
 
 			spritePositions.Clear();
 
-			// Sort the render order based on layer
-			RenderedGameObjects.Sort((x, y) => x.Layer.CompareTo(y.Layer));
+			// Sort the render order based on layer descending when the size changes
+			// This doesnt work, what if layer changes during runtime?
+			// Solution optimize sort, run each frame
+			if (RenderedGameObjects.Count != oldRenderedGameObjectsCount)
+			{
+				RenderedGameObjects.Sort((x, y) => y.Layer.CompareTo(x.Layer));
+			}
+			oldRenderedGameObjectsCount = RenderedGameObjects.Count;
+
+			// Filling colors based on the current RenderedGameObjects
+			FillColors();
+
+			// Joining allrows from colors
+			JoinColorsToString();
+
+			// Handle to console output buffer
+			IntPtr stdOutHandle = GetStdHandle(StdHandle.OutputHandle);
+
+			// Clearing the sprites from the last render
+			ClearConsole(stdOutHandle);
+
+			// Writing all the rows to the console
+			WriteConsoleW(
+				stdOutHandle,   // The handle
+				allRows,        // Characters to write
+				allRows.Length, // Amount of characters to write
+				out int charsWritten,
+				IntPtr.Zero);   // Reserved
 
 
+			// Clearing the internal color array representing the console
+			ClearOldSprites();
+		}
 
-			for (int i = RenderedGameObjects.Count - 1; i >= 0; i--)
+		private static void FillColors()
+		{
+			// Iterate the lowest priority layers first, as they are later overwritten
+			for (int i = 0; i < RenderedGameObjects.Count; i++)
 			{
 				// Only render the visible ones
 				if (!RenderedGameObjects[i].IsVisible)
@@ -196,86 +258,148 @@ namespace Uncoal.Runner
 
 				// Assuring we won't go out of bounds
 				if (colorMapSize.X + position.X > displaySize.X)
+				{
+					// This is basically a shortened version of position.X - (position.X + colorMapSize.X - displaySize.X)
 					colorMapSize.X = (displaySize.X - position.X);
 
+					// The above formula sets colormapsize.x equal to  the max width, problem is arrays start at 0
+					// We do this check to ensure that colorMapSize.X does not go below 0
+					if (colorMapSize.X != 0)
+						colorMapSize.X--;
+				}
+
+
 				if (colorMapSize.Y + position.Y > displaySize.Y)
+				{
+					// This is basically a shortened version of position.Y - (position.Y + colorMapSize.Y - displaySize.Y)
 					colorMapSize.Y = (displaySize.Y - position.Y);
 
-				int xOffset = (int)colorMapSize.X / 2;
-				int yOffset = (int)colorMapSize.Y / 2;
+					if (colorMapSize.X != 0)
+						// The above formula sets colormapsize.Y equal to  the max width, problem is arrays start at 0
+						// We do this check to ensure that colorMapSize.Y does not go below 0
+						colorMapSize.X--;
+				}
 
-				int realXPosition;
-				int realYPosition;
+				int xOffset = colorMapSize.X / 2;
+				int yOffset = colorMapSize.Y / 2;
 
+				position.X = position.Y - yOffset;
 
-				position.X = ((realXPosition = (int)position.X - xOffset) < 0)
-					? 0
-					: position.X - (uint)xOffset;
-
-				
-				position.Y = ((realYPosition = (int)position.Y - yOffset) < 0)
-					? 0
-					: position.Y - (uint)yOffset;
+				position.Y = position.X - xOffset;
 
 
 				// Storing the position and dimensions of the sprite for later use
 				spritePositions.Insert(0, new SmallRectangle(
-					(ushort)position.X,
-					(ushort)position.Y,
-					(ushort)colorMapSize.X,
-					(ushort)colorMapSize.Y));
+					(short)position.X,
+					(short)position.Y,
+					(short)colorMapSize.X,
+					(short)colorMapSize.Y));
 
+				// What we will use for indexing the color array
+				int xIndex;
+				int yIndex;
 
 				// Filling our internal array (strings representing colors) representing the console
-				for (int y = 0; y < colorMapSize.Y; y++)
+
+				// X and Y are for the array of the gameobject, which are then added to (xIndex and yIndex) to get the index of colors
+				for (int x = 0; x < colorMapSize.X; x++)
 				{
-					for (int x = 0; x < colorMapSize.X; x++)
+					for (int y = 0; y < colorMapSize.Y; y++)
 					{
 						string cellColor = RenderedGameObjects[i].ColorMap[x, y];
 
-						int xIndex = x + realXPosition;
-
-						if (xIndex < 0)
+						if ((xIndex = x + position.X) < 0)
 							continue;
 
-						int yIndex = y + realYPosition;
-
-						if (yIndex < 0)
+						if ((yIndex = y + position.Y) < 0)
 							continue;
 
-						// Faster than cellColor.Length == " "
-						// cellcolor will only have length 1 if it is whitespace
-						if (cellColor.Length == 1)
-							if (!(colors[xIndex, yIndex] is null))
+
+						// cellcolor will only have length 1 if it is whitespace (due to the way cellcolor is assigned)
+						// This can be found in sprite.cs under ctor: public Sprite(Bitmap image, float scale)
+
+						if (cellColor.Length == 1) // cellColor == " " but faster
+							if (colors[xIndex, yIndex] != null)
 								continue;
 
 						colors[xIndex, yIndex] = cellColor;
 					}
 				}
 			}
+		}
 
-			// Clearing the old rows
+		static void ClearOldSprites()
+		{
+			for (int i = 0; i < spritePositions.Count; i++)
+			{
+				// Getting a positive version of spritepositions x and y
+				int positivePositionX = (spritePositions[i].X < 0)
+					? 0
+					: spritePositions[i].X;
+
+				int positivePositionY = (spritePositions[i].Y < 0)
+					? 0
+					: spritePositions[i].Y;
+
+				for (int y = 0; y < spritePositions[i].Height; y++)
+				{
+					for (int x = 0; x < spritePositions[i].Width; x++)
+					{
+						colors[positivePositionX + x, positivePositionY + y] = null;
+					}
+				}
+			}
+		}
+
+		static void JoinColorsToString()
+		{
 			allRows.Clear();
 
-			//
-			// Joining all the rows
-			// 
-
 			// Hashing the y positions
-			Dictionary<ushort, List<SmallRectangle>> yFilledRows = new Dictionary<ushort, List<SmallRectangle>>(spritePositions.Count);
-			for (ushort i = 0; i < spritePositions.Count; i++)
+
+			/////////////////////////////////////////////////////////////////////////////////////////////////// 
+			// Coord represents a coordinate and length here (sorry) x is the start position and y is length //
+			///////////////////////////////////////////////////////////////////////////////////////////////////
+			Dictionary<ushort, Coord> yFilledRows = new Dictionary<ushort, Coord>(spritePositions.Count);
+
+			for (int i = 0; i < spritePositions.Count; i++)
 			{
-				if (yFilledRows.ContainsKey(spritePositions[i].Y))
+				for (short y = 0; y < spritePositions[i].Height; y++)
 				{
-					yFilledRows[spritePositions[i].Y].Add(spritePositions[i]);
-				}
-				else
-				{
-					yFilledRows.Add(spritePositions[i].Y, new List<SmallRectangle> { spritePositions[i] });
+					short index = (short)(spritePositions[i].Y + y);
+					if (index < 0)
+						continue;
+
+					if (yFilledRows.TryGetValue((ushort)index, out Coord currentCoord))
+					{
+						if (spritePositions[i].X < currentCoord.X && spritePositions[i].X > 0)
+						{
+							currentCoord.X = spritePositions[i].X;
+						}
+						else
+						{
+							currentCoord.Y += spritePositions[i].X - currentCoord.X;
+						}
+
+						if (spritePositions[i].Width > currentCoord.Y)
+						{
+							currentCoord.Y = spritePositions[i].Width;
+						}
+
+						yFilledRows[(ushort)(spritePositions[i].Y + y)] = currentCoord;
+					}
+					else
+					{
+						int positiveX = (spritePositions[i].X < 0) 
+							? 0
+							: spritePositions[i].X;
+
+						yFilledRows[(ushort)(spritePositions[i].Y + y)] = new Coord(positiveX, spritePositions[i].Width);
+					}
 				}
 			}
 
-			// Caching the array size
+			//Caching the array size
 			int colorWidth = colors.GetLength(0);
 			int colorHeight = colors.GetLength(1);
 
@@ -283,95 +407,40 @@ namespace Uncoal.Runner
 			{
 				// Checking if there is an object on this row
 				// Otherwise, we sipmly append a newline
-				if (yFilledRows.TryGetValue(y, out List<SmallRectangle> rowInfo))
+				if (yFilledRows.TryGetValue(y, out Coord rowInfo))
 				{
-					ushort maxWidth = 0;
-					ushort maxHeight = 0;
-					ushort minX = ushort.MaxValue;
-					for (ushort i = 0; i < rowInfo.Count; i++)
+					// Spacing from left to the start of the sprite
+					// Uses an escape sequence
+					// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#cursor-positioning
+
+					allRows.Append(escapeStartNormal);
+					allRows.Append(rowInfo.X + "C");
+
+					// rowInfo.Y is width. Sorry
+					for (int x = 0; x < rowInfo.Y; x++)
 					{
-						if (rowInfo[i].Width > maxWidth)
-						{
-							maxWidth = rowInfo[i].Width;
-						}
+						// An escape sequence telling the console what color to display
+						// For more info, check
+						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
-						if (rowInfo[i].Height > maxHeight)
-						{
-							maxHeight = rowInfo[i].Height;
-						}
-
-						if (rowInfo[i].X < minX)
-						{
-							minX = rowInfo[i].X;
-						}
+						allRows.Append(colors[x + rowInfo.X, y]);
 					}
-
-					// Here, we iterate through the sprite height and increment the outer y manually
-					for (int spriteY = 0; spriteY < maxHeight; spriteY++)
-					{
-						// Incrementing the outer loop variable, as we are still traversing the array here
-						y++;
-						
-											   
-						// Spacing from left to the start of the sprite
-						// Uses an escape sequence
-						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#cursor-positioning
-
-						allRows.Append(escapeStartNormal);
-						allRows.Append(minX + "C");
-
-						for (int x = 0; x < maxWidth; x++)
-						{
-							// An escape sequence telling the console what color to display
-							// For more info, check
-							// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
-
-							allRows.Append(colors[x + minX, y]);
-						}
-						allRows.Append(Environment.NewLine);
-					}
+					allRows.Append(Environment.NewLine);
 				}
 				else
 				{
 					allRows.Append(Environment.NewLine);
 				}
 			}
-
-			// Handle to console output buffer
-			IntPtr stdOutHandle = GetStdHandle(StdHandle.OutputHandle);
-
-			// Clearing the sprites from the last render
-			ClearConsle(stdOutHandle);
-
-			// Writing all the rows to the console
-			WriteConsoleW(
-				stdOutHandle,   // The handle
-				allRows,        // Characters to write
-				allRows.Length, // Amount of characters to write
-				out int charsWritten,
-				IntPtr.Zero);   // Reserved
-
-
-			// Clearing the internal color array representing the console
-			for (int i = 0; i < spritePositions.Count; i++)
-			{
-				for (int y = 0; y < spritePositions[i].Height; y++)
-				{
-					for (int x = 0; x < spritePositions[i].Width; x++)
-					{
-						colors[spritePositions[i].X + x, spritePositions[i].Y + y] = null;
-					}
-				}
-			}
 		}
 
-		static void ClearConsle(IntPtr stdOut)
+		static void ClearConsole(IntPtr stdOut)
 		{
 			// Clearing the console Using some p/invoking
 			for (int i = 0; i < spritePositionsCopy.Count; i++)
 			{
 				// Converting the position to coordinates
-				COORD position = new COORD((short)spritePositionsCopy[i].X, (short)spritePositionsCopy[i].X);
+				COORD position = new COORD(spritePositionsCopy[i].X, spritePositionsCopy[i].X);
 
 				for (int y = 0; y < spritePositionsCopy[i].Height; y++)
 				{

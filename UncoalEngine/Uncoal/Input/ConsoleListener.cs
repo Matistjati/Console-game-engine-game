@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 using static Uncoal.Internal.NativeMethods;
 
@@ -24,12 +25,18 @@ namespace Uncoal.Internal
 
 				IntPtr inHandle = GetStdHandle(StdHandle.InputHandle);
 				uint mode = 0;
-				// Setting some shit
+				// Setting some console modes
 				GetConsoleMode(inHandle, ref mode);
 				mode &= ~ENABLE_QUICK_EDIT_MODE; //disable
 				mode |= ENABLE_WINDOW_INPUT;     //enable
 				mode |= ENABLE_MOUSE_INPUT;      //enable
 				SetConsoleMode(inHandle, mode);
+
+				int error = Marshal.GetLastWin32Error();
+				if (error != 0)
+				{
+					Log.DefaultLogger.LogError($"Error when calling Setconsolemode in consolelistener: {error}");
+				}
 
 				new Thread(() =>
 				{

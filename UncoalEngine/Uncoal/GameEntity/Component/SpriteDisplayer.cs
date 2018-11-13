@@ -68,7 +68,7 @@ namespace Uncoal.Engine
 
 		public void SetImage(string image) => ImageBase = (Bitmap)Image.FromFile(image);
 
-		public void SetImage(string[,] image) => imageBaseString = image;
+		public void SetImage(string[,] image) => ImageBaseString = image;
 
 
 

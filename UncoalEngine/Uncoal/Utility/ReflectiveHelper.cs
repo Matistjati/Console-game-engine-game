@@ -139,7 +139,7 @@ namespace Uncoal.Internal
 			MethodInfo methodInfo = target.GetType().GetMethod(method,
 				defaultBindingFlags);
 
-			return (Action)methodInfo.CreateDelegate(typeof(Action), target);
+			return (Action)methodInfo?.CreateDelegate(typeof(Action), target);
 		}
 
 		public static Action GetAction(MethodInfo method, object target) => (Action)method.CreateDelegate(typeof(Action), target);

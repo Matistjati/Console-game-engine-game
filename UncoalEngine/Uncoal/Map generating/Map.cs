@@ -44,11 +44,14 @@ namespace Uncoal.MapGenerating
 		public Map(int seed)
 			: this(seed, standardMapSize.X, standardMapSize.Y, standardScale) { }
 
-		public Map(uint mapSizeX, uint mapSizeY)
+		public Map(int mapSizeX, int mapSizeY)
 			: this(randomGen.Next(), mapSizeX, mapSizeY, standardScale) { }
 
-		public Map(int seed, uint mapSizeX, uint mapSizeY, float scale)
+		public Map(int seed, int mapSizeX, int mapSizeY, float scale)
 		{
+			if (mapSizeX < 0 || mapSizeY < 0)
+				throw new ArgumentOutOfRangeException($"No negative sizes allowed. X was {mapSizeX}, Y was {mapSizeY}");
+
 			if (scale <= 0)
 				throw new ArgumentOutOfRangeException($"Scale: {scale} was negative");
 
@@ -70,8 +73,8 @@ namespace Uncoal.MapGenerating
 			// Assuring that we're inside the map
 			position.Clamp(minMapPosition, maxMapPosition);
 
-			uint width = PlayerViewRange.X * 2;
-			uint heigth = PlayerViewRange.Y * 2;
+			int width = PlayerViewRange.X * 2;
+			int heigth = PlayerViewRange.Y * 2;
 
 			if (position.X + width > MapSize.X)
 			{
@@ -84,10 +87,10 @@ namespace Uncoal.MapGenerating
 			}
 
 			return new Rectangle(
-				x: (int)((width + position.X > PlayerViewRange.X * 2) ? position.X - (width + position.X - PlayerViewRange.X * 2) : position.X),
-				y: (int)((heigth + position.Y > PlayerViewRange.Y * 2) ? position.Y - (heigth + position.Y - PlayerViewRange.Y * 2) : position.Y),
-				width: (int)width,
-				height: (int)heigth);
+				x: (width + position.X > PlayerViewRange.X * 2) ? position.X - (width + position.X - PlayerViewRange.X * 2) : position.X,
+				y: (heigth + position.Y > PlayerViewRange.Y * 2) ? position.Y - (heigth + position.Y - PlayerViewRange.Y * 2) : position.Y,
+				width: width,
+				height: heigth);
 		}
 
 		public ConsoleColor[,] GetPrintableMap(Coord playerPosition)
@@ -137,7 +140,7 @@ namespace Uncoal.MapGenerating
 		public override string ToString()
 		{
 #if (DEBUG)
-			StringBuilder stringBuilder = new StringBuilder((int)(MapSize.X * MapSize.Y));
+			StringBuilder stringBuilder = new StringBuilder(MapSize.X * MapSize.Y);
 			for (int y = 0; y < map.GetLength(0); y++)
 			{
 				for (int x = 0; x < map.GetLength(1); x++)

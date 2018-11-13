@@ -52,9 +52,6 @@
     <Reference Include="UncoalEngine">
       <HintPath>..\UncoalEngine\bin\Debug\UncoalEngine.dll</HintPath>
     </Reference>
-    <Reference Include="UncoalRunner">
-      <HintPath>..\UncoalRunner\bin\Debug\UncoalRunner.exe</HintPath>
-    </Reference>
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">

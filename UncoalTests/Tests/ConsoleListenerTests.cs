@@ -106,13 +106,13 @@ namespace Uncoal.Tests
 			WriteConsoleInput(GetStdHandle(StdHandle.InputHandle), record, 1, ref recordsWritten);
 
 			// Giving time for keydown to be called
-			Thread.Sleep(1);
+			Thread.Sleep(2);
 
-			Assert.IsTrue(keyDownCalled);
-			Assert.AreEqual(keyPressed, keyDownResult.AsciiChar);
-			Assert.AreEqual(keyPressed, (byte)keyDownResult.UnicodeChar);
-			Assert.AreEqual(keyDown, keyDownResult.bKeyDown);
-			Assert.AreEqual(repeatCount, keyDownResult.wRepeatCount);
+			Assert.IsTrue(keyDownCalled, "Keydowncalled");
+			Assert.AreEqual(keyPressed, keyDownResult.AsciiChar, "Asciichar");
+			Assert.AreEqual(keyPressed, (byte)keyDownResult.UnicodeChar, "KeyPressed");
+			Assert.AreEqual(keyDown, keyDownResult.bKeyDown, "KeyDown");
+			Assert.AreEqual(repeatCount, keyDownResult.wRepeatCount, "Repeatcount");
 		}
 
 		KEY_EVENT_RECORD keyDownResult;

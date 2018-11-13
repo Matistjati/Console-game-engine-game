@@ -5,27 +5,16 @@ namespace Uncoal.Engine
 {
 	public struct Coord
 	{
-		public static readonly Coord empty = new Coord();
+		internal static readonly Coord empty = new Coord();
 
-		public uint X;
+		public int X;
 
-		public uint Y;
-
-		public Coord(uint x, uint y)
-		{
-			X = x;
-			Y = y;
-		}
+		public int Y;
 
 		public Coord(int x, int y)
 		{
-			if (x < 0)
-				throw new ArgumentOutOfRangeException($"x must be greater than 0. X was {x}");
-			if (y < 0)
-				throw new ArgumentOutOfRangeException($"y must be greater than 0. X was {y}");
-
-			X = (uint)x;
-			Y = (uint)y;
+			X = x;
+			Y = y;
 		}
 
 		public static explicit operator CoordF(Coord coord)
@@ -35,11 +24,11 @@ namespace Uncoal.Engine
 
 		public void Clamp(Coord min, Coord max)
 		{
-			uint X = this.X;
+			int X = this.X;
 			X = (X > max.X) ? max.X : X;
 			X = (X < min.X) ? min.X : X;
 
-			uint Y = this.Y;
+			int Y = this.Y;
 			Y = (Y > max.Y) ? max.Y : Y;
 			Y = (Y < min.Y) ? min.Y : Y;
 

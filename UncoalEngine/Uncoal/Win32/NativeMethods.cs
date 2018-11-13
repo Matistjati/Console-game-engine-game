@@ -23,6 +23,9 @@ namespace Uncoal.Internal
 			bool bMaximumWindow,
 			ref CONSOLE_FONT_INFOEX lpConsoleCurrentFont);
 
+		[DllImport("kernel32")]
+		public static extern IntPtr GetStdHandle(StdHandle index);
+
 		public enum StdHandle
 		{
 			OutputHandle = -11,
@@ -32,13 +35,10 @@ namespace Uncoal.Internal
 
 		public static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
-		[DllImport("kernel32")]
-		public static extern IntPtr GetStdHandle(StdHandle index);
 
 		[StructLayout(LayoutKind.Sequential)]
 		public struct COORD
 		{
-
 			public short X;
 
 			public short Y;
@@ -75,13 +75,13 @@ namespace Uncoal.Internal
 			public ushort EventType;
 
 			// These are a union
-			[FieldOffset(2)]
+			[FieldOffset(4)]
 			public KEY_EVENT_RECORD KeyEvent;
 
-			[FieldOffset(2)]
+			[FieldOffset(4)]
 			public MOUSE_EVENT_RECORD MouseEvent;
 
-			[FieldOffset(2)]
+			[FieldOffset(4)]
 			public WINDOW_BUFFER_SIZE_RECORD WindowBufferSizeEvent;
 
 			/*
@@ -128,21 +128,28 @@ namespace Uncoal.Internal
 			public uint dwEventFlags;
 		}
 
-		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+		[StructLayout(LayoutKind.Explicit, CharSet = CharSet.Unicode)]
 		public struct KEY_EVENT_RECORD
 		{
+			[FieldOffset(0)]
 			public bool bKeyDown;
 
+			[FieldOffset(4)]
 			public ushort wRepeatCount;
 
+			[FieldOffset(6)]
 			public ushort wVirtualKeyCode;
 
+			[FieldOffset(8)]
 			public ushort wVirtualScanCode;
 
+			[FieldOffset(10)]
 			public char UnicodeChar;
 
+			[FieldOffset(10)]
 			public byte AsciiChar;
 
+			[FieldOffset(12)]
 			public uint dwControlKeyState;
 
 			public const int CAPSLOCK_ON = 0x0080,
@@ -240,14 +247,5 @@ namespace Uncoal.Internal
 			int nLength,
 			COORD dwWriteCoord,
 			out int pNumCharsWritten);
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool FillConsoleOutputAttribute(
-			IntPtr hConsoleOutput,
-			short wColorAttribute,
-			int numCells,
-			COORD startCoord,
-			out int pNumBytesWritten);
 	}
 }

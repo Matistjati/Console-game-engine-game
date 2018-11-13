@@ -53,8 +53,8 @@ namespace Uncoal.Engine
 			else if (r.dwEventFlags == MOUSE_EVENT_RECORD.MOUSE_MOVED)
 			{
 				//mousePosition.Set((uint)r.dwMousePosition.X, (uint)r.dwMousePosition.Y);
-				mousePosition.X = (uint)r.dwMousePosition.X;
-				mousePosition.Y = (uint)r.dwMousePosition.Y;
+				mousePosition.X = r.dwMousePosition.X;
+				mousePosition.Y = r.dwMousePosition.Y;
 			}
 		}
 

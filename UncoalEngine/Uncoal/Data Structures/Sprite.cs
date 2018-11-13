@@ -21,7 +21,16 @@ namespace Uncoal.Engine
 		public Sprite(string image) : this((Bitmap)Image.FromFile(image), 1f)
 		{ }
 
+		public Sprite(string image, float scale) : this((Bitmap)Image.FromFile(image), scale)
+		{ }
+
 		public Sprite(Image image) : this(new Bitmap(image), 1f)
+		{ }
+
+		public Sprite(Image image, float scale) : this(new Bitmap(image), scale)
+		{ }
+
+		public Sprite(Bitmap image) : this(image, 1f)
 		{ }
 
 		static StringBuilder colorStringBuilder = new StringBuilder(24);
@@ -43,7 +52,7 @@ namespace Uncoal.Engine
 				{
 					Color rgb = image.GetPixel(x, y);
 
-					if (rgb.R == 0 && rgb.G == 0 && rgb.B == 0)
+					if ((rgb.R == 0 && rgb.G == 0 && rgb.B == 0)) //|| rgb.A < 10)
 					{
 						colorValues[x, y] = whiteSpace;
 					}
