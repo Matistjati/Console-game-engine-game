@@ -283,9 +283,9 @@ namespace Uncoal.Runner
 				int xOffset = colorMapSize.X / 2;
 				int yOffset = colorMapSize.Y / 2;
 
-				position.X = position.Y - yOffset;
+				position.X = position.X - xOffset;
 
-				position.Y = position.X - xOffset;
+				position.Y = position.Y - yOffset;
 
 
 				// Storing the position and dimensions of the sprite for later use
@@ -374,11 +374,12 @@ namespace Uncoal.Runner
 					{
 						if (spritePositions[i].X < currentCoord.X && spritePositions[i].X > 0)
 						{
+							currentCoord.Y += currentCoord.X - spritePositions[i].X;
 							currentCoord.X = spritePositions[i].X;
 						}
 						else
 						{
-							currentCoord.Y += spritePositions[i].X - currentCoord.X;
+							currentCoord.X = spritePositions[i].X;
 						}
 
 						if (spritePositions[i].Width > currentCoord.Y)
@@ -386,7 +387,7 @@ namespace Uncoal.Runner
 							currentCoord.Y = spritePositions[i].Width;
 						}
 
-						yFilledRows[(ushort)(spritePositions[i].Y + y)] = currentCoord;
+						yFilledRows[(ushort)index] = currentCoord;
 					}
 					else
 					{
@@ -394,7 +395,7 @@ namespace Uncoal.Runner
 							? 0
 							: spritePositions[i].X;
 
-						yFilledRows[(ushort)(spritePositions[i].Y + y)] = new Coord(positiveX, spritePositions[i].Width);
+						yFilledRows[(ushort)index] = new Coord(positiveX, spritePositions[i].Width);
 					}
 				}
 			}
@@ -423,7 +424,7 @@ namespace Uncoal.Runner
 						// For more info, check
 						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
-						allRows.Append(colors[x + rowInfo.X, y]);
+						allRows.Append(colors[x + rowInfo.X, y] ?? " ");
 					}
 					allRows.Append(Environment.NewLine);
 				}
