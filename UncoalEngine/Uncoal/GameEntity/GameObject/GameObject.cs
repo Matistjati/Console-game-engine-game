@@ -65,12 +65,12 @@ namespace Uncoal.Engine
 			return Instantiate<TPrefab>(position, null);
 		}
 
-		public static GameObject Instantiate<TPrefab>(object[] args) where TPrefab : GameObject
+		public static GameObject Instantiate<TPrefab>(params object[] args) where TPrefab : GameObject
 		{
 			return Instantiate<TPrefab>(new Coord(0, 0), args);
 		}
 
-		public static GameObject Instantiate<TPrefab>(Coord location, object[] args) where TPrefab : GameObject
+		public static GameObject Instantiate<TPrefab>(Coord location, params object[] args) where TPrefab : GameObject
 		{
 			// Checking if the TPrefab type is marked with the isprefab attribute
 			if (!(Attribute.GetCustomAttribute(typeof(TPrefab), typeof(IsPrefabAttribute)) is null))
