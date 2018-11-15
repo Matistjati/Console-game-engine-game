@@ -137,9 +137,6 @@ namespace Uncoal.Runner
 			// Creating the necessary folders and files
 			Directory.CreateDirectory("logs");
 			using (StreamWriter x = File.AppendText("logs/log.txt")) { }
-
-			// Starting
-			FrameRunner.Run();
 		}
 
 		public static void Start(ushort fontSizeX, ushort fontSizeY, int framesBetweenDraws, string gameName)
@@ -148,8 +145,12 @@ namespace Uncoal.Runner
 			Console.ReadKey(true);
 #endif
 
-
+			// Setting up the game
 			GameSetup(fontSizeX, fontSizeY, framesBetweenDraws, gameName);
+
+			// Starting
+			FrameRunner.Run();
+
 
 #if DEBUG
 			Console.SetBufferSize(1200, 300);

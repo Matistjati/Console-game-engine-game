@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Uncoal\Data Structures\Distance.cs" />
     <Compile Include="Uncoal\Data Structures\SmallRectangle.cs" />
     <Compile Include="Uncoal\Data Structures\Sprite.cs" />
     <Compile Include="Uncoal\GameEntity\Component\Component.cs" />
