@@ -31,6 +31,7 @@ namespace Uncoal.Tests
 			new Coord(5, 12), new Coord(7, 12), new Coord(8, 12), new Coord(16, 12),
 			new Coord(12, 16), new Coord(10, 18), new Coord(4, 6), new Coord(4, 6)};
 
+		// This one is hopeless with the new windows 10 console
 		[TestMethod()]
 		public void SetConsoleFontSizeNormalUsage()
 		{
@@ -52,7 +53,8 @@ namespace Uncoal.Tests
 		}
 
 		// Random strings to test in SetConsoleTitleNormalUsage
-		private static readonly string[] consoleTestNames = new string[] { "memory", "whether", "industrial", "reach", "car", "off",
+		private static readonly string[] consoleTestNames = new string[] {
+			"memory", "whether", "industrial", "reach", "car", "off",
 			"toward", "oxygen", "friendly", "draw", "window", "aboard",
 			"bend", "been", "track", "central", "war", "keep",
 			"personal", "gas", "proud", "involved", "smooth", "tightly",
@@ -70,10 +72,9 @@ namespace Uncoal.Tests
 			byte[] receiver = new byte[consoleTestName.Length + 1];
 			GetConsoleTitle(receiver, (uint)receiver.Length);
 
-
-			Assert.AreEqual(consoleTestName,
-			// Converting the byte array to string and slicing away the null terminator
-			Encoding.Default.GetString(receiver).Substring(0, receiver.Length - 1));
+			// Converting the byte array to a string and slicing away the null terminator
+			string cleanTitle = Encoding.Default.GetString(receiver).Substring(0, receiver.Length - 1);
+			Assert.AreEqual(consoleTestName, cleanTitle);
 		}
 
 		private const string consolasString = "Consolas";

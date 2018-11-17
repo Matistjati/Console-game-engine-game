@@ -35,12 +35,17 @@ namespace Uncoal.Tests
 		public void ReflectiveHelperTryGetMethodFromComponentTestSuccess()
 		{
 			List<GameObject> localGameObjects = gameObjects.GetTInstanceNonPrefab();
-			Assert.IsTrue(ReflectiveHelper<GameObject>.TryGetMethodFromComponent(
-				localGameObjects[0].GetComponent<ComponentTest>(),
+
+			Component componentTest = localGameObjects[0].GetComponent<ComponentTest>();
+			bool methodFound = ReflectiveHelper<GameObject>.TryGetMethodFromComponent(
+				componentTest,
 				"methodfound",
-				out MethodInfo method));
+				out MethodInfo method);
+
+			Assert.IsTrue(methodFound, "No method found");
 			Assert.IsFalse(method is null);
-			Assert.IsTrue((bool)method.Invoke(localGameObjects[0].GetComponent<ComponentTest>(), null));
+
+			Assert.IsTrue((bool)method.Invoke(componentTest, null));
 		}
 
 		[TestMethod]
@@ -58,7 +63,7 @@ namespace Uncoal.Tests
 		public void ReflectiveHelperGetComponentMethodAndInstanceTestSuccess()
 		{
 			Action action = gameObjects.GetComponentAction("update");
-			Assert.AreEqual(1, action.Target, "Less than one components on GameObjectTest Implements update");
+			Assert.IsTrue(action.GetInvocationList().Length > 1, "Less than one components on GameObjectTest Implements update");
 			action.Invoke();
 		}
 

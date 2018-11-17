@@ -118,8 +118,8 @@ namespace Uncoal.Tests
 
 			Input.UpdateInput();
 
-			Assert.AreEqual((uint)x, Input.mousePosition.X);
-			Assert.AreEqual((uint)y, Input.mousePosition.Y);
+			Assert.AreEqual(x, Input.mousePosition.X);
+			Assert.AreEqual(y, Input.mousePosition.Y);
 		}
 	}
 }

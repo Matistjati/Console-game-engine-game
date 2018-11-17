@@ -1,6 +1,6 @@
 ﻿namespace Uncoal.Engine
 {
-	class Distance
+	struct Distance
 	{
 		public int start;
 		public int length;

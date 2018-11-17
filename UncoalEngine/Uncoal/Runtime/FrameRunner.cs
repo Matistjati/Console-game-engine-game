@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using Uncoal.Engine;
 using static Uncoal.Internal.NativeMethods;
 
@@ -144,7 +143,8 @@ namespace Uncoal.Runner
 
 			colors = new string[displaySize.X, displaySize.Y];
 
-			allRows = new StringBuilder(RenderedGameObjects.Count * 32 * 32);
+			// Multipltying RenderedGameObjects.Count by 32 * 32, See left bitwise shift
+			allRows = new StringBuilder(RenderedGameObjects.Count << 10);
 
 			run = true;
 
@@ -191,7 +191,7 @@ namespace Uncoal.Runner
 
 				// This is to avoid the console flickering randomly
 				// Grant developer ability to change this value
-				Thread.Sleep(100);
+				//Thread.Sleep(100);
 			}
 		}
 
@@ -319,7 +319,7 @@ namespace Uncoal.Runner
 				// Filling our internal array (strings representing colors) representing the console
 
 				// X and Y are for the array of the gameobject, which are then added to (xIndex and yIndex) to get the index of colors
-				
+
 				for (int x = 0; x < colorMapSize.X; x++)
 				{
 					if ((xIndex = x + position.X) < 0)
@@ -372,7 +372,9 @@ namespace Uncoal.Runner
 		{
 			allRows.Clear();
 
-			// Hashing the y positions
+			/////////////////////////////
+			// Hashing the y positions //
+			/////////////////////////////
 
 			//                                                                          Multipltying spritePositions.Count by 32. See left bitwise shift
 			Dictionary<ushort, Distance> yFilledRows = new Dictionary<ushort, Distance>(spritePositions.Count << 5);
@@ -409,7 +411,7 @@ namespace Uncoal.Runner
 					}
 					else
 					{
-						int positiveX = (spritePositions[i].X < 0) 
+						int positiveX = (spritePositions[i].X < 0)
 							? 0
 							: spritePositions[i].X;
 
@@ -417,6 +419,10 @@ namespace Uncoal.Runner
 					}
 				}
 			}
+
+			////////////////////////////////////////////////////////////
+			// Using the y positions to join everything into a string //
+			////////////////////////////////////////////////////////////
 
 			//Caching the array size
 			int colorHeight = colors.GetLength(1);
@@ -440,13 +446,8 @@ namespace Uncoal.Runner
 						// For more info, check
 						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
-						try
-						{
-							allRows.Append(colors[x + rowInfo.start, y] ?? " ");
-						}
-						catch (IndexOutOfRangeException)
-						{
-						}
+
+						allRows.Append(colors[x + rowInfo.start, y] ?? " ");
 					}
 					allRows.Append(Environment.NewLine);
 				}

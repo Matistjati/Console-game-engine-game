@@ -118,8 +118,8 @@ namespace Uncoal.Tests
 			Assert.IsFalse(seenMap.Height + seenMap.Y > testMap.MapSize.Y * 2);
 
 			// Testing that the seen map is equal to that of the viewrange
-			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (uint)(seenMap.Width + seenMap.X));
-			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (uint)(seenMap.Height + seenMap.Y));
+			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (seenMap.Width + seenMap.X));
+			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (seenMap.Height + seenMap.Y));
 		}
 
 		[TestMethod()]
@@ -132,8 +132,8 @@ namespace Uncoal.Tests
 			Assert.IsFalse(seenMap.Width + seenMap.X > testMap.MapSize.X * 2);
 			Assert.IsFalse(seenMap.Height + seenMap.Y > testMap.MapSize.Y * 2);
 
-			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (uint)(seenMap.Width + seenMap.X));
-			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (uint)(seenMap.Height + seenMap.Y));
+			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (seenMap.Width + seenMap.X));
+			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (seenMap.Height + seenMap.Y));
 		}
 
 		[TestMethod()]
@@ -142,8 +142,8 @@ namespace Uncoal.Tests
 			Coord position = new Coord(0, 15);
 
 			Rectangle seenMap = testMap.GetSeenMap(position);
-			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (uint)(seenMap.X + seenMap.Width));
-			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (uint)(seenMap.Y + seenMap.Height));
+			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (seenMap.X + seenMap.Width));
+			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (seenMap.Y + seenMap.Height));
 		}
 
 		[TestMethod()]
@@ -156,8 +156,8 @@ namespace Uncoal.Tests
 			Assert.IsFalse(seenMap.Width + seenMap.X > testMap.MapSize.X * 2);
 			Assert.IsFalse(seenMap.Height + seenMap.Y > testMap.MapSize.Y * 2);
 
-			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (uint)(seenMap.Width + seenMap.X));
-			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (uint)(seenMap.Height + seenMap.Y));
+			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (seenMap.Width + seenMap.X));
+			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (seenMap.Height + seenMap.Y));
 		}
 
 		[TestMethod()]
@@ -170,8 +170,8 @@ namespace Uncoal.Tests
 			Assert.IsFalse(seenMap.Width + seenMap.X > testMap.MapSize.X * 2);
 			Assert.IsFalse(seenMap.Height + seenMap.Y > testMap.MapSize.Y * 2);
 
-			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (uint)(seenMap.Width + seenMap.X));
-			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (uint)(seenMap.Height + seenMap.Y));
+			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (seenMap.Width + seenMap.X));
+			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (seenMap.Height + seenMap.Y));
 		}
 
 		[TestMethod()]
@@ -186,8 +186,8 @@ namespace Uncoal.Tests
 			Assert.IsFalse(seenMap.Width + seenMap.X > testMap.MapSize.X * 2);
 			Assert.IsFalse(seenMap.Height + seenMap.Y > testMap.MapSize.Y * 2);
 
-			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (uint)(seenMap.Width + seenMap.X));
-			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (uint)(seenMap.Height + seenMap.Y));
+			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (seenMap.Width + seenMap.X));
+			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (seenMap.Height + seenMap.Y));
 		}
 
 		[TestMethod()]
@@ -202,8 +202,8 @@ namespace Uncoal.Tests
 			Assert.IsFalse(seenMap.Width + seenMap.X > testMap.MapSize.X * 2);
 			Assert.IsFalse(seenMap.Height + seenMap.Y > testMap.MapSize.Y * 2);
 
-			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (uint)(seenMap.Width + seenMap.X));
-			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (uint)(seenMap.Height + seenMap.Y));
+			Assert.AreEqual(testMap.PlayerViewRange.X * 2, (seenMap.Width + seenMap.X));
+			Assert.AreEqual(testMap.PlayerViewRange.Y * 2, (seenMap.Height + seenMap.Y));
 		}
 	}
 }

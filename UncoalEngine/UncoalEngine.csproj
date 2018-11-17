@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;CODE_ANALYSIS;CODE_ANALYSIS;DEBUGOBJECTNO</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS;CODE_ANALYSIS;CODE_ANALYSIS;CODE_ANALYSIS;CODE_ANALYSIS;DEBUGOBJECTNO</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
@@ -99,7 +99,6 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(SolutionDir)\UncoalEngine\bin\Debug" "C:\Users\Matis\source\repos\CmdOsu\Uncoal\Resources" /s /i /y
 xcopy "$(SolutionDir)\UncoalEngine\bin\Debug" "C:\Users\Matis\source\repos\CmdOsu\bin\Debug" /s /i /y
-xcopy "$(SolutionDir)\UncoalEngine\bin\Debug" "$(SolutionDir)\UncoalTests\bin\Debug" /s /i /y
 xcopy "$(SolutionDir)\UncoalEngine\bin\Debug" "$(SolutionDir)\$safeprojectname$\bin\Debug" /s /i /y
 </PostBuildEvent>
   </PropertyGroup>

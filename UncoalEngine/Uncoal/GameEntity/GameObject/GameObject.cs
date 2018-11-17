@@ -13,6 +13,14 @@ namespace Uncoal.Engine
 
 		internal List<Component> components = new List<Component>();
 
+
+		internal static float _timeDelta;
+		internal static float _time;
+
+		public static float TimeDelta => _timeDelta;
+
+		public static float Time => _time;
+
 		public void AddComponent(Component component)
 		{
 			component.physicalState = physicalState;
@@ -47,7 +55,7 @@ namespace Uncoal.Engine
 					return (T)component;
 				}
 			}
-			return null;
+			return default(T);
 		}
 
 		public bool HasComponent<T>() where T : Component
@@ -144,12 +152,5 @@ namespace Uncoal.Engine
 
 			FrameRunner.destructionQueue.Enqueue(gameObject);
 		}
-
-		internal static float _timeDelta;
-		internal static float _time;
-
-		public static float TimeDelta => _timeDelta;
-
-		public static float Time => _time;
 	}
 }
