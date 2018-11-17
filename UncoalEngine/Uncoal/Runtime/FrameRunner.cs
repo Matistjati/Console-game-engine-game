@@ -61,12 +61,17 @@ namespace Uncoal.Runner
 
 #if DEBUG
 		// For checking if the rendering or the internal representation of the sprite is at fault
+
 		public static void ColorMapPrint()
 		{
+			Console.Clear();
+
 			StringBuilder sprite = new StringBuilder(colors.GetLength(0) * colors.GetLength(1));
-			for (int x = 0; x < colors.GetLength(0); x++)
+			int width = colors.GetLength(0);
+			int height = colors.GetLength(1);
+			for (int x = 0; x < width; x++)
 			{
-				for (int y = 0; y < colors.GetLength(1); y++)
+				for (int y = 0; y < height; y++)
 				{
 					string color = colors[x, y];
 					if (color is null)
@@ -79,8 +84,9 @@ namespace Uncoal.Runner
 					}
 				}
 				sprite.Append('\n');
+				Console.Write(sprite);
+				sprite.Clear();
 			}
-			Console.Write(sprite);
 		}
 
 		public static bool IsColorsAllNull()
@@ -185,7 +191,7 @@ namespace Uncoal.Runner
 
 				// This is to avoid the console flickering randomly
 				// Grant developer ability to change this value
-				Thread.Sleep(10);
+				Thread.Sleep(100);
 			}
 		}
 
@@ -263,7 +269,9 @@ namespace Uncoal.Runner
 					continue;
 
 				// Caching the size of the sprite
-				Coord colorMapSize = new Coord(RenderedGameObjects[i].ColorMap.GetLength(0), RenderedGameObjects[i].ColorMap.GetLength(0));
+				Coord colorMapSize = new Coord(
+					RenderedGameObjects[i].ColorMap.GetLength(0),
+					RenderedGameObjects[i].ColorMap.GetLength(1));
 
 				// Assuring we won't go out of bounds
 				if (colorMapSize.X + position.X > displaySize.X)
@@ -292,9 +300,9 @@ namespace Uncoal.Runner
 				int xOffset = colorMapSize.X / 2;
 				int yOffset = colorMapSize.Y / 2;
 
-				position.X = position.X - xOffset;
+				position.X -= xOffset;
 
-				position.Y = position.Y - yOffset;
+				position.Y -= yOffset;
 
 
 				// Storing the position and dimensions of the sprite for later use
@@ -366,10 +374,8 @@ namespace Uncoal.Runner
 
 			// Hashing the y positions
 
-			/////////////////////////////////////////////////////////////////////////////////////////////////// 
-			// Coord represents a coordinate and length here (sorry) x is the start position and y is length //
-			///////////////////////////////////////////////////////////////////////////////////////////////////
-			Dictionary<ushort, Distance> yFilledRows = new Dictionary<ushort, Distance>(spritePositions.Count);
+			//                                                                          Multipltying spritePositions.Count by 32. See left bitwise shift
+			Dictionary<ushort, Distance> yFilledRows = new Dictionary<ushort, Distance>(spritePositions.Count << 5);
 
 			for (int i = 0; i < spritePositions.Count; i++)
 			{
@@ -385,13 +391,18 @@ namespace Uncoal.Runner
 						if (spritePositions[i].X < currentRow.start && spritePositions[i].X > 0)
 						{
 							currentRow.length += currentRow.start - spritePositions[i].X;
+
 							currentRow.start = spritePositions[i].X;
+						}
+						else
+						{
+							currentRow.length += spritePositions[i].X - currentRow.start;
 						}
 
 						// Enable if we want to use sprites of different sizes
 						if (spritePositions[i].Width > currentRow.length)
 						{
-							currentRow.start = spritePositions[i].Width;
+							currentRow.length = spritePositions[i].Width;
 						}
 
 						yFilledRows[(ushort)index] = currentRow;
@@ -408,7 +419,6 @@ namespace Uncoal.Runner
 			}
 
 			//Caching the array size
-			int colorWidth = colors.GetLength(0);
 			int colorHeight = colors.GetLength(1);
 
 			for (ushort y = 0; y < colorHeight; y++)
@@ -424,15 +434,19 @@ namespace Uncoal.Runner
 					allRows.Append(escapeStartNormal);
 					allRows.Append(rowInfo.start + "C");
 
-					// rowInfo.Y is width. Sorry
 					for (int x = 0; x < rowInfo.length; x++)
 					{
 						// An escape sequence telling the console what color to display
 						// For more info, check
 						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
-
-						allRows.Append(colors[x + rowInfo.start, y] ?? " ");
+						try
+						{
+							allRows.Append(colors[x + rowInfo.start, y] ?? " ");
+						}
+						catch (IndexOutOfRangeException)
+						{
+						}
 					}
 					allRows.Append(Environment.NewLine);
 				}
