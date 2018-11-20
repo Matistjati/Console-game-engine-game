@@ -29,7 +29,7 @@ namespace Uncoal.Engine
 
 		Bitmap imageBase;
 
-		internal Bitmap ImageBase
+		public Bitmap ImageBase
 		{
 			get => imageBase;
 			set

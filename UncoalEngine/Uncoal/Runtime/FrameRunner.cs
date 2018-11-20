@@ -447,7 +447,15 @@ namespace Uncoal.Runner
 						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
 
-						allRows.Append(colors[x + rowInfo.start, y] ?? " ");
+						// TODO sometimes indexoutofrange
+						try
+						{
+							allRows.Append(colors[x + rowInfo.start, y] ?? " ");
+
+						}
+						catch (IndexOutOfRangeException)
+						{
+						}
 					}
 					allRows.Append(Environment.NewLine);
 				}

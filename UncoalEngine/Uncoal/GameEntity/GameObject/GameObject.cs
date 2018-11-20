@@ -129,7 +129,6 @@ namespace Uncoal.Engine
 
 				// Leave no references hanging
 				update = null;
-				newGameObject = null;
 				return newGameObject;
 			}
 			else
