@@ -42,9 +42,9 @@ namespace Uncoal.Runner
 				// Just killing references
 				foreach (Component component in gameObject.components)
 				{
-					if (component.GetType() == typeof(SpriteDisplayer))
+					if (component is SpriteDisplayer sprite)
 					{
-						RenderedGameObjects.Remove((SpriteDisplayer)component);
+						RenderedGameObjects.Remove(sprite);
 					}
 
 					component.gameObject = null;
@@ -399,6 +399,11 @@ namespace Uncoal.Runner
 						else
 						{
 							currentRow.length += spritePositions[i].X - currentRow.start;
+
+							if (currentRow.length + currentRow.start  > displaySize.X)
+							{
+								currentRow.length = displaySize.X - currentRow.start;
+							}
 						}
 
 						// Enable if we want to use sprites of different sizes
@@ -448,14 +453,10 @@ namespace Uncoal.Runner
 
 
 						// TODO sometimes indexoutofrange
-						try
-						{
-							allRows.Append(colors[x + rowInfo.start, y] ?? " ");
 
-						}
-						catch (IndexOutOfRangeException)
-						{
-						}
+						allRows.Append(colors[x + rowInfo.start, y] ?? " ");
+
+
 					}
 					allRows.Append(Environment.NewLine);
 				}
