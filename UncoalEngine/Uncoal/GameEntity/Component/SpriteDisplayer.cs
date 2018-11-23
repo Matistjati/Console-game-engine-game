@@ -5,28 +5,20 @@ namespace Uncoal.Engine
 	public class SpriteDisplayer : Component
 	{
 		public bool IsVisible = true;
-
-		public bool IsInitialized
-		{
-			get { return !(Sprite?.colorValues is null); }
-		}
-
 		public int Layer;
 
-		internal void RecalculateSpriteSize()
-		{
-			Sprite = new Sprite(imageBase, physicalState.Scale);
-		}
-
-		internal Sprite Sprite { get; set; }
-
-		public int Width { get => (int)Sprite.Size.X; }
-		public int Heigth { get => (int)Sprite.Size.Y; }
 
 		public string[,] ColorMap => Sprite.colorValues;
 
-		private float lastScaleImage;
+		internal Sprite Sprite { get; set; }
 
+		public int Width => Sprite.Size.X;
+
+		public int Heigth => Sprite.Size.Y;
+
+		public bool IsInitialized => Sprite?.colorValues != null;
+
+		private float lastScaleImage;
 		Bitmap imageBase;
 
 		public Bitmap ImageBase
@@ -43,8 +35,10 @@ namespace Uncoal.Engine
 			}
 		}
 
-
-		private float lastScaleString;
+		void ImageBaseChanged()
+		{
+			Sprite = new Sprite(ImageBase, physicalState.Scale);
+		}
 
 		private string[,] imageBaseString;
 
@@ -54,12 +48,13 @@ namespace Uncoal.Engine
 			set
 			{
 				imageBaseString = value;
-				if (lastScaleString != physicalState.Scale)
-				{
-					ImageBaseStringChanged();
-					lastScaleString = physicalState.Scale;
-				}
+				ImageBaseStringChanged();
 			}
+		}
+
+		void ImageBaseStringChanged()
+		{
+			Sprite = new Sprite(imageBaseString);
 		}
 
 		public void SetImage(Bitmap image) => ImageBase = image;
@@ -70,17 +65,9 @@ namespace Uncoal.Engine
 
 		public void SetImage(string[,] image) => ImageBaseString = image;
 
-
-
-
-		void ImageBaseStringChanged()
+		internal void RecalculateSpriteSize()
 		{
-			Sprite = new Sprite(imageBaseString);
-		}
-
-		void ImageBaseChanged()
-		{
-			Sprite = new Sprite(ImageBase, physicalState.Scale);
+			Sprite = new Sprite(imageBase, physicalState.Scale);
 		}
 	}
 }

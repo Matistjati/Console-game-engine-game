@@ -31,6 +31,10 @@ namespace Uncoal.Runner
 				GameObject gameObject = destructionQueue.Dequeue();
 				List<Delegate> componentsToRemove = new List<Delegate>();
 
+				if (gameObject.components is null)
+					continue;
+
+
 				for (int i = 0; i < methods.Length; i++)
 				{
 					if (gameObject.components.Contains(methods[i].Target))
@@ -40,7 +44,7 @@ namespace Uncoal.Runner
 				}
 
 				// Just killing references
-				foreach (Component component in gameObject.components)
+				foreach (Component component in gameObject?.components)
 				{
 					if (component is SpriteDisplayer sprite)
 					{

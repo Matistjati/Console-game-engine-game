@@ -7,16 +7,21 @@ namespace Uncoal.Engine
 {
 	public class Sprite
 	{
+		public readonly float Scale;
 		public readonly string[,] colorValues;
 		public readonly Coord Size;
-		// This assumes that the fontsize is 6 * 10
-		public readonly float Scale;
 
 		// Used for building colorValues
 		const string whiteSpace = " ";
 		const string escapeStartRGB = "\x1b[38;2;";
 		const string escapeEnd = "m█";
 		const char colorSeparator = ';';
+
+		public Sprite(string[,] image)
+		{
+			Size = new Coord(image.GetLength(0), image.GetLength(1));
+			colorValues = image;
+		}
 
 		public Sprite(string image) : this((Bitmap)Image.FromFile(image), 1f)
 		{ }
@@ -52,13 +57,13 @@ namespace Uncoal.Engine
 				{
 					Color rgb = image.GetPixel(x, y);
 
-					if ((rgb.R == 0 && rgb.G == 0 && rgb.B == 0)) //|| rgb.A < 10)
+					if (rgb.R == 0 && rgb.G == 0 && rgb.B == 0) //|| rgb.A < 10)
 					{
 						colorValues[x, y] = whiteSpace;
 					}
 					else
 					{
-						// I know, it looks messy but it's the fastest
+						// I know, it looks messy but it's the fastest way
 						// An escape sequence telling the console what color to display
 						// For more info, check
 						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
@@ -77,34 +82,8 @@ namespace Uncoal.Engine
 				}
 			}
 
-			if (scale != 1)
-			{
-				image.Dispose();
-			}
+			image.Dispose();
 		}
-
-		public Sprite(string[,] image)
-		{
-			Size = new Coord(image.GetLength(0), image.GetLength(1));
-
-			colorValues = image;
-		}
-
-#if DEBUG
-		public override string ToString()
-		{
-			StringBuilder sprite = new StringBuilder(colorValues.GetLength(0) * colorValues.GetLength(1));
-			for (int y = 0; y < colorValues.GetLength(1); y++)
-			{
-				for (int x = 0; x < colorValues.GetLength(0); x++)
-				{
-					sprite.Append(colorValues[x, y]);
-				}
-				sprite.Append('\n');
-			}
-			return sprite.ToString();
-		}
-#endif
 
 		/// <summary>
 		/// Resize the image to the specified width and height.
@@ -138,5 +117,21 @@ namespace Uncoal.Engine
 
 			return destImage;
 		}
+
+#if DEBUG
+		public override string ToString()
+		{
+			StringBuilder sprite = new StringBuilder(colorValues.GetLength(0) * colorValues.GetLength(1));
+			for (int y = 0; y < colorValues.GetLength(1); y++)
+			{
+				for (int x = 0; x < colorValues.GetLength(0); x++)
+				{
+					sprite.Append(colorValues[x, y]);
+				}
+				sprite.Append('\n');
+			}
+			return sprite.ToString();
+		}
+#endif
 	}
 }
