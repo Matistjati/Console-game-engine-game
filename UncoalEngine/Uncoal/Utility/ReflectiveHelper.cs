@@ -51,7 +51,20 @@ namespace Uncoal.Internal
 				{
 					if (Attribute.GetCustomAttribute(instanceType, typeof(IsPrefabAttribute)) is null)
 					{
-						instances.Add((T)Activator.CreateInstance(instanceType));
+						try
+						{
+							instances.Add((T)Activator.CreateInstance(instanceType));
+						}
+						catch (MissingMethodException exception)
+						{
+							MissingMethodException methodEx = new MissingMethodException($"Empty constructor not found in class {instanceType.ToString()}", exception);
+							throw methodEx;
+						}
+						catch (TargetInvocationException exception)
+						{
+							TargetInvocationException targetEx = new TargetInvocationException($"Exception was thrown during creation of class {instanceType.ToString()}", exception);
+							throw targetEx;
+						}
 					}
 				}
 				TInstances = instances;

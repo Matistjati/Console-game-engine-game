@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Uncoal.Engine;
 using static Uncoal.Internal.NativeMethods;
 
@@ -474,23 +475,24 @@ namespace Uncoal.Runner
 		static void ClearConsole(IntPtr stdOut)
 		{
 			// Clearing the console Using some p/invoking
-			for (int i = 0; i < spritePositionsCopy.Count; i++)
-			{
-				// Converting the position to coordinates
-				COORD position = new COORD(spritePositionsCopy[i].X, spritePositionsCopy[i].X);
+			Parallel.For(0, spritePositionsCopy.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, 
+				index => {
+					COORD position = new COORD(spritePositionsCopy[index].X, spritePositionsCopy[index].X);
 
-				for (int y = 0; y < spritePositionsCopy[i].Height; y++)
-				{
-					FillConsoleOutputCharacter(
-						stdOut,     // Output buffer handle
-						whiteSpace, // The character we replace stuff with
-						spritePositionsCopy[i].Width, // Amount of times to replace character
-						position,   // The position to start writing
-						out int lpNumberOfCharsWritten);
+					Parallel.For(0, spritePositionsCopy[index].Height, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+					indexInner =>
+					   {
+						   COORD pos = position;
+						   pos.Y += (short)indexInner;
 
-					position.Y++;
-				}
-			}
+						   FillConsoleOutputCharacter(
+								stdOut,     // Output buffer handle
+								whiteSpace, // The character we replace stuff with
+								spritePositionsCopy[index].Width, // Amount of times to replace character
+								pos,   // The position to start writing
+								out int lpNumberOfCharsWritten);
+					   });
+				});
 		}
 
 		public static Queue<GameObject> destructionQueue = new Queue<GameObject>();
