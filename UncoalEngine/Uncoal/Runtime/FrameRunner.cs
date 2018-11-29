@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Uncoal.Engine;
+using System.Runtime.CompilerServices;
 using static Uncoal.Internal.NativeMethods;
 
 namespace Uncoal.Runner
@@ -201,22 +202,27 @@ namespace Uncoal.Runner
 		}
 
 		const char whiteSpace = ' ';
-		const char colorSeparator = ';';
-		const string escapeStartRGB = "\x1b[38;2;";
 		const string escapeStartNormal = "\x1b[";
-		const string escapeEnd = "m█";
 
 		static List<SmallRectangle> spritePositions = new List<SmallRectangle>();
 		static List<SmallRectangle> spritePositionsCopy = new List<SmallRectangle>();
+		static Dictionary<ushort, Distance> filledRows = new Dictionary<ushort, Distance>(spritePositions.Count << 5);
 
 		static string[,] colors;
 		static Coord displaySize;
 
 		static StringBuilder allRows;
-		static int oldRenderedGameObjectsCount = 0;
 
+		static Task writeConsole;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void RenderSprites()
 		{
+			writeConsole?.Wait();
+
+			// Clearing the internal color array representing the console
+			ClearOldSprites();
+
 			// Used in clearconsole for clearing the old frame drawing
 			// Copying spritepositions before clearing it is important
 			spritePositionsCopy = new List<SmallRectangle>(spritePositions);
@@ -224,13 +230,8 @@ namespace Uncoal.Runner
 			spritePositions.Clear();
 
 			// Sort the render order based on layer descending when the size changes
-			// This doesnt work, what if layer changes during runtime?
-			// Solution optimize sort, run each frame
-			if (RenderedGameObjects.Count != oldRenderedGameObjectsCount)
-			{
-				RenderedGameObjects.Sort((x, y) => y.Layer.CompareTo(x.Layer));
-			}
-			oldRenderedGameObjectsCount = RenderedGameObjects.Count;
+			
+			RenderedGameObjects.Sort((x, y) => y.Layer.CompareTo(x.Layer));
 
 			// Filling colors based on the current RenderedGameObjects
 			FillColors();
@@ -245,18 +246,16 @@ namespace Uncoal.Runner
 			ClearConsole(stdOutHandle);
 
 			// Writing all the rows to the console
+			writeConsole = Task.Run(() =>
 			WriteConsoleW(
 				stdOutHandle,   // The handle
 				allRows,        // Characters to write
 				allRows.Length, // Amount of characters to write
 				out int charsWritten,
-				IntPtr.Zero);   // Reserved
-
-
-			// Clearing the internal color array representing the console
-			ClearOldSprites();
+				IntPtr.Zero));  // Reserved
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void FillColors()
 		{
 			// Iterate the lowest priority layers first, as they are later overwritten
@@ -350,6 +349,7 @@ namespace Uncoal.Runner
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void ClearOldSprites()
 		{
 			for (int i = 0; i < spritePositions.Count; i++)
@@ -373,6 +373,7 @@ namespace Uncoal.Runner
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void JoinColorsToString()
 		{
 			allRows.Clear();
@@ -380,9 +381,7 @@ namespace Uncoal.Runner
 			/////////////////////////////
 			// Hashing the y positions //
 			/////////////////////////////
-
-			//                                                                          Multipltying spritePositions.Count by 32. See left bitwise shift
-			Dictionary<ushort, Distance> yFilledRows = new Dictionary<ushort, Distance>(spritePositions.Count << 5);
+			filledRows.Clear();
 
 			for (int i = 0; i < spritePositions.Count; i++)
 			{
@@ -393,7 +392,7 @@ namespace Uncoal.Runner
 					if (index < 0)
 						continue;
 
-					if (yFilledRows.TryGetValue((ushort)index, out Distance currentRow))
+					if (filledRows.TryGetValue((ushort)index, out Distance currentRow))
 					{
 						if (spritePositions[i].X < currentRow.start && spritePositions[i].X > 0)
 						{
@@ -417,7 +416,7 @@ namespace Uncoal.Runner
 							currentRow.length = spritePositions[i].Width;
 						}
 
-						yFilledRows[(ushort)index] = currentRow;
+						filledRows[(ushort)index] = currentRow;
 					}
 					else
 					{
@@ -425,7 +424,7 @@ namespace Uncoal.Runner
 							? 0
 							: spritePositions[i].X;
 
-						yFilledRows[(ushort)index] = new Distance(positiveX, spritePositions[i].Width);
+						filledRows[(ushort)index] = new Distance(positiveX, spritePositions[i].Width);
 					}
 				}
 			}
@@ -441,7 +440,7 @@ namespace Uncoal.Runner
 			{
 				// Checking if there is an object on this row
 				// Otherwise, we sipmly append a newline
-				if (yFilledRows.TryGetValue(y, out Distance rowInfo))
+				if (filledRows.TryGetValue(y, out Distance rowInfo))
 				{
 					// Spacing from left to the start of the sprite
 					// Uses an escape sequence
@@ -456,12 +455,7 @@ namespace Uncoal.Runner
 						// For more info, check
 						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
-
-						// TODO sometimes indexoutofrange
-
 						allRows.Append(colors[x + rowInfo.start, y] ?? " ");
-
-
 					}
 					allRows.Append(Environment.NewLine);
 				}
@@ -472,6 +466,7 @@ namespace Uncoal.Runner
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void ClearConsole(IntPtr stdOut)
 		{
 			// Clearing the console Using some p/invoking

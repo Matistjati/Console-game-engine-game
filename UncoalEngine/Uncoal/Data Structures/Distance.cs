@@ -10,5 +10,10 @@
 			start = Start;
 			length = Length;
 		}
+
+		public override string ToString()
+		{
+			return $"s: {start}  l: {length}";
+		}
 	}
 }
