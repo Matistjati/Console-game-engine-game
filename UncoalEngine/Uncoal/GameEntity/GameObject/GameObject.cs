@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Uncoal.Internal;
 using Uncoal.Runner;
+using System.Linq.Expressions;
 
 namespace Uncoal.Engine
 {
@@ -89,6 +90,124 @@ namespace Uncoal.Engine
 
 				// Creating a new instance of the gameobject
 				GameObject newGameObject = (GameObject)Activator.CreateInstance(typeof(TPrefab), args);
+
+				// Setting the position of the gameobject
+				newGameObject.physicalState.Position = (CoordF)location;
+
+				// Adding physicalstate to the gameobjects components
+				newGameObject.AddComponent(newGameObject.physicalState);
+
+				// If the gameobject has a spritedisplayer, add it to RenderedGameObjects
+				if (newGameObject.GetComponent<SpriteDisplayer>() is SpriteDisplayer sprite && sprite.IsInitialized)
+				{
+					FrameRunner.RenderedGameObjects.Add(sprite);
+					//Leave no references hanging
+					sprite = null;
+				}
+
+				// Invoking start
+				foreach (Component component in newGameObject.components)
+				{
+					if (ReflectiveHelper<Type>.TryGetMethodFromComponent(component, "start", out MethodInfo method))
+					{
+						method.Invoke(component, null);
+						// Leave no references hanging
+						method = null;
+					}
+				}
+
+				// Adding update from the gameobjects components to framerunners update list
+				void doNothing() { }
+				Action update = new Action(doNothing);
+
+				foreach (Component component in newGameObject.components)
+				{
+					update += ReflectiveHelper<Type>.GetAction("update", component);
+				}
+				update -= doNothing;
+
+				FrameRunner.AddFrameSubscriber(update);
+
+				// Leave no references hanging
+				update = null;
+				return newGameObject;
+			}
+			else
+			{
+				throw new ArgumentException($"TPrefab {typeof(TPrefab)} must be marked with [IsPrefab] ");
+			}
+		}
+
+		public delegate T ObjectActivator<T>(params object[] args);
+
+		public static ObjectActivator<T> GetActivator<T>(ConstructorInfo ctor)
+		{
+			Type type = ctor.DeclaringType;
+			ParameterInfo[] paramsInfo = ctor.GetParameters();
+
+			//create a single param of type object[]
+			ParameterExpression param =
+				Expression.Parameter(typeof(object[]), "args");
+
+			Expression[] argsExp =
+				new Expression[paramsInfo.Length];
+
+			//pick each arg from the params array 
+			//and create a typed expression of them
+			for (int i = 0; i < paramsInfo.Length; i++)
+			{
+				Expression index = Expression.Constant(i);
+				Type paramType = paramsInfo[i].ParameterType;
+
+				Expression paramAccessorExp =
+					Expression.ArrayIndex(param, index);
+
+				Expression paramCastExp =
+					Expression.Convert(paramAccessorExp, paramType);
+
+				argsExp[i] = paramCastExp;
+			}
+
+			//make a NewExpression that calls the
+			//ctor with the args we just created
+			NewExpression newExp = Expression.New(ctor, argsExp);
+
+			//create a lambda with the New
+			//Expression as body and our param object[] as arg
+			LambdaExpression lambda =
+				Expression.Lambda(typeof(ObjectActivator<T>), newExp, param);
+
+			//compile it
+			ObjectActivator<T> compiled = (ObjectActivator<T>)lambda.Compile();
+			return compiled;
+		}
+
+		public static GameObject InstantiateActivator<TPrefab>(ObjectActivator<TPrefab> activator) where TPrefab : GameObject
+		{
+			return InstantiateActivator(new Coord(0, 0), activator, null);
+		}
+
+		public static GameObject InstantiateActivator<TPrefab>(Coord position, ObjectActivator<TPrefab> activator) where TPrefab : GameObject
+		{
+			return InstantiateActivator(position, activator, null);
+		}
+
+		public static GameObject InstantiateActivator<TPrefab>(ObjectActivator<TPrefab> activator, params object[] args) where TPrefab : GameObject
+		{
+			return InstantiateActivator(new Coord(0, 0), activator, args);
+		}
+
+		public static GameObject InstantiateActivator<TPrefab>(Coord location, ObjectActivator<TPrefab> activator, params object[] args) where TPrefab : GameObject
+		{
+			// Checking if the TPrefab type is marked with the isprefab attribute
+			if (!(Attribute.GetCustomAttribute(typeof(TPrefab), typeof(IsPrefabAttribute)) is null))
+			{
+				// Note:
+				// Lots of things here get assigned to null
+				// This is to ensure that gameobjects can be destroyed and have their memory freed up during runtime
+
+				// Creating a new instance of the gameobject
+				GameObject newGameObject = activator.Invoke(args);
 
 				// Setting the position of the gameobject
 				newGameObject.physicalState.Position = (CoordF)location;

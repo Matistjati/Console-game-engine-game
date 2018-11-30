@@ -352,25 +352,27 @@ namespace Uncoal.Runner
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void ClearOldSprites()
 		{
-			for (int i = 0; i < spritePositions.Count; i++)
-			{
-				// Getting a positive version of spritepositions x and y
-				int positivePositionX = (spritePositions[i].X < 0)
-					? 0
-					: spritePositions[i].X;
-
-				int positivePositionY = (spritePositions[i].Y < 0)
-					? 0
-					: spritePositions[i].Y;
-
-				for (int y = 0; y < spritePositions[i].Height; y++)
+			Parallel.For(0, spritePositions.Count,
+				i =>
 				{
-					for (int x = 0; x < spritePositions[i].Width; x++)
-					{
-						colors[positivePositionX + x, positivePositionY + y] = null;
-					}
-				}
-			}
+					// Getting a positive version of spritepositions x and y
+					int positivePositionX = (spritePositions[i].X < 0)
+						? 0
+						: spritePositions[i].X;
+
+					int positivePositionY = (spritePositions[i].Y < 0)
+						? 0
+						: spritePositions[i].Y;
+
+					Parallel.For(0, spritePositions[i].Height,
+						y =>
+						{
+							for (int x = 0; x < spritePositions[i].Width; x++)
+							{
+								colors[positivePositionX + x, positivePositionY + y] = null;
+							}
+						});
+				});
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

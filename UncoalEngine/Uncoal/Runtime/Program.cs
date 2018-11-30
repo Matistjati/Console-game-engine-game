@@ -64,7 +64,14 @@ namespace Uncoal.Runner
 				{
 					if (ReflectiveHelper<Type>.TryGetMethodFromComponent(component, "start", out MethodInfo method))
 					{
-						method.Invoke(component, null);
+						try
+						{
+							method.Invoke(component, null);
+						}
+						catch (TargetInvocationException ex)
+						{
+							throw new TargetInvocationException($"Exception was thrown during start on component {component}", ex);
+						}
 						// Leave no references hanging, see top of method
 						method = null;
 					}
