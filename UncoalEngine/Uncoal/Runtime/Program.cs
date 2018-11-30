@@ -119,14 +119,19 @@ namespace Uncoal.Runner
 
 			if (bufferHandle == NativeMethods.INVALID_HANDLE_VALUE || handleResult != 0)
 			{
-				Log.DefaultLogger.LogError($"Win32Error calling GetStdHandle (invalid handle): {handleResult}");
+				Log.DefaultLogger.LogError($"Win32Error calling GetStdHandle (invalid handle): {handleResult}. Handle was {bufferHandle}");
 			}
 
 			uint mode = 0;
 
 			NativeMethods.GetConsoleMode(bufferHandle, ref mode);
+			int getModeResult = Marshal.GetLastWin32Error();
 
-			
+			if (getModeResult != 0)
+			{
+				Log.DefaultLogger.LogError($"Win32Error calling GetConsoleMode: {getModeResult}");
+			}
+
 			NativeMethods.SetConsoleMode(bufferHandle, mode | 0x4); // 0x4 is enable escape sequences
 			int setConsoleResult = Marshal.GetLastWin32Error();
 

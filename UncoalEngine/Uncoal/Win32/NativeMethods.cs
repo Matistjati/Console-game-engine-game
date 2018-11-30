@@ -7,7 +7,7 @@ namespace Uncoal.Internal
 {
 	internal static class NativeMethods
 	{
-		[DllImport("Kernel32.dll", CharSet = CharSet.Unicode)]
+		[DllImport("Kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 		public static extern bool SetConsoleTitle(
 			string lpConsoleTitle);
 
@@ -185,7 +185,7 @@ namespace Uncoal.Internal
 			ENABLE_ECHO_INPUT = 0x0004,
 			ENABLE_WINDOW_INPUT = 0x0008; //more
 
-		[DllImport("kernel32.dll")]
+		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetConsoleMode(
 			IntPtr hConsoleInput,
 			ref uint lpMode);
