@@ -78,7 +78,7 @@ namespace Uncoal.Runner
 			{
 				for (int y = 0; y < height; y++)
 				{
-					string color = colors[x, y];
+					StringBuilder color = colors[x, y];
 					if (color is null)
 					{
 						sprite.Append(" ");
@@ -101,21 +101,6 @@ namespace Uncoal.Runner
 				for (int x = 0; x < colors.GetLength(0); x++)
 				{
 					if (colors[x, y] != null)
-					{
-						return false;
-					}
-				}
-			}
-			return true;
-		}
-
-		public static bool IsColorsAllWhiteSpaceOrNull()
-		{
-			for (int y = 0; y < colors.GetLength(1); y++)
-			{
-				for (int x = 0; x < colors.GetLength(0); x++)
-				{
-					if (!string.IsNullOrWhiteSpace(colors[x, y]))
 					{
 						return false;
 					}
@@ -147,7 +132,7 @@ namespace Uncoal.Runner
 
 			displaySize = new Coord(Console.BufferWidth, Console.BufferHeight);
 
-			colors = new string[displaySize.X, displaySize.Y];
+			colors = new StringBuilder[displaySize.X, displaySize.Y];
 
 			// Multipltying RenderedGameObjects.Count by 32 * 32, See left bitwise shift
 			allRows = new StringBuilder(RenderedGameObjects.Count << 10);
@@ -201,14 +186,15 @@ namespace Uncoal.Runner
 			}
 		}
 
-		const char whiteSpace = ' ';
+		const char whiteSpaceChar = ' ';
 		const string escapeStartNormal = "\x1b[";
+		static readonly StringBuilder whiteSpace = new StringBuilder(" ");
 
 		static List<SmallRectangle> spritePositions = new List<SmallRectangle>();
 		static List<SmallRectangle> spritePositionsCopy = new List<SmallRectangle>();
 		static Dictionary<ushort, Distance> filledRows = new Dictionary<ushort, Distance>(spritePositions.Count << 5);
 
-		static string[,] colors;
+		static StringBuilder[,] colors;
 		static Coord displaySize;
 
 		static StringBuilder allRows;
@@ -317,8 +303,17 @@ namespace Uncoal.Runner
 					(short)colorMapSize.Y));
 
 				// What we will use for indexing the color array
-				int xIndex;
-				int yIndex;
+
+				if (position.X < 0)
+				{
+					colorMapSize.X += position.X;
+					position.X = 0;
+				}
+				if (position.Y < 0)
+				{
+					colorMapSize.Y += position.Y;
+					position.Y = 0;
+				}
 
 				// Filling our internal array (strings representing colors) representing the console
 
@@ -326,24 +321,19 @@ namespace Uncoal.Runner
 
 				for (int x = 0; x < colorMapSize.X; x++)
 				{
-					if ((xIndex = x + position.X) < 0)
-						continue;
-
 					for (int y = 0; y < colorMapSize.Y; y++)
 					{
-						string cellColor = RenderedGameObjects[i].ColorMap[x, y];
+						StringBuilder cellColor = RenderedGameObjects[i].ColorMap[x, y];
 
-						if ((yIndex = y + position.Y) < 0)
-							continue;
 
 						// cellcolor will only have length 1 if it is whitespace (due to the way cellcolor is assigned)
 						// This can be found in sprite.cs under ctor: public Sprite(Bitmap image, float scale)
 
 						if (cellColor.Length == 1) // cellColor == " " but faster
-							if (colors[xIndex, yIndex] != null)
+							if (colors[x + position.X, y + position.Y] != null)
 								continue;
 
-						colors[xIndex, yIndex] = cellColor;
+						colors[x + position.X, y + position.Y] = cellColor;
 					}
 				}
 			}
@@ -457,7 +447,7 @@ namespace Uncoal.Runner
 						// For more info, check
 						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
-						allRows.Append(colors[x + rowInfo.start, y] ?? " ");
+						allRows.Append(colors[x + rowInfo.start, y] ?? whiteSpace);
 					}
 					allRows.Append(Environment.NewLine);
 				}
@@ -473,7 +463,7 @@ namespace Uncoal.Runner
 		{
 			// Clearing the console Using some p/invoking
 			Parallel.For(0, spritePositionsCopy.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, 
-				index => {
+				(int index) => {
 					COORD position = new COORD(spritePositionsCopy[index].X, spritePositionsCopy[index].X);
 
 					Parallel.For(0, spritePositionsCopy[index].Height, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
@@ -484,7 +474,7 @@ namespace Uncoal.Runner
 
 						   FillConsoleOutputCharacter(
 								stdOut,     // Output buffer handle
-								whiteSpace, // The character we replace stuff with
+								whiteSpaceChar, // The character we replace stuff with
 								spritePositionsCopy[index].Width, // Amount of times to replace character
 								pos,   // The position to start writing
 								out int lpNumberOfCharsWritten);
@@ -493,7 +483,7 @@ namespace Uncoal.Runner
 		}
 
 		public static Queue<GameObject> destructionQueue = new Queue<GameObject>();
-		public static List<SpriteDisplayer> RenderedGameObjects { get; set; } = new List<SpriteDisplayer>();
+		public static List<SpriteDisplayer> RenderedGameObjects = new List<SpriteDisplayer>();
 
 		static void DoNothing() { }
 		static Action updateCallBack = new Action(DoNothing);

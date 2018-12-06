@@ -8,16 +8,19 @@ namespace Uncoal.Engine
 	public class Sprite
 	{
 		public readonly float Scale;
-		public readonly string[,] colorValues;
+		public readonly StringBuilder[,] colorValues;
 		public readonly Coord Size;
 
 		// Used for building colorValues
-		const string whiteSpace = " ";
+		static readonly StringBuilder whiteSpace = new StringBuilder(" ");
+		static readonly StringBuilder blockChar = new StringBuilder("█");
 		const string escapeStartRGB = "\x1b[38;2;";
 		const string escapeEnd = "m█";
 		const char colorSeparator = ';';
 
-		public Sprite(string[,] image)
+		static StringBuilder colorStringBuilder = new StringBuilder(24);
+
+		public Sprite(StringBuilder[,] image)
 		{
 			Size = new Coord(image.GetLength(0), image.GetLength(1));
 			colorValues = image;
@@ -38,48 +41,79 @@ namespace Uncoal.Engine
 		public Sprite(Bitmap image) : this(image, 1f)
 		{ }
 
-		static StringBuilder colorStringBuilder = new StringBuilder(24);
 
 		public Sprite(Bitmap image, float scale)
 		{
+			if (scale <= 0)
+			{
+				throw new System.ArgumentOutOfRangeException(nameof(scale), scale, "Scale was less than or equal to 0");
+			}
+
 			if (scale != 1)
 			{
 				image = ResizeImage(image, (int)(image.Width * scale), (int)(image.Width * scale));
 			}
 
-			Scale = scale;
-			Size = new Coord(image.Width, image.Height);
-			colorValues = new string[Size.X, Size.Y];
+			this.Scale = scale;
+			this.Size = new Coord(image.Width, image.Height);
+			this.colorValues = new StringBuilder[Size.X, Size.Y];
 
-			for (int x = 0; x < Size.X; x++)
+
+			unsafe
 			{
-				for (int y = 0; y < Size.Y; y++)
+				BitmapData bitmapData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, image.PixelFormat);
+
+				int bytesPerPixel = Image.GetPixelFormatSize(image.PixelFormat) / 8;
+				int heightInPixels = bitmapData.Height;
+				int widthInBytes = bitmapData.Width * bytesPerPixel;
+				byte* ptrFirstPixel = (byte*)bitmapData.Scan0;
+
+				for (int y = 0; y < heightInPixels; y++)
 				{
-					Color rgb = image.GetPixel(x, y);
-
-					if (rgb.R == 0 && rgb.G == 0 && rgb.B == 0) //|| rgb.A < 10)
+					byte* currentLine = ptrFirstPixel + (y * bitmapData.Stride);
+					for (int x = 0; x < widthInBytes; x += bytesPerPixel)
 					{
-						colorValues[x, y] = whiteSpace;
-					}
-					else
-					{
-						// I know, it looks messy but it's the fastest way
-						// An escape sequence telling the console what color to display
-						// For more info, check
-						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
-						colorStringBuilder.Append(escapeStartRGB);
-						colorStringBuilder.Append(rgb.R);
-						colorStringBuilder.Append(colorSeparator);
-						colorStringBuilder.Append(rgb.G);
-						colorStringBuilder.Append(colorSeparator);
-						colorStringBuilder.Append(rgb.B);
-						colorStringBuilder.Append(escapeEnd);
+						int blue = currentLine[x];
+						int green = currentLine[x + 1];
+						int red = currentLine[x + 2];
 
-						colorValues[x, y] = colorStringBuilder.ToString();
-						colorStringBuilder.Clear();
+
+						if (blue == 0 && green == 0 && red == 0) //|| rgb.A < 10)
+						{
+							colorValues[x / bytesPerPixel, y] = whiteSpace;
+						}
+						else
+						{
+							// I know, it looks messy but it's the fastest way
+							// An escape sequence telling the console what color to display
+							// For more info, check
+							// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
+
+							colorStringBuilder.Append(escapeStartRGB);
+							colorStringBuilder.Append(red);
+							colorStringBuilder.Append(colorSeparator);
+							colorStringBuilder.Append(green);
+							colorStringBuilder.Append(colorSeparator);
+							colorStringBuilder.Append(blue);
+							colorStringBuilder.Append(escapeEnd);
+
+							int xIndex = x / bytesPerPixel;
+
+							// If the previous cell was identical to this one, make this one uncolored
+							if (xIndex - 1 >= 0 && colorValues[xIndex - 1, y] == colorStringBuilder)
+							{
+								colorValues[xIndex, y] = blockChar;
+							}
+							else
+							{
+								colorValues[xIndex, y] = colorStringBuilder;
+							}
+							colorStringBuilder.Clear();
+						}
 					}
 				}
+				image.UnlockBits(bitmapData);
 			}
 
 			image.Dispose();

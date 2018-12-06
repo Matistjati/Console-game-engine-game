@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Text;
 
 namespace Uncoal.Engine
 {
@@ -8,7 +9,7 @@ namespace Uncoal.Engine
 		public int Layer;
 
 
-		public string[,] ColorMap => Sprite.colorValues;
+		public StringBuilder[,] ColorMap => Sprite.colorValues;
 
 		internal Sprite Sprite { get; set; }
 
@@ -40,9 +41,9 @@ namespace Uncoal.Engine
 			Sprite = new Sprite(ImageBase, physicalState.Scale);
 		}
 
-		private string[,] imageBaseString;
+		private StringBuilder[,] imageBaseString;
 
-		internal string[,] ImageBaseString
+		internal StringBuilder[,] ImageBaseString
 		{
 			get => imageBaseString;
 			set
@@ -63,7 +64,7 @@ namespace Uncoal.Engine
 
 		public void SetImage(string image) => ImageBase = (Bitmap)Image.FromFile(image);
 
-		public void SetImage(string[,] image) => ImageBaseString = image;
+		public void SetImage(StringBuilder[,] image) => ImageBaseString = image;
 
 		internal void RecalculateSpriteSize()
 		{
