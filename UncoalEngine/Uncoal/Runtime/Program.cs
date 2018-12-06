@@ -91,7 +91,7 @@ namespace Uncoal.Runner
 			gameObjects = null;
 		}
 
-		static void GameSetup(ushort fontSizeX, ushort fontSizeY, int framesBetweenDraws, string gameName)
+		static void GameSetup(ushort fontSizeX, ushort fontSizeY, string gameName)
 		{
 			// Setting console settings
 			// The console cursor will look weird with all our write operations
@@ -106,7 +106,6 @@ namespace Uncoal.Runner
 			Console.BufferHeight = Console.WindowHeight;
 
 			// Setting how many frames we want to run between drawing to the console according to what was passed in start
-			FrameRunner.framesBetweenDraws = framesBetweenDraws;
 
 			// Set the console's title to a preset gamename
 			NativeMethods.SetConsoleTitle(gameName);
@@ -151,14 +150,14 @@ namespace Uncoal.Runner
 			using (StreamWriter x = File.AppendText("logs/log.txt")) { }
 		}
 
-		public static void Start(ushort fontSizeX, ushort fontSizeY, int framesBetweenDraws, string gameName)
+		public static void Start(ushort fontSizeX, ushort fontSizeY, string gameName)
 		{
 #if DEBUG
 			Console.ReadKey(true);
 #endif
 
 			// Setting up the game
-			GameSetup(fontSizeX, fontSizeY, framesBetweenDraws, gameName);
+			GameSetup(fontSizeX, fontSizeY, gameName);
 
 			// Starting
 			FrameRunner.Run();

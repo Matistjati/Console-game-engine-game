@@ -7,22 +7,20 @@ namespace Uncoal.Engine
 {
 	public class Sprite
 	{
-		public readonly float Scale;
-		public readonly StringBuilder[,] colorValues;
-		public readonly Coord Size;
+		public float Scale;
+		public string[,] colorValues;
 
 		// Used for building colorValues
-		static readonly StringBuilder whiteSpace = new StringBuilder(" ");
-		static readonly StringBuilder blockChar = new StringBuilder("█");
+		const string whiteSpace = " ";
+		const string blockChar = "█";
 		const string escapeStartRGB = "\x1b[38;2;";
 		const string escapeEnd = "m█";
 		const char colorSeparator = ';';
 
 		static StringBuilder colorStringBuilder = new StringBuilder(24);
 
-		public Sprite(StringBuilder[,] image)
+		public Sprite(string[,] image)
 		{
-			Size = new Coord(image.GetLength(0), image.GetLength(1));
 			colorValues = image;
 		}
 
@@ -55,8 +53,8 @@ namespace Uncoal.Engine
 			}
 
 			this.Scale = scale;
-			this.Size = new Coord(image.Width, image.Height);
-			this.colorValues = new StringBuilder[Size.X, Size.Y];
+
+			this.colorValues = new string[image.Width, image.Height];
 
 
 			unsafe
@@ -100,14 +98,15 @@ namespace Uncoal.Engine
 
 							int xIndex = x / bytesPerPixel;
 
+							string colorString = colorStringBuilder.ToString();
 							// If the previous cell was identical to this one, make this one uncolored
-							if (xIndex - 1 >= 0 && colorValues[xIndex - 1, y] == colorStringBuilder)
+							if (y - 1 >= 0 && colorValues[xIndex, y - 1] == (colorString))
 							{
 								colorValues[xIndex, y] = blockChar;
 							}
 							else
 							{
-								colorValues[xIndex, y] = colorStringBuilder;
+								colorValues[xIndex, y] = colorString;
 							}
 							colorStringBuilder.Clear();
 						}

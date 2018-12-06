@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using WMPRichPreviewLauncher;
 using System.Text;
 using System.Threading.Tasks;
 using Uncoal.Engine;
-using System.Runtime.CompilerServices;
 using static Uncoal.Internal.NativeMethods;
 
 namespace Uncoal.Runner
@@ -78,7 +79,7 @@ namespace Uncoal.Runner
 			{
 				for (int y = 0; y < height; y++)
 				{
-					StringBuilder color = colors[x, y];
+					string color = colors[x, y];
 					if (color is null)
 					{
 						sprite.Append(" ");
@@ -123,8 +124,8 @@ namespace Uncoal.Runner
 		}
 #endif
 
-		internal static int framesBetweenDraws = 2;
-		internal static int framesSinceLastDraw;
+		static Task renderSprites;
+		static Action renderSpritesAction = (Action)RenderSprites;
 
 		public static void Run()
 		{
@@ -132,19 +133,19 @@ namespace Uncoal.Runner
 
 			displaySize = new Coord(Console.BufferWidth, Console.BufferHeight);
 
-			colors = new StringBuilder[displaySize.X, displaySize.Y];
-
-			// Multipltying RenderedGameObjects.Count by 32 * 32, See left bitwise shift
-			allRows = new StringBuilder(RenderedGameObjects.Count << 10);
+			colors = new string[displaySize.X, displaySize.Y];
 
 			run = true;
 
 			frameMeasurer.Start();
-			framesSinceLastDraw = 0;
 
+
+			renderSprites = Task.Run(renderSpritesAction);
+			
 			// Debug time calculation accuracy
 			//updateCallBack += TestTimeAccuracy;
 			//startDate = DateTime.UtcNow;
+
 
 			while (run)
 			{
@@ -167,44 +168,40 @@ namespace Uncoal.Runner
 				// If two objects overlap, make sure that the bigger one has the lowest layer
 				// Rendering at (0,0) causes problems, too lazy to fix tho..
 
-				if (framesSinceLastDraw >= framesBetweenDraws)
+				if (renderSprites.IsCompleted)
 				{
-					RenderSprites();
-					framesSinceLastDraw = 0;
+					renderSprites = Task.Run(renderSpritesAction);
 				}
-				else
-				{
-					framesSinceLastDraw++;
-				}
+
 
 				// Destroying all gameobjects in destructionQueue
-				DestroyGameObjects();
-
-				// This is to avoid the console flickering randomly
-				// Grant developer ability to change this value
-				//Thread.Sleep(100);
+				if (destructionQueue.Count != 0)
+				{
+					DestroyGameObjects();
+				}
 			}
 		}
 
 		const char whiteSpaceChar = ' ';
 		const string escapeStartNormal = "\x1b[";
-		static readonly StringBuilder whiteSpace = new StringBuilder(" ");
 
-		static List<SmallRectangle> spritePositions = new List<SmallRectangle>();
-		static List<SmallRectangle> spritePositionsCopy = new List<SmallRectangle>();
-		static Dictionary<ushort, Distance> filledRows = new Dictionary<ushort, Distance>(spritePositions.Count << 5);
+		// I estimate that maybe 40 gameobjects will exist at once?
+		static List<SmallRectangle> spritePositions = new List<SmallRectangle>(40);
+		static List<SmallRectangle> spritePositionsCopy = new List<SmallRectangle>(40);
+		static Dictionary<ushort, Distance> filledRows = new Dictionary<ushort, Distance>(40);
 
-		static StringBuilder[,] colors;
+		static string[,] colors;
 		static Coord displaySize;
 
-		static StringBuilder allRows;
+		// Believe me, it will be about this big
+		static StringBuilder allRows = new StringBuilder(244000);
 
 		static Task writeConsole;
+
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void RenderSprites()
 		{
-			writeConsole?.Wait();
 
 			// Clearing the internal color array representing the console
 			ClearOldSprites();
@@ -216,11 +213,15 @@ namespace Uncoal.Runner
 			spritePositions.Clear();
 
 			// Sort the render order based on layer descending when the size changes
-			
+
 			RenderedGameObjects.Sort((x, y) => y.Layer.CompareTo(x.Layer));
 
 			// Filling colors based on the current RenderedGameObjects
 			FillColors();
+
+			// We don't want to risk changing allrows while still writing
+			writeConsole?.Wait();
+
 
 			// Joining allrows from colors
 			JoinColorsToString();
@@ -304,16 +305,9 @@ namespace Uncoal.Runner
 
 				// What we will use for indexing the color array
 
-				if (position.X < 0)
-				{
-					colorMapSize.X += position.X;
-					position.X = 0;
-				}
-				if (position.Y < 0)
-				{
-					colorMapSize.Y += position.Y;
-					position.Y = 0;
-				}
+				// What we will use for indexing the color array
+				int xIndex;
+				int yIndex;
 
 				// Filling our internal array (strings representing colors) representing the console
 
@@ -321,19 +315,24 @@ namespace Uncoal.Runner
 
 				for (int x = 0; x < colorMapSize.X; x++)
 				{
+					if ((xIndex = x + position.X) < 0)
+						continue;
+
 					for (int y = 0; y < colorMapSize.Y; y++)
 					{
-						StringBuilder cellColor = RenderedGameObjects[i].ColorMap[x, y];
+						string cellColor = RenderedGameObjects[i].ColorMap[x, y];
 
+						if ((yIndex = y + position.Y) < 0)
+							continue;
 
 						// cellcolor will only have length 1 if it is whitespace (due to the way cellcolor is assigned)
 						// This can be found in sprite.cs under ctor: public Sprite(Bitmap image, float scale)
 
 						if (cellColor.Length == 1) // cellColor == " " but faster
-							if (colors[x + position.X, y + position.Y] != null)
+							if (colors[xIndex, yIndex] != null)
 								continue;
 
-						colors[x + position.X, y + position.Y] = cellColor;
+						colors[xIndex, yIndex] = cellColor;
 					}
 				}
 			}
@@ -369,11 +368,11 @@ namespace Uncoal.Runner
 		static void JoinColorsToString()
 		{
 			allRows.Clear();
+			filledRows.Clear();
 
 			/////////////////////////////
 			// Hashing the y positions //
 			/////////////////////////////
-			filledRows.Clear();
 
 			for (int i = 0; i < spritePositions.Count; i++)
 			{
@@ -396,7 +395,7 @@ namespace Uncoal.Runner
 						{
 							currentRow.length += spritePositions[i].X - currentRow.start;
 
-							if (currentRow.length + currentRow.start  > displaySize.X)
+							if (currentRow.length + currentRow.start > displaySize.X)
 							{
 								currentRow.length = displaySize.X - currentRow.start;
 							}
@@ -447,7 +446,7 @@ namespace Uncoal.Runner
 						// For more info, check
 						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
-						allRows.Append(colors[x + rowInfo.start, y] ?? whiteSpace);
+						allRows.Append(colors[x + rowInfo.start, y] ?? " ");
 					}
 					allRows.Append(Environment.NewLine);
 				}
@@ -462,8 +461,9 @@ namespace Uncoal.Runner
 		static void ClearConsole(IntPtr stdOut)
 		{
 			// Clearing the console Using some p/invoking
-			Parallel.For(0, spritePositionsCopy.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, 
-				(int index) => {
+			Parallel.For(0, spritePositionsCopy.Count, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
+				(int index) =>
+				{
 					COORD position = new COORD(spritePositionsCopy[index].X, spritePositionsCopy[index].X);
 
 					Parallel.For(0, spritePositionsCopy[index].Height, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },

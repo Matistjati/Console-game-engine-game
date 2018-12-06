@@ -141,27 +141,7 @@ namespace Uncoal.Engine
 
 		public static Coord mousePosition = new Coord();
 
-		public enum ButtonPress
-		{
-			left = 0x0001,
-			right = 0x0002
-		}
-
-		internal static bool leftMouseButtonPressed;
-		internal static bool rightMouseButtonPressed;
-
-		public static bool GetButtonDown(ButtonPress button)
-		{
-			switch (button)
-			{
-				case ButtonPress.left:
-					return leftMouseButtonPressed;
-				case ButtonPress.right:
-					return rightMouseButtonPressed;
-				default:
-					Log.DefaultLogger.LogError($"Case default was reached: {button}");
-					return false;
-			}
-		}
+		public static bool leftMouseButtonPressed;
+		public static bool rightMouseButtonPressed;
 	}
 }
