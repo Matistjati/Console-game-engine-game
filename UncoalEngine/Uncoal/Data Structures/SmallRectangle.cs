@@ -4,13 +4,13 @@
 	{
 		public static readonly SmallRectangle empty = new SmallRectangle(0, 0, 0, 0);
 
-		public readonly short X;
+		public short X;
 
-		public readonly short Y;
+		public short Y;
 
-		public readonly short Width;
+		public short Width;
 
-		public readonly short Height;
+		public short Height;
 
 		public SmallRectangle(short x, short y, short width, short height)
 		{
