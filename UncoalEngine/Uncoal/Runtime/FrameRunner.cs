@@ -73,10 +73,7 @@ namespace Uncoal.Runner
 
 			frameMeasurer.Start();
 
-
 			Task renderSprites = Task.Run((Action)RenderSprites);
-
-
 
 
 			while (run)
@@ -310,8 +307,11 @@ namespace Uncoal.Runner
 			// Filling with sprites to rendered
 			Task iterateSpritePos = Task.Run(() =>
 			{
-				foreach (SmallRectangle rectangle in spritePositions)
+				for (int i = 0; i < spritePositions.Count; i++)
 				{
+					// Combining concepts of for and foreach for even faster
+					SmallRectangle rectangle = spritePositions[i];
+
 					if (rectangle.Y < 0)
 					{
 						rectangle.Height += rectangle.Y;
@@ -360,8 +360,11 @@ namespace Uncoal.Runner
 			// Sprites to be removed
 			Task iterateSpritePosCopy = Task.Run(() =>
 			{
-				foreach (SmallRectangle rectangle in spritePositionsCopy)
+				for (int i = 0; i < spritePositions.Count; i++)
 				{
+					// Combining concepts of for and foreach for even faster
+					SmallRectangle rectangle = spritePositions[i];
+
 					if (rectangle.Y < 0)
 					{
 						rectangle.Height += rectangle.Y;
