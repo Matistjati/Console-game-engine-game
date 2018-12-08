@@ -43,20 +43,11 @@ namespace Uncoal.Tests
 		[TestMethod()]
 		public void InputKeyUpAndPressed()
 		{
-			keyEvent.bKeyDown = true;
-			keyEvent.UnicodeChar = 'w';
-
-			InternalInput.KeyEventHandler(keyEvent);
-
-			Input.UpdateInput();
-			Assert.IsTrue(Input.GetKeyDown('w'));
-
-			Input.UpdateInput();
-			Assert.IsTrue(Input.GetKeyUp('w'));
-
-			Input.UpdateInput();
-			Input.UpdateInput();
-			Assert.AreEqual(0, Input.charsMayRelease.Count);
+			InternalInput.Reset();
+			for (byte i = 0; i < 255; i++)
+			{
+				Assert.IsTrue(Input.GetKeyUp((char)i), $"input contains {(char)i}");
+			}
 		}
 
 		[TestMethod()]
@@ -92,13 +83,13 @@ namespace Uncoal.Tests
 			InternalInput.MouseEventHandler(mouseEvent);
 
 			Input.UpdateInput();
-			Assert.IsTrue(Input.GetButtonDown(Input.ButtonPress.left));
+			Assert.IsTrue(Input.leftMouseButtonPressed);
 
 			mouseEvent.dwButtonState = MOUSE_EVENT_RECORD.RIGHTMOST_BUTTON_PRESSED;
 			InternalInput.MouseEventHandler(mouseEvent);
 
 			Input.UpdateInput();
-			Assert.IsTrue(Input.GetButtonDown(Input.ButtonPress.right));
+			Assert.IsTrue(Input.rightMouseButtonPressed);
 		}
 
 		[TestMethod]

@@ -61,6 +61,7 @@
     <Compile Include="Uncoal\GameEntity\Component\Component.cs" />
     <Compile Include="Uncoal\GameEntity\Debug\SampleGameObj.cs" />
     <Compile Include="Uncoal\GameEntity\Component\SpriteDisplayer.cs" />
+    <Compile Include="Uncoal\GameEntity\Debug\TimeAccuracyTest.cs" />
     <Compile Include="Uncoal\Input\ConsoleListener.cs" />
     <Compile Include="Uncoal\Data Structures\Coord.cs" />
     <Compile Include="Uncoal\Data Structures\CoordF.cs" />

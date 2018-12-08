@@ -23,6 +23,7 @@ namespace Uncoal.Runner
 			frameMeasurer.Stop();
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void DestroyGameObjects()
 		{
 			// The only way to do kill an objects is to kill all references to it
@@ -64,50 +65,6 @@ namespace Uncoal.Runner
 
 
 
-#if DEBUG
-		// For checking if the rendering or the internal representation of the sprite is at fault
-
-		public static void ColorMapPrint()
-		{
-			Console.Clear();
-
-			StringBuilder sprite = new StringBuilder(colors.Length);
-			int width = colors.GetLength(0);
-			int height = colors.GetLength(1);
-			for (int x = 0; x < width; x++)
-			{
-				for (int y = 0; y < height; y++)
-				{
-					string color = colors[x, y];
-					if (color is null)
-					{
-						sprite.Append(" ");
-					}
-					else
-					{
-						sprite.Append(color);
-					}
-				}
-				sprite.Append('\n');
-				Console.Write(sprite);
-				sprite.Clear();
-			}
-		}
-
-		private static float total;
-		private static readonly DateTime startDate;
-		private static void TestTimeAccuracy()
-		{
-			total += GameObject.TimeDelta;
-			Console.Clear();
-			Console.Write($"time: {GameObject.Time}\n" +
-				$"timedelta total: {total}\n" +
-				$"timedelta: {GameObject.TimeDelta}\n" +
-				$"difference: {total - GameObject.Time}\n" +
-				$"Actual time: {(DateTime.UtcNow - startDate).TotalSeconds}");
-		}
-#endif
-
 		public static void Run()
 		{
 			lastFrameCall = new TimeSpan();
@@ -119,9 +76,7 @@ namespace Uncoal.Runner
 
 			Task renderSprites = Task.Run((Action)RenderSprites);
 
-			// Debug time calculation accuracy
-			//updateCallBack += TestTimeAccuracy;
-			//startDate = DateTime.UtcNow;
+
 
 
 			while (run)
