@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Reflection;
-using Uncoal.Engine;
-using Uncoal.MapGenerating;
-using Uncoal.Internal;
 using System.Runtime.InteropServices;
+using Uncoal.Engine;
+using Uncoal.Internal;
+using Uncoal.MapGenerating;
+using static Uncoal.Internal.NativeMethods;
 
 namespace Uncoal.Runner
 {
@@ -108,22 +108,22 @@ namespace Uncoal.Runner
 			// Setting how many frames we want to run between drawing to the console according to what was passed in start
 
 			// Set the console's title to a preset gamename
-			NativeMethods.SetConsoleTitle(gameName);
+			SetConsoleTitle(gameName);
 
 
 			// Activating escape sequences
 
-			IntPtr bufferHandle = NativeMethods.GetStdHandle(NativeMethods.StdHandle.OutputHandle);
+			IntPtr bufferHandle = GetStdHandle(StdHandle.OutputHandle);
 			int handleResult = Marshal.GetLastWin32Error();
 
-			if (bufferHandle == NativeMethods.INVALID_HANDLE_VALUE || handleResult != 0)
+			if (bufferHandle == INVALID_HANDLE_VALUE || handleResult != 0)
 			{
 				Log.DefaultLogger.LogError($"Win32Error calling GetStdHandle (invalid handle): {handleResult}. Handle was {bufferHandle}");
 			}
 
-			uint mode = 0;
+			ConsoleMode mode = 0;
 
-			NativeMethods.GetConsoleMode(bufferHandle, ref mode);
+			GetConsoleMode(bufferHandle, ref mode);
 			int getModeResult = Marshal.GetLastWin32Error();
 
 			if (getModeResult != 0)
@@ -131,7 +131,7 @@ namespace Uncoal.Runner
 				Log.DefaultLogger.LogError($"Win32Error calling GetConsoleMode: {getModeResult}");
 			}
 
-			NativeMethods.SetConsoleMode(bufferHandle, mode | 0x4); // 0x4 is enable escape sequences
+			SetConsoleMode(bufferHandle, mode | ConsoleMode.ENABLE_VIRTUAL_TERMINAL_PROCESSING); // Enable escape sequences
 			int setConsoleResult = Marshal.GetLastWin32Error();
 
 			if (setConsoleResult != 0)

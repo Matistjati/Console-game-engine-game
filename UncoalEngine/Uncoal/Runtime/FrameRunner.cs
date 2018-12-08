@@ -71,7 +71,7 @@ namespace Uncoal.Runner
 		{
 			Console.Clear();
 
-			StringBuilder sprite = new StringBuilder(colors.GetLength(0) * colors.GetLength(1));
+			StringBuilder sprite = new StringBuilder(colors.Length);
 			int width = colors.GetLength(0);
 			int height = colors.GetLength(1);
 			for (int x = 0; x < width; x++)
@@ -94,21 +94,6 @@ namespace Uncoal.Runner
 			}
 		}
 
-		public static bool IsColorsAllNull()
-		{
-			for (int y = 0; y < colors.GetLength(1); y++)
-			{
-				for (int x = 0; x < colors.GetLength(0); x++)
-				{
-					if (colors[x, y] != null)
-					{
-						return false;
-					}
-				}
-			}
-			return true;
-		}
-
 		private static float total;
 		private static readonly DateTime startDate;
 		private static void TestTimeAccuracy()
@@ -123,9 +108,6 @@ namespace Uncoal.Runner
 		}
 #endif
 
-		static Task renderSprites;
-		static readonly Action renderSpritesAction = RenderSprites;
-
 		public static void Run()
 		{
 			lastFrameCall = new TimeSpan();
@@ -135,7 +117,7 @@ namespace Uncoal.Runner
 			frameMeasurer.Start();
 
 
-			renderSprites = Task.Run(renderSpritesAction);
+			Task renderSprites = Task.Run((Action)RenderSprites);
 
 			// Debug time calculation accuracy
 			//updateCallBack += TestTimeAccuracy;
@@ -162,7 +144,7 @@ namespace Uncoal.Runner
 				// Rendering has is done on another thread
 				if (renderSprites.IsCompleted)
 				{
-					renderSprites = Task.Run(renderSpritesAction);
+					renderSprites = Task.Run((Action)RenderSprites);
 				}
 
 
@@ -234,6 +216,9 @@ namespace Uncoal.Runner
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void FillColors()
 		{
+			int colorWidth = colors.GetLength(0);
+			int colorHeight = colors.GetLength(1);
+
 			foreach (SpriteDisplayer sprite in RenderedGameObjects)
 			{
 				// Only render the visible ones
@@ -244,7 +229,7 @@ namespace Uncoal.Runner
 				Coord position = (Coord)sprite.physicalState.Position;
 
 				// Checking that the sprite is on-screen
-				if (position.X > colors.GetLength(0) || position.Y > colors.GetLength(1))
+				if (position.X > colorWidth || position.Y > colorHeight)
 					continue;
 
 				// Caching the size of the sprite
@@ -253,10 +238,10 @@ namespace Uncoal.Runner
 					sprite.ColorMap.GetLength(1));
 
 				// Assuring we won't go out of bounds
-				if (colorMapSize.X + position.X > colors.GetLength(0))
+				if (colorMapSize.X + position.X > colorWidth)
 				{
 					// This is basically a shortened version of position.X - (position.X + colorMapSize.X - displaySize.X)
-					colorMapSize.X = (colors.GetLength(0) - position.X);
+					colorMapSize.X = (colorWidth - position.X);
 
 					// The above formula sets colormapsize.x equal to  the max width, problem is arrays start at 0
 					// We do this check to ensure that colorMapSize.X does not go below 0
@@ -265,10 +250,10 @@ namespace Uncoal.Runner
 				}
 
 
-				if (colorMapSize.Y + position.Y > colors.GetLength(1))
+				if (colorMapSize.Y + position.Y > colorHeight)
 				{
 					// This is basically a shortened version of position.Y - (position.Y + colorMapSize.Y - displaySize.Y)
-					colorMapSize.Y = (colors.GetLength(1) - position.Y);
+					colorMapSize.Y = (colorHeight - position.Y);
 
 					if (colorMapSize.X != 0)
 						// The above formula sets colormapsize.Y equal to  the max width, problem is arrays start at 0
@@ -292,7 +277,7 @@ namespace Uncoal.Runner
 					(short)colorMapSize.X,
 					(short)colorMapSize.Y));
 
-				
+
 
 				if (position.X < 0)
 				{
@@ -364,6 +349,9 @@ namespace Uncoal.Runner
 			// Hashing the y positions //
 			/////////////////////////////
 
+			int colorWidth = colors.GetLength(0);
+			int colorHeight = colors.GetLength(1);
+
 			// Filling with sprites to rendered
 			Task iterateSpritePos = Task.Run(() =>
 			{
@@ -390,9 +378,9 @@ namespace Uncoal.Runner
 							{
 								currentRow.length += rectangle.X - currentRow.start;
 
-								if (currentRow.length + currentRow.start > colors.GetLength(0))
+								if (currentRow.length + currentRow.start > colorWidth)
 								{
-									currentRow.length = colors.GetLength(0) - currentRow.start;
+									currentRow.length = colorWidth - currentRow.start;
 								}
 							}
 
@@ -406,11 +394,9 @@ namespace Uncoal.Runner
 						}
 						else
 						{
-							int positiveX = (rectangle.X < 0)
-								? 0
-								: rectangle.X;
-
-							filledRows[y] = new Distance(positiveX, rectangle.Width);
+							filledRows[y] = new Distance(
+								Start: (rectangle.X < 0) ? 0 : rectangle.X,
+								Length: rectangle.Width);
 						}
 					}
 				}
@@ -442,9 +428,9 @@ namespace Uncoal.Runner
 							{
 								currentRow.length += rectangle.X - currentRow.start;
 
-								if (currentRow.length + currentRow.start > colors.GetLength(0))
+								if (currentRow.length + currentRow.start > colorWidth)
 								{
-									currentRow.length = colors.GetLength(0) - currentRow.start;
+									currentRow.length = colorWidth - currentRow.start;
 								}
 							}
 
@@ -458,11 +444,9 @@ namespace Uncoal.Runner
 						}
 						else
 						{
-							int positiveX = (rectangle.X < 0)
-								? 0
-								: rectangle.X;
-
-							filledRows[y] = new Distance(positiveX, rectangle.Width);
+							filledRows[y] = new Distance(
+								Start: (rectangle.X < 0) ? 0 : rectangle.X,
+								Length: rectangle.Width);
 						}
 					}
 				}
@@ -472,13 +456,16 @@ namespace Uncoal.Runner
 			{
 				foreach (SmallRectangle rect in spritePositionsCopy)
 				{
-					for (short x = 0; x < rect.Width; x++)
+					int width = rect.Width + rect.X;
+					int height = rect.Height + rect.Y;
+
+					for (short x = rect.X; x < width; x++)
 					{
-						for (short y = 0; y < rect.Height; y++)
+						for (short y = rect.Y; y < height; y++)
 						{
-							if (colors[x + rect.X, y + rect.Y] is null)
+							if (colors[x, y] is null)
 							{
-								colors[x + rect.X, y + rect.Y] = " ";
+								colors[x, y] = " ";
 							}
 						}
 					}
@@ -491,7 +478,7 @@ namespace Uncoal.Runner
 			// Using the y positions to join everything into a string //
 			////////////////////////////////////////////////////////////
 
-			for (ushort y = 0; y < colors.GetLength(1); y++)
+			for (ushort y = 0; y < colorHeight; y++)
 			{
 				// Checking if there is an object on this row
 				// Otherwise, we sipmly append a newline

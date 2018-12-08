@@ -27,9 +27,7 @@ namespace Uncoal.Engine
 
 			pressedChars.Clear();
 			heldChars.Clear();
-			Input.charsMayRelease.Clear();
 			Input.heldChars.Clear();
-			Input.releasedChars.Clear();
 			Input.pressedChars.Clear();
 		}
 
@@ -52,7 +50,6 @@ namespace Uncoal.Engine
 			}
 			else if (r.dwEventFlags == MOUSE_EVENT_RECORD.MOUSE_MOVED)
 			{
-				//mousePosition.Set((uint)r.dwMousePosition.X, (uint)r.dwMousePosition.Y);
 				mousePosition.X = r.dwMousePosition.X;
 				mousePosition.Y = r.dwMousePosition.Y;
 			}
@@ -83,44 +80,23 @@ namespace Uncoal.Engine
 	{
 		internal static void Reset() => InternalInput.Reset();
 
-		internal static Queue<char> charsMayRelease = new Queue<char>();
-
 		internal static HashSet<char> heldChars = new HashSet<char>();
-		internal static HashSet<char> releasedChars = new HashSet<char>();
 		internal static HashSet<char> pressedChars = new HashSet<char>();
 
 		internal static void UpdateInput()
 		{
 			heldChars.Clear();
-			releasedChars.Clear();
 			pressedChars.Clear();
 
-			for (int i = 0; i < charsMayRelease.Count; i++)
-			{
-				char potentiallyReleased = charsMayRelease.Dequeue();
-				if (!InternalInput.heldChars.Contains(potentiallyReleased) &&
-					!InternalInput.pressedChars.Contains(potentiallyReleased))
-				{
-					releasedChars.Add(potentiallyReleased);
-				}
-				else if (!charsMayRelease.Contains(potentiallyReleased))
-				{
-					charsMayRelease.Enqueue(potentiallyReleased);
-				}
-			}
 
 			for (int i = 0; i < InternalInput.pressedChars.Count; i++)
 			{
-				char charChanged = InternalInput.pressedChars.Dequeue();
-				pressedChars.Add(charChanged);
-				charsMayRelease.Enqueue(charChanged);
+				pressedChars.Add(InternalInput.pressedChars.Dequeue());
 			}
 
 			for (int i = 0; i < InternalInput.heldChars.Count; i++)
 			{
-				char charChanged = InternalInput.heldChars.Dequeue();
-				heldChars.Add(charChanged);
-				charsMayRelease.Enqueue(charChanged);
+				heldChars.Add(InternalInput.heldChars.Dequeue());
 			}
 
 			leftMouseButtonPressed = InternalInput.leftMouseButtonPressed;
@@ -137,7 +113,7 @@ namespace Uncoal.Engine
 
 		public static bool GetKeyHeld(char key) => heldChars.Contains(key);
 
-		public static bool GetKeyUp(char key) => releasedChars.Contains(key);
+		public static bool GetKeyUp(char key) => !pressedChars.Contains(key) && !heldChars.Contains(key);
 
 		public static Coord mousePosition = new Coord();
 

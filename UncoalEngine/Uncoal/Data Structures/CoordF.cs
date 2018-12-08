@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace Uncoal.Engine
 {
@@ -56,7 +55,7 @@ namespace Uncoal.Engine
 
 		public override int GetHashCode()
 		{
-			return X.GetHashCode();
+			return X.GetHashCode() ^ (Y.GetHashCode() << 2);
 		}
 
 		public override string ToString()

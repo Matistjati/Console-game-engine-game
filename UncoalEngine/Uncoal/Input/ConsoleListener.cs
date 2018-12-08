@@ -24,12 +24,12 @@ namespace Uncoal.Internal
 				Run = true;
 
 				IntPtr inHandle = GetStdHandle(StdHandle.InputHandle);
-				uint mode = 0;
+				ConsoleMode mode = 0;
 				// Setting some console modes
 				GetConsoleMode(inHandle, ref mode);
-				mode &= ~ENABLE_QUICK_EDIT_MODE; //disable
-				mode |= ENABLE_WINDOW_INPUT;     //enable
-				mode |= ENABLE_MOUSE_INPUT;      //enable
+				mode &= ~ConsoleMode.ENABLE_QUICK_EDIT_MODE; //disable
+				mode |= ConsoleMode.ENABLE_WINDOW_INPUT;     //enable
+				mode |= ConsoleMode.ENABLE_MOUSE_INPUT;      //enable
 				SetConsoleMode(inHandle, mode);
 
 				int error = Marshal.GetLastWin32Error();

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -7,22 +6,9 @@ namespace Uncoal.Internal
 {
 	internal static class NativeMethods
 	{
-		[DllImport("Kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-		public static extern bool SetConsoleTitle(
-			string lpConsoleTitle);
-
-		[DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-		public static extern bool SetCurrentConsoleFontEx(
-			IntPtr hConsoleOutput,
-			bool bMaximumWindow,
-			ref CONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
-
-		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-		public static extern bool GetCurrentConsoleFontEx(
-			IntPtr hConsoleOutput,
-			bool bMaximumWindow,
-			ref CONSOLE_FONT_INFOEX lpConsoleCurrentFont);
-
+		  /////////////////////
+		 // Console handles //
+		/////////////////////
 		[DllImport("kernel32")]
 		public static extern IntPtr GetStdHandle(StdHandle index);
 
@@ -34,6 +20,42 @@ namespace Uncoal.Internal
 		}
 
 		public static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
+
+		  //////////////////////////////
+		 // Console write operations //
+		//////////////////////////////
+		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		public static extern bool WriteConsoleW(
+			IntPtr hConsoleOutput,
+			StringBuilder lpBuffer,
+			int nNumberOfCharsToWrite,
+			out int lpNumberOfCharsWritten,
+			IntPtr lpReservedMustBeNull);
+
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern bool FillConsoleOutputCharacter(
+			IntPtr hConsoleOutput,
+			char character,
+			int nLength,
+			COORD dwWriteCoord,
+			out int pNumCharsWritten);
+
+		  ///////////////////////////////
+		 // Console title management ///
+		///////////////////////////////
+		[DllImport("Kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+		public static extern bool SetConsoleTitle(
+			string lpConsoleTitle);
+
+
+		[DllImport("kernel32")]
+		public static extern bool GetConsoleTitle(
+			[MarshalAs(UnmanagedType.LPArray)] byte[] lpConsoleTitle,
+			uint nSize);
+
+
+
 
 
 		[StructLayout(LayoutKind.Sequential)]
@@ -50,6 +72,44 @@ namespace Uncoal.Internal
 			}
 		}
 
+		  /////////////////////
+		 // Font management //
+		/////////////////////
+		[DllImport("kernel32")]
+		public static extern COORD GetConsoleFontSize(
+			IntPtr hConsoleOutput,
+			int nFont);
+
+
+		[DllImport("kernel32")]
+		public static extern bool GetCurrentConsoleFont(
+			IntPtr hConsoleOutput,
+			bool bMaximumWindow,
+			ref CONSOLE_FONT_INFO lpConsoleCurrentFont);
+
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct CONSOLE_FONT_INFO
+		{
+			public int nFont;
+			public COORD dwFontSize;
+		}
+
+
+		[DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+		public static extern bool SetCurrentConsoleFontEx(
+			IntPtr hConsoleOutput,
+			bool bMaximumWindow,
+			ref CONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
+
+
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+		public static extern bool GetCurrentConsoleFontEx(
+			IntPtr hConsoleOutput,
+			bool bMaximumWindow,
+			ref CONSOLE_FONT_INFOEX lpConsoleCurrentFont);
+
+
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 		public struct CONSOLE_FONT_INFOEX
 		{
@@ -63,8 +123,30 @@ namespace Uncoal.Internal
 			public string FaceName;
 		}
 
+		  //////////////////////////////
+		 // Console input management //
+		//////////////////////////////
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+		public static extern bool ReadConsoleInput(
+			IntPtr hConsoleInput,
+			[Out] INPUT_RECORD[] lpBuffer,
+			uint nLength,
+			ref uint lpNumberOfEventsRead);
+
+
+		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+		public static extern bool WriteConsoleInput(
+			IntPtr hConsoleInput,
+			INPUT_RECORD[] lpBuffer,
+			uint nLength,
+			ref uint lpNumberOfEventsWritten);
+
+		[DllImport("kernel32.dll")]
+		public static extern bool FlushConsoleInputBuffer(
+			IntPtr hConsoleInput);
+
 		// Code analysis will bring errors, but things here work
-		// This is because i have the flag definitions inside the structs but ignore them through field offsets
+		// This is most likely due to the union
 		[StructLayout(LayoutKind.Explicit, CharSet = CharSet.Unicode)]
 		public struct INPUT_RECORD
 		{
@@ -169,83 +251,29 @@ namespace Uncoal.Internal
 			public COORD dwSize;
 		}
 
-		[StructLayout(LayoutKind.Sequential)]
-		public struct CONSOLE_FONT_INFO
-		{
-			public int nFont;
-			public COORD dwFontSize;
-		}
-
-		[DllImport("kernel32.dll")]
-		public static extern IntPtr GetStdHandle(uint nStdHandle);
-
-		public const uint ENABLE_MOUSE_INPUT = 0x0010,
-			ENABLE_QUICK_EDIT_MODE = 0x0040,
-			ENABLE_EXTENDED_FLAGS = 0x0080,
-			ENABLE_ECHO_INPUT = 0x0004,
-			ENABLE_WINDOW_INPUT = 0x0008; //more
-
+		  //////////////////////////
+		 // Console mode changes //
+		//////////////////////////
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetConsoleMode(
 			IntPtr hConsoleInput,
-			ref uint lpMode);
+			ref ConsoleMode lpMode);
+
 
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool SetConsoleMode(
 			IntPtr hConsoleInput,
-			uint dwMode);
+			ConsoleMode dwMode);
 
 
-		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-		public static extern bool ReadConsoleInput(
-			IntPtr hConsoleInput,
-			[Out] INPUT_RECORD[] lpBuffer,
-			uint nLength,
-			ref uint lpNumberOfEventsRead);
-
-		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-		public static extern bool WriteConsoleInput(
-			IntPtr hConsoleInput,
-			INPUT_RECORD[] lpBuffer,
-			uint nLength,
-			ref uint lpNumberOfEventsWritten);
-
-		[DllImport("kernel32")]
-		public static extern bool GetConsoleTitle(
-			[MarshalAs(UnmanagedType.LPArray)] byte[] lpConsoleTitle,
-			uint nSize);
-
-		[DllImport("kernel32")]
-		public static extern COORD GetConsoleFontSize(
-			IntPtr hConsoleOutput,
-			int nFont);
-
-		[DllImport("kernel32")]
-		public static extern bool GetCurrentConsoleFont(
-			IntPtr hConsoleOutput,
-			bool bMaximumWindow,
-			ref CONSOLE_FONT_INFO lpConsoleCurrentFont);
-
-		[DllImport("kernel32.dll")]
-		public static extern bool FlushConsoleInputBuffer(
-			IntPtr hConsoleInput);
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-		public static extern bool WriteConsoleW(
-			IntPtr hConsoleOutput,
-			StringBuilder lpBuffer,
-			int nNumberOfCharsToWrite,
-			out int lpNumberOfCharsWritten,
-			IntPtr lpReservedMustBeNull);
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool FillConsoleOutputCharacter(
-			IntPtr hConsoleOutput,
-			char character,
-			int nLength,
-			COORD dwWriteCoord,
-			out int pNumCharsWritten);
+		public enum ConsoleMode
+		{
+			ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004,
+			ENABLE_MOUSE_INPUT = 0x0010,
+			ENABLE_QUICK_EDIT_MODE = 0x0040,
+			ENABLE_EXTENDED_FLAGS = 0x0080,
+			ENABLE_ECHO_INPUT = 0x0004,
+			ENABLE_WINDOW_INPUT = 0x0008 //more
+		}
 	}
 }
