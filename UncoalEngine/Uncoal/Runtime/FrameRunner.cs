@@ -98,13 +98,6 @@ namespace Uncoal.Runner
 				{
 					renderSprites = Task.Run((Action)RenderSprites);
 				}
-
-
-				// Destroying all gameobjects in destructionQueue
-				if (destructionQueue.Count != 0)
-				{
-					DestroyGameObjects();
-				}
 			}
 		}
 
@@ -163,6 +156,12 @@ namespace Uncoal.Runner
 				allRows.Length, // Amount of characters to write
 				out int charsWritten,
 				IntPtr.Zero));  // Reserved
+
+			// Destroying all gameobjects in destructionQueue
+			if (destructionQueue.Count != 0)
+			{
+				DestroyGameObjects();
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -360,10 +359,10 @@ namespace Uncoal.Runner
 			// Sprites to be removed
 			Task iterateSpritePosCopy = Task.Run(() =>
 			{
-				for (int i = 0; i < spritePositions.Count; i++)
+				for (int i = 0; i < spritePositionsCopy.Count; i++)
 				{
 					// Combining concepts of for and foreach for even faster
-					SmallRectangle rectangle = spritePositions[i];
+					SmallRectangle rectangle = spritePositionsCopy[i];
 
 					if (rectangle.Y < 0)
 					{
