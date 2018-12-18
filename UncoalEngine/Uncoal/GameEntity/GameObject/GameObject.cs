@@ -5,6 +5,7 @@ using System.Linq;
 using Uncoal.Internal;
 using Uncoal.Runner;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace Uncoal.Engine
 {
@@ -62,6 +63,12 @@ namespace Uncoal.Engine
 		public bool HasComponent<T>() where T : Component
 		{
 			return (!components.OfType<T>().Any()) ? true : false;
+		}
+
+		[MethodImpl]
+		public static void SetSpriteSafe(Sprite sprite, string[,] newSprite)
+		{
+			FrameRunner.spritesToReassign.Enqueue(new SpritePair(sprite, newSprite));
 		}
 
 		public static GameObject Instantiate<TPrefab>() where TPrefab : GameObject

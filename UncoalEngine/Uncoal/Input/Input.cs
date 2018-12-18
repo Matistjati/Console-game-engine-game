@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Uncoal.Internal;
 using static Uncoal.Internal.NativeMethods;
 
@@ -109,10 +110,13 @@ namespace Uncoal.Engine
 			mousePosition.Y = InternalInput.mousePosition.Y;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool GetKeyDown(char key) => pressedChars.Contains(key);
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool GetKeyHeld(char key) => heldChars.Contains(key);
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool GetKeyUp(char key) => !pressedChars.Contains(key) && !heldChars.Contains(key);
 
 		public static Coord mousePosition = new Coord();

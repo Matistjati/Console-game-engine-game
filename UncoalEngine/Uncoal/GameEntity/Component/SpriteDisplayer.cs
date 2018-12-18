@@ -7,10 +7,11 @@ namespace Uncoal.Engine
 		public bool IsVisible = true;
 		public int Layer;
 
+		internal int generation = 0;
 
 		public string[,] ColorMap => Sprite.colorValues;
 
-		public Sprite Sprite { get; set; }
+		public Sprite Sprite { get; private set; }
 
 		public int Width => Sprite.colorValues.GetLength(0);
 
@@ -37,6 +38,7 @@ namespace Uncoal.Engine
 
 		void ImageBaseChanged()
 		{
+			generation++;
 			Sprite = new Sprite(ImageBase, physicalState.Scale);
 		}
 
@@ -54,6 +56,7 @@ namespace Uncoal.Engine
 
 		void ImageBaseStringChanged()
 		{
+			generation++;
 			Sprite = new Sprite(imageBaseString);
 		}
 
@@ -67,6 +70,7 @@ namespace Uncoal.Engine
 
 		internal void RecalculateSpriteSize()
 		{
+			generation++;
 			Sprite = new Sprite(imageBase, physicalState.Scale);
 		}
 	}
