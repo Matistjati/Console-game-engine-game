@@ -107,7 +107,7 @@ namespace Uncoal.Engine
 				// If the gameobject has a spritedisplayer, add it to RenderedGameObjects
 				if (newGameObject.GetComponent<SpriteDisplayer>() is SpriteDisplayer sprite && sprite.IsInitialized)
 				{
-					FrameRunner.RenderedGameObjects.Add(sprite);
+					FrameRunner.spritesToAdd.Enqueue(sprite);
 					//Leave no references hanging
 					sprite = null;
 				}
@@ -274,7 +274,7 @@ namespace Uncoal.Engine
 		public static void Destroy(GameObject gameObject)
 		{
 			// The only way to do this really is to kill all references to the objects
-
+			FrameRunner.updateRemovalQueue.Enqueue(gameObject);
 			FrameRunner.destructionQueue.Enqueue(gameObject);
 		}
 	}

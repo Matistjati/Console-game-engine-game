@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Uncoal.Engine;
-using static Uncoal.Internal.NativeMethods;
 using Uncoal.Internal;
+using static Uncoal.Internal.NativeMethods;
 
 namespace Uncoal.Runner
 {
@@ -28,31 +29,20 @@ namespace Uncoal.Runner
 		internal static void DestroyGameObjects()
 		{
 			// The only way to do kill an objects is to kill all references to it
-			Delegate[] methods = updateCallBack?.GetInvocationList();
 			while (destructionQueue.Count != 0)
 			{
 				// Removing components from update
 				GameObject gameObject = destructionQueue.Dequeue();
-				List<Delegate> componentsToRemove = new List<Delegate>();
 
-				if (gameObject.components is null)
+				if (gameObject?.components is null)
 					continue;
-
-
-				for (int i = 0; i < methods.Length; i++)
-				{
-					if (gameObject.components.Contains(methods[i].Target))
-					{
-						updateCallBack -= (Action)methods[i];
-					}
-				}
 
 				// Just killing references
 				foreach (Component component in gameObject?.components)
 				{
 					if (component is SpriteDisplayer sprite)
 					{
-						RenderedGameObjects.Remove(sprite);
+						spritesToRemove.Enqueue(sprite);
 					}
 
 					component.gameObject = null;
@@ -64,6 +54,29 @@ namespace Uncoal.Runner
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal static void RemoveGameObjectsFromUpdate()
+		{
+			Delegate[] methods = updateCallBack?.GetInvocationList();
+
+			while (updateRemovalQueue.Count != 0)
+			{
+				GameObject gameObject = updateRemovalQueue.Dequeue();
+
+				// Avoiding nullreference
+				if (gameObject?.components is null)
+					continue;
+
+				// Checking where they intersect and removing if so
+				for (int i = 0; i < methods.Length; i++)
+				{
+					if (gameObject.components.Contains(methods[i].Target))
+					{
+						updateCallBack -= (Action)methods[i];
+					}
+				}
+			}
+		}
 
 
 		public static void Run()
@@ -75,7 +88,6 @@ namespace Uncoal.Runner
 			frameMeasurer.Start();
 
 			Task renderSprites = Task.Run((Action)RenderSprites);
-
 
 			while (run)
 			{
@@ -94,15 +106,38 @@ namespace Uncoal.Runner
 				// Calling update
 				updateCallBack?.Invoke();
 
-				//RenderSprites();
-
-				// Rendering has is done on another thread
-				//if (renderSprites.Exception != null)
-				//{	}
+				// When gameobjects actually get scheduled for destruction is reliant on the if statement down there
+				// This is just to ensure that an object doesn't recognize that it should destroy itself more than one time in update
+				if (updateRemovalQueue.Count != 0)
+				{
+					RemoveGameObjectsFromUpdate();
+				}
 
 				if (renderSprites.IsCompleted)
 				{
+					// Achieving thread safety by only modifying the gameobjects when no code using them is running
+					if (destructionQueue.Count != 0)
+					{
+						DestroyGameObjects();
+					}
+
 					renderSprites = Task.Run((Action)RenderSprites);
+
+					//// Debugging
+					
+					//renderSprites = Task.Run(() =>
+					//{
+					//	try
+					//	{
+					//		RenderSprites();
+					//	}
+					//	catch (Exception err)
+					//	{
+					//		Log.DefaultLogger.LogError(err);
+
+					//		throw;
+					//	}
+					//});
 				}
 			}
 		}
@@ -127,30 +162,40 @@ namespace Uncoal.Runner
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void RenderSprites()
 		{
-			Task reassignSprites = Task.Run(() =>
+			while (spritesToReassign.Count != 0)
 			{
-				while (spritesToReassign.Count != 0)
-				{
-					SpritePair spritePair = spritesToReassign.Dequeue();
-					spritePair.sprite.colorValues = spritePair.newSprite;
-				}
-			});
+				SpritePair spritePair = spritesToReassign.Dequeue();
+				spritePair.sprite.colorValues = spritePair.newSprite;
+			}
+
+
+			while (spritesToAdd.Count != 0)
+			{
+				RenderedGameObjects.Add(spritesToAdd.Dequeue());
+			}
+
+
+			while (spritesToRemove.Count != 0)
+			{
+				RenderedGameObjects.Remove(spritesToRemove.Dequeue());
+			}
+
 
 			// Clearing the internal color array representing the console
 			ClearOldSprites();
+
+
+			// Used for clearing the last frame drawing
+			spritePositionsCopy = new List<SmallRectangle>(spritePositions);
+
+			spritePositions.Clear();
+
 
 			// Sort the render order based on layer ascending
 			RenderedGameObjects.Sort((x, y) => y.Layer.CompareTo(x.Layer));
 
 
-			// Used in for clearing the old frame drawing
-			spritePositionsCopy = new List<SmallRectangle>(spritePositions);
-
-			spritePositions.Clear();
-
-			reassignSprites.Wait();
-
-			//Log.DefaultLogger.LogInfo("filling colors");
+			// Filling colors
 			FillColors();
 
 
@@ -169,18 +214,19 @@ namespace Uncoal.Runner
 
 			// Writing all the rows to the console
 			writeConsole = Task.Run(() =>
-			WriteConsoleW(
+			{
+				bool success = WriteConsoleW(
 				stdOutHandle,   // The handle
 				allRows,        // Characters to write
 				allRows.Length, // Amount of characters to write
 				out int charsWritten,
-				IntPtr.Zero));  // Reserved
+				IntPtr.Zero);// Reserved
 
-			// Destroying all gameobjects in destructionQueue
-			if (destructionQueue.Count != 0)
-			{
-				DestroyGameObjects();
-			}
+				if (!success)
+				{
+					Log.DefaultLogger.LogError($"Error callong writeconsole: {Marshal.GetLastWin32Error()}");
+				}
+			});
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -264,7 +310,7 @@ namespace Uncoal.Runner
 					position.Y = 0;
 				}
 
-			
+
 
 				if (sprite.ColorMap.GetLength(0) <= colorMapSizeX)
 				{
@@ -506,9 +552,14 @@ namespace Uncoal.Runner
 			}
 		}
 
-		public static Queue<SpritePair> spritesToReassign = new Queue<SpritePair>();
+
 		public static Queue<GameObject> destructionQueue = new Queue<GameObject>();
+		public static Queue<GameObject> updateRemovalQueue = new Queue<GameObject>();
+
 		public static List<SpriteDisplayer> RenderedGameObjects = new List<SpriteDisplayer>();
+		public static Queue<SpriteDisplayer> spritesToRemove = new Queue<SpriteDisplayer>();
+		public static Queue<SpriteDisplayer> spritesToAdd = new Queue<SpriteDisplayer>();
+		public static Queue<SpritePair> spritesToReassign = new Queue<SpritePair>();
 
 		static void DoNothing() { }
 		static Action updateCallBack = new Action(DoNothing);
