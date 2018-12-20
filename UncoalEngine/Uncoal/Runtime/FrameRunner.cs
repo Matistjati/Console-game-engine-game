@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -35,7 +36,7 @@ namespace Uncoal.Runner
 				GameObject gameObject = destructionQueue.Dequeue();
 
 				if (gameObject?.components is null)
-					continue;
+					return;
 
 				// Just killing references
 				foreach (Component component in gameObject?.components)
@@ -59,13 +60,14 @@ namespace Uncoal.Runner
 		{
 			Delegate[] methods = updateCallBack?.GetInvocationList();
 
-			while (updateRemovalQueue.Count != 0)
+			Parallel.For(0, updateRemovalQueue.Count, (int j) =>
 			{
 				GameObject gameObject = updateRemovalQueue.Dequeue();
 
 				// Avoiding nullreference
 				if (gameObject?.components is null)
-					continue;
+					// Parallel equivalent of break
+					return;
 
 				// Checking where they intersect and removing if so
 				for (int i = 0; i < methods.Length; i++)
@@ -75,12 +77,14 @@ namespace Uncoal.Runner
 						updateCallBack -= (Action)methods[i];
 					}
 				}
-			}
+			});
 		}
 
 
 		public static void Run()
 		{
+			colors = new string[Console.BufferWidth, Console.BufferHeight];
+
 			lastFrameCall = new TimeSpan();
 
 			run = true;
@@ -123,8 +127,8 @@ namespace Uncoal.Runner
 
 					renderSprites = Task.Run((Action)RenderSprites);
 
-					//// Debugging
-					
+					////// Debugging
+
 					//renderSprites = Task.Run(() =>
 					//{
 					//	try
@@ -148,10 +152,9 @@ namespace Uncoal.Runner
 
 		// I estimate that maybe 40 gameobjects will exist at once?
 		static List<SmallRectangle> spritePositions = new List<SmallRectangle>(40);
-		static List<SmallRectangle> spritePositionsCopy = new List<SmallRectangle>(40);
 		static Dictionary<ushort, Distance> filledRows = new Dictionary<ushort, Distance>(40);
 
-		static string[,] colors = new string[Console.BufferWidth, Console.BufferHeight];
+		static string[,] colors;
 
 		// Believe me, it can become about this big
 		static StringBuilder allRows = new StringBuilder(564000);
@@ -164,20 +167,27 @@ namespace Uncoal.Runner
 		{
 			while (spritesToReassign.Count != 0)
 			{
-				SpritePair spritePair = spritesToReassign.Dequeue();
-				spritePair.sprite.colorValues = spritePair.newSprite;
+				if (spritesToReassign.TryDequeue(out SpritePair spritePair))
+				{
+					spritePair.sprite.colorValues = spritePair.newSprite;
+				}
 			}
-
 
 			while (spritesToAdd.Count != 0)
 			{
-				RenderedGameObjects.Add(spritesToAdd.Dequeue());
+				if (spritesToAdd.TryDequeue(out SpriteDisplayer sprite))
+				{
+					RenderedGameObjects.Add(sprite);
+				}
 			}
 
 
 			while (spritesToRemove.Count != 0)
 			{
-				RenderedGameObjects.Remove(spritesToRemove.Dequeue());
+				if (spritesToRemove.TryDequeue(out SpriteDisplayer sprite))
+				{
+					RenderedGameObjects.Remove(sprite);
+				}
 			}
 
 
@@ -186,7 +196,7 @@ namespace Uncoal.Runner
 
 
 			// Used for clearing the last frame drawing
-			spritePositionsCopy = new List<SmallRectangle>(spritePositions);
+			List<SmallRectangle> spritePositionsCopy = new List<SmallRectangle>(spritePositions);
 
 			spritePositions.Clear();
 
@@ -194,14 +204,16 @@ namespace Uncoal.Runner
 			// Sort the render order based on layer ascending
 			RenderedGameObjects.Sort((x, y) => y.Layer.CompareTo(x.Layer));
 
+			// Filling colors and preparing spritepositions
+			List<Task> fillColors = PrepareSpritePositionsAndFillColors();
 
-			// Filling colors
-			FillColors();
 
 
 			// Preparing what is used to build the new allrows
-			PrepareLineInfo();
+			PrepareLineInfo(spritePositionsCopy);
 
+			// We have to finish filling colors before using it
+			Task.WaitAll(fillColors.ToArray());
 
 			// We don't want to risk changing allrows while still writing
 			writeConsole?.Wait();
@@ -230,15 +242,16 @@ namespace Uncoal.Runner
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static void FillColors()
+		private static List<Task> PrepareSpritePositionsAndFillColors()
 		{
 			int colorWidth = colors.GetLength(0);
 			int colorHeight = colors.GetLength(1);
 
-			List<SpriteDisplayer> localGameObjects = new List<SpriteDisplayer>(RenderedGameObjects);
-			for (int i = 0; i < localGameObjects.Count; i++)
+			List<Task> fillColors = new List<Task>();
+
+			for (int i = 0; i < RenderedGameObjects.Count; i++)
 			{
-				SpriteDisplayer sprite = localGameObjects[i];
+				SpriteDisplayer sprite = RenderedGameObjects[i];
 
 				// Only render the visible ones
 				if (!sprite.IsVisible)
@@ -279,64 +292,69 @@ namespace Uncoal.Runner
 						colorMapSizeY--;
 				}
 
-				// Same  as division by 2
-				int xOffset = colorMapSizeX >> 1;
-				int yOffset = colorMapSizeY >> 1;
+				// >> 1 is the same as division by 2
+				position.X -= colorMapSizeX >> 1;
 
-				position.X -= xOffset;
-
-				position.Y -= yOffset;
+				position.Y -= colorMapSizeY >> 1;
 
 
 				// Storing the position and dimensions of the sprite for later use
-				spritePositions.Insert(0, new SmallRectangle(
+				spritePositions.Add(new SmallRectangle(
 					(short)position.X,
 					(short)position.Y,
 					(short)colorMapSizeX,
 					(short)colorMapSizeY));
 
+				fillColors.Add(Task.Run(
+					() => FillColors(position.X, position.Y, colorMapSizeX, colorMapSizeY, sprite)));
+			}
+
+			return fillColors;
+		}
+
+		static void FillColors(int X, int Y, int colorMapSizeX, int colorMapSizeY, SpriteDisplayer sprite)
+		{
+			// Copying the rectangle
+
+			if (X < 0)
+			{
+				colorMapSizeX += X;
+				X = 0;
+			}
 
 
-				if (position.X < 0)
+			if (Y < 0)
+			{
+				colorMapSizeY += Y;
+				Y = 0;
+			}
+
+
+
+			if (sprite.ColorMap.GetLength(0) <= colorMapSizeX)
+			{
+				colorMapSizeX = sprite.ColorMap.GetLength(0);
+			}
+
+			if (sprite.ColorMap.GetLength(1) <= colorMapSizeY)
+			{
+				colorMapSizeY = sprite.ColorMap.GetLength(1);
+			}
+			// Filling our internal array (strings representing colors) representing the console
+
+
+			for (int x = 0; x < colorMapSizeX; x++)
+			{
+				for (int y = 0; y < colorMapSizeY; y++)
 				{
-					colorMapSizeX += position.X;
-					position.X = 0;
-				}
+					string cellColor = sprite.Sprite.colorValues[x, y];
 
 
-				if (position.Y < 0)
-				{
-					colorMapSizeY += position.Y;
-					position.Y = 0;
-				}
+					if (cellColor[0] == ' ')
+						if (colors[x + X, y + Y] != null)
+							continue;
 
-
-
-				if (sprite.ColorMap.GetLength(0) <= colorMapSizeX)
-				{
-					colorMapSizeX = sprite.ColorMap.GetLength(0);
-				}
-
-				if (sprite.ColorMap.GetLength(1) <= colorMapSizeY)
-				{
-					colorMapSizeY = sprite.ColorMap.GetLength(1);
-				}
-				// Filling our internal array (strings representing colors) representing the console
-
-
-				for (int x = 0; x < colorMapSizeX; x++)
-				{
-					for (int y = 0; y < colorMapSizeY; y++)
-					{
-						string cellColor = sprite.ColorMap[x, y];
-
-
-						if (cellColor[0] == ' ')
-							if (colors[x + position.X, y + position.Y] != null)
-								continue;
-
-						colors[x + position.X, y + position.Y] = cellColor;
-					}
+					colors[x + X, y + Y] = cellColor;
 				}
 			}
 		}
@@ -356,19 +374,24 @@ namespace Uncoal.Runner
 						? 0
 						: spritePositions[i].Y;
 
-					Parallel.For(0, spritePositions[i].Height,
-						y =>
+
+					int totalHeight = positivePositionY + spritePositions[i].Height;
+
+					int totalWidth = positivePositionX + spritePositions[i].Width;
+
+					Parallel.For(positivePositionX, totalWidth,
+						x =>
 						{
-							for (int x = 0; x < spritePositions[i].Width; x++)
+							for (int y = positivePositionY; y < totalHeight; y++)
 							{
-								colors[positivePositionX + x, positivePositionY + y] = null;
+								colors[x, y] = null;
 							}
 						});
 				});
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void PrepareLineInfo()
+		static void PrepareLineInfo(List<SmallRectangle> spritePositionsCopy)
 		{
 			filledRows.Clear();
 
@@ -485,30 +508,16 @@ namespace Uncoal.Runner
 				}
 			});
 
-			Task clearOldSprites = Task.Run(() =>
-			{
-				for (int i = 0; i < spritePositionsCopy.Count; i++)
-				{
-					SmallRectangle rect = spritePositionsCopy[i];
-
-					int width = rect.Width + rect.X;
-					int height = rect.Height + rect.Y;
-
-					for (short x = rect.X; x < width; x++)
-					{
-						for (short y = rect.Y; y < height; y++)
-						{
-							if (colors[x, y] is null)
-							{
-								colors[x, y] = whiteSpaceString;
-							}
-						}
-					}
-				}
-			});
-
-			Task.WaitAll(iterateSpritePos, iterateSpritePosCopy, clearOldSprites);
+			Task.WaitAll(iterateSpritePos, iterateSpritePosCopy);
 		}
+
+
+
+
+
+
+
+
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void JoinColorsToString()
@@ -524,7 +533,6 @@ namespace Uncoal.Runner
 			for (ushort y = 0; y < colorHeight; y++)
 			{
 				// Checking if there is an object on this row
-				// Otherwise, we sipmly append a newline
 				if (filledRows.TryGetValue(y, out Distance rowInfo))
 				{
 					// Spacing from left to the start of the sprite
@@ -532,23 +540,24 @@ namespace Uncoal.Runner
 					// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#cursor-positioning
 
 					allRows.Append(escapeStartNormal);
-					allRows.Append(rowInfo.start + "C");
+					allRows.Append(rowInfo.start);
+					allRows.Append("C");
 
-					for (int x = 0; x < rowInfo.length; x++)
+					int totalLength = rowInfo.start + rowInfo.length;
+
+					for (int x = rowInfo.start; x < totalLength; x++)
 					{
 						// An escape sequence telling the console what color to display
 						// For more info, check
 						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
 
 
-						allRows.Append(colors[x + rowInfo.start, y] ?? whiteSpaceString);
+						allRows.Append(colors[x, y] ?? whiteSpaceString);
 					}
-					allRows.Append("\n");
 				}
-				else
-				{
-					allRows.Append("\n");
-				}
+
+				// Always append a newline
+				allRows.Append("\n");
 			}
 		}
 
@@ -557,9 +566,9 @@ namespace Uncoal.Runner
 		public static Queue<GameObject> updateRemovalQueue = new Queue<GameObject>();
 
 		public static List<SpriteDisplayer> RenderedGameObjects = new List<SpriteDisplayer>();
-		public static Queue<SpriteDisplayer> spritesToRemove = new Queue<SpriteDisplayer>();
-		public static Queue<SpriteDisplayer> spritesToAdd = new Queue<SpriteDisplayer>();
-		public static Queue<SpritePair> spritesToReassign = new Queue<SpritePair>();
+		public static ConcurrentQueue<SpriteDisplayer> spritesToRemove = new ConcurrentQueue<SpriteDisplayer>();
+		public static ConcurrentQueue<SpriteDisplayer> spritesToAdd = new ConcurrentQueue<SpriteDisplayer>();
+		public static ConcurrentQueue<SpritePair> spritesToReassign = new ConcurrentQueue<SpritePair>();
 
 		static void DoNothing() { }
 		static Action updateCallBack = new Action(DoNothing);

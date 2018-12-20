@@ -11,7 +11,7 @@ namespace Uncoal.Engine
 
 		public string[,] ColorMap => Sprite.colorValues;
 
-		public Sprite Sprite { get; private set; }
+		public Sprite Sprite;
 
 		public int Width => Sprite.colorValues.GetLength(0);
 
