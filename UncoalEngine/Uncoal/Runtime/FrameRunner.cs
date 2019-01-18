@@ -15,15 +15,15 @@ namespace Uncoal.Runner
 {
 	internal static class FrameRunner
 	{
-		static TimeSpan lastFrameCall;
-		static Stopwatch frameMeasurer = new Stopwatch();
+		static TimeSpan lastFrameIteration;
+		static Stopwatch frameCounter = new Stopwatch();
 
 		static bool run;
 
 		public static void Pause()
 		{
 			run = false;
-			frameMeasurer.Stop();
+			frameCounter.Stop();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,13 +83,13 @@ namespace Uncoal.Runner
 
 		public static void Run()
 		{
-			colors = new string[Console.BufferWidth, Console.BufferHeight];
+			playField = new CHAR_INFO[Console.BufferWidth, Console.BufferHeight];
 
-			lastFrameCall = new TimeSpan();
+			lastFrameIteration = new TimeSpan();
 
 			run = true;
 
-			frameMeasurer.Start();
+			frameCounter.Start();
 
 			Task renderSprites = Task.Run((Action)RenderSprites);
 
@@ -97,12 +97,12 @@ namespace Uncoal.Runner
 			{
 				// Time Calculations
 
-				TimeSpan elapsed = frameMeasurer.Elapsed;
-				GameObject._timeDelta = (float)(elapsed - lastFrameCall).TotalSeconds;
+				TimeSpan elapsed = frameCounter.Elapsed;
+				GameObject._timeDelta = (float)(elapsed - lastFrameIteration).TotalSeconds;
 
 				GameObject._time = (float)elapsed.TotalSeconds;
 
-				lastFrameCall = elapsed;
+				lastFrameIteration = elapsed;
 
 				// Updating the public input api
 				Input.UpdateInput();
@@ -146,18 +146,12 @@ namespace Uncoal.Runner
 			}
 		}
 
-		const char whiteSpaceChar = ' ';
-		const string whiteSpaceString = " ";
-		const string escapeStartNormal = "\x1b[";
-
 		// I estimate that maybe 40 gameobjects will exist at once?
 		static List<SmallRectangle> spritePositions = new List<SmallRectangle>(40);
-		static Dictionary<ushort, Distance> filledRows = new Dictionary<ushort, Distance>(40);
 
-		static string[,] colors;
+		static CHAR_INFO[,] playField;
 
 		// Believe me, it can become about this big
-		static StringBuilder allRows = new StringBuilder(564000);
 
 		static Task writeConsole;
 
@@ -169,7 +163,7 @@ namespace Uncoal.Runner
 			{
 				if (spritesToReassign.TryDequeue(out SpritePair spritePair))
 				{
-					spritePair.sprite.colorValues = spritePair.newSprite;
+					spritePair.sprite.spriteMap = spritePair.newSprite;
 				}
 			}
 
@@ -219,7 +213,6 @@ namespace Uncoal.Runner
 			writeConsole?.Wait();
 
 			// Joining allrows from colors
-			JoinColorsToString();
 
 			// Handle to console output buffer
 			IntPtr stdOutHandle = GetStdHandle(StdHandle.OutputHandle);
@@ -244,8 +237,8 @@ namespace Uncoal.Runner
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static List<Task> PrepareSpritePositionsAndFillColors()
 		{
-			int colorWidth = colors.GetLength(0);
-			int colorHeight = colors.GetLength(1);
+			int colorWidth = playField.GetLength(0);
+			int colorHeight = playField.GetLength(1);
 
 			List<Task> fillColors = new List<Task>();
 
@@ -312,6 +305,7 @@ namespace Uncoal.Runner
 			return fillColors;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void FillColors(int X, int Y, int colorMapSizeX, int colorMapSizeY, SpriteDisplayer sprite)
 		{
 			// Copying the rectangle
@@ -347,14 +341,14 @@ namespace Uncoal.Runner
 			{
 				for (int y = 0; y < colorMapSizeY; y++)
 				{
-					string cellColor = sprite.Sprite.colorValues[x, y];
+					CHAR_INFO cell = sprite.Sprite.spriteMap[x, y];
 
 
-					if (cellColor[0] == ' ')
-						if (colors[x + X, y + Y] != null)
+					if (cell[0] == ' ')
+						if (playField[x + X, y + Y] != null)
 							continue;
 
-					colors[x + X, y + Y] = cellColor;
+					playField[x + X, y + Y] = cell;
 				}
 			}
 		}
@@ -384,7 +378,7 @@ namespace Uncoal.Runner
 						{
 							for (int y = positivePositionY; y < totalHeight; y++)
 							{
-								colors[x, y] = null;
+								playField[x, y] = null;
 							}
 						});
 				});
@@ -399,8 +393,8 @@ namespace Uncoal.Runner
 			// Hashing the y positions //
 			/////////////////////////////
 
-			int colorWidth = colors.GetLength(0);
-			int colorHeight = colors.GetLength(1);
+			int colorWidth = playField.GetLength(0);
+			int colorHeight = playField.GetLength(1);
 
 			// Filling with sprites to rendered
 			Task iterateSpritePos = Task.Run(() =>
@@ -509,56 +503,6 @@ namespace Uncoal.Runner
 			});
 
 			Task.WaitAll(iterateSpritePos, iterateSpritePosCopy);
-		}
-
-
-
-
-
-
-
-
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void JoinColorsToString()
-		{
-			allRows.Clear();
-
-			int colorHeight = colors.GetLength(1);
-
-			////////////////////////////////////////////////////////////
-			// Using the y positions to join everything into a string //
-			////////////////////////////////////////////////////////////
-
-			for (ushort y = 0; y < colorHeight; y++)
-			{
-				// Checking if there is an object on this row
-				if (filledRows.TryGetValue(y, out Distance rowInfo))
-				{
-					// Spacing from left to the start of the sprite
-					// Uses an escape sequence
-					// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#cursor-positioning
-
-					allRows.Append(escapeStartNormal);
-					allRows.Append(rowInfo.start);
-					allRows.Append("C");
-
-					int totalLength = rowInfo.start + rowInfo.length;
-
-					for (int x = rowInfo.start; x < totalLength; x++)
-					{
-						// An escape sequence telling the console what color to display
-						// For more info, check
-						// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
-
-
-						allRows.Append(colors[x, y] ?? whiteSpaceString);
-					}
-				}
-
-				// Always append a newline
-				allRows.Append("\n");
-			}
 		}
 
 

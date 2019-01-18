@@ -73,6 +73,7 @@
     <Compile Include="Uncoal\GameEntity\GameObject\GameObject.cs" />
     <Compile Include="Uncoal\Runtime\FrameRunner.cs" />
     <Compile Include="Uncoal\Runtime\Program.cs" />
+    <Compile Include="Uncoal\Utility\ConsoleColorHelper.cs" />
     <Compile Include="Uncoal\Win32\NativeMethods.cs" />
     <Compile Include="Uncoal\GameEntity\Component\PhysicalState.cs" />
     <Compile Include="Uncoal\GameEntity\Debug\ComponentTest.cs" />

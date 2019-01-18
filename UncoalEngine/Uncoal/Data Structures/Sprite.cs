@@ -1,27 +1,24 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Text;
+using static Uncoal.Internal.NativeMethods;
+using Uncoal.Internal;
 
 namespace Uncoal.Engine
 {
 	public class Sprite
 	{
 		public float Scale;
-		public string[,] colorValues;
+		public CHAR_INFO[,] spriteMap;
 
 		// Used for building colorValues
-		const string whiteSpace = " ";
-		const string blockChar = "█";
-		const string escapeStartRGB = "\x1b[38;2;";
-		const string escapeEnd = "m█";
-		const char colorSeparator = ';';
+		const char blockChar = '█';
 
-		static StringBuilder colorStringBuilder = new StringBuilder(24);
-
-		public Sprite(string[,] image)
+		public Sprite(CHAR_INFO[,] image)
 		{
-			colorValues = image;
+			spriteMap = image;
 		}
 
 		public Sprite(string image) : this((Bitmap)Image.FromFile(image), 1f)
@@ -44,7 +41,7 @@ namespace Uncoal.Engine
 		{
 			if (scale <= 0)
 			{
-				throw new System.ArgumentOutOfRangeException(nameof(scale), scale, "Scale was less than or equal to 0");
+				throw new ArgumentOutOfRangeException(nameof(scale), scale, "Scale was less than or equal to 0");
 			}
 
 			if (scale != 1)
@@ -54,7 +51,7 @@ namespace Uncoal.Engine
 
 			this.Scale = scale;
 
-			this.colorValues = new string[image.Width, image.Height];
+			this.spriteMap = new CHAR_INFO[image.Width, image.Height];
 
 
 			unsafe
@@ -72,44 +69,14 @@ namespace Uncoal.Engine
 					for (int x = 0; x < widthInBytes; x += bytesPerPixel)
 					{
 
-						int blue = currentLine[x];
-						int green = currentLine[x + 1];
-						int red = currentLine[x + 2];
+						byte blue = currentLine[x];
+						byte green = currentLine[x + 1];
+						byte red = currentLine[x + 2];
 
+						int xIndex = x / bytesPerPixel;
 
-						if (blue == 0 && green == 0 && red == 0) //|| rgb.A < 10)
-						{
-							colorValues[x / bytesPerPixel, y] = whiteSpace;
-						}
-						else
-						{
-							// I know, it looks messy but it's the fastest way
-							// An escape sequence telling the console what color to display
-							// For more info, check
-							// https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#extended-colors
-
-							colorStringBuilder.Append(escapeStartRGB);
-							colorStringBuilder.Append(red);
-							colorStringBuilder.Append(colorSeparator);
-							colorStringBuilder.Append(green);
-							colorStringBuilder.Append(colorSeparator);
-							colorStringBuilder.Append(blue);
-							colorStringBuilder.Append(escapeEnd);
-
-							int xIndex = x / bytesPerPixel;
-
-							string colorString = colorStringBuilder.ToString();
-							// If the previous cell was identical to this one, make this one uncolored
-							if (y - 1 >= 0 && colorValues[xIndex, y - 1] == (colorString))
-							{
-								colorValues[xIndex, y] = blockChar;
-							}
-							else
-							{
-								colorValues[xIndex, y] = colorString;
-							}
-							colorStringBuilder.Clear();
-						}
+						spriteMap[xIndex, y].UnicodeChar = blockChar;
+						spriteMap[xIndex, y].Attributes |= (CharAttribute)ConsoleColorHelper.ClosestConsoleColor(red, green, blue);
 					}
 				}
 				image.UnlockBits(bitmapData);
@@ -117,6 +84,8 @@ namespace Uncoal.Engine
 
 			image.Dispose();
 		}
+
+
 
 		/// <summary>
 		/// Resize the image to the specified width and height.
@@ -154,12 +123,12 @@ namespace Uncoal.Engine
 #if DEBUG
 		public override string ToString()
 		{
-			StringBuilder sprite = new StringBuilder(colorValues.GetLength(0) * colorValues.GetLength(1));
-			for (int y = 0; y < colorValues.GetLength(1); y++)
+			StringBuilder sprite = new StringBuilder(spriteMap.GetLength(0) * spriteMap.GetLength(1));
+			for (int y = 0; y < spriteMap.GetLength(1); y++)
 			{
-				for (int x = 0; x < colorValues.GetLength(0); x++)
+				for (int x = 0; x < spriteMap.GetLength(0); x++)
 				{
-					sprite.Append(colorValues[x, y]);
+					sprite.Append(spriteMap[x, y]);
 				}
 				sprite.Append('\n');
 			}

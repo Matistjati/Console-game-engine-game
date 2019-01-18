@@ -6,8 +6,8 @@ namespace Uncoal.Internal
 {
 	internal static class NativeMethods
 	{
-		  /////////////////////
-		 // Console handles //
+		/////////////////////
+		// Console handles //
 		/////////////////////
 		[DllImport("kernel32")]
 		public static extern IntPtr GetStdHandle(StdHandle index);
@@ -21,8 +21,37 @@ namespace Uncoal.Internal
 
 		public static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
-		  //////////////////////////////
-		 // Console write operations //
+		/////////////////////////////
+		// Common Data Structures ///
+		/////////////////////////////
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct SMALL_RECT
+		{
+			public short Left;
+			public short Top;
+			public short Right;
+			public short Bottom;
+		}
+
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct COORD
+		{
+			public short X;
+
+			public short Y;
+
+			public COORD(short x, short y)
+			{
+				X = x;
+				Y = y;
+			}
+		}
+
+
+		//////////////////////////////
+		// Console write operations //
 		//////////////////////////////
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
 		public static extern bool WriteConsoleW(
@@ -41,8 +70,87 @@ namespace Uncoal.Internal
 			COORD dwWriteCoord,
 			out int pNumCharsWritten);
 
-		  ///////////////////////////////
-		 // Console title management ///
+		[DllImport("kernel32.dll", EntryPoint = "WriteConsoleOutputW", CharSet = CharSet.Unicode, SetLastError = true)]
+		internal static extern bool WriteConsoleOutput(
+			IntPtr hConsoleOutput,
+			/* This pointer is treated as the origin of a two-dimensional array of CHAR_INFO structures
+			whose size is specified by the dwBufferSize parameter.*/
+			[MarshalAs(UnmanagedType.LPArray), In] CHAR_INFO[,] lpBuffer,
+			COORD dwBufferSize,
+			COORD dwBufferCoord,
+			ref SMALL_RECT lpWriteRegion);
+
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct CHAR_INFO
+		{
+			public char UnicodeChar;
+			public CharAttribute Attributes;
+		}
+
+		[Flags]
+		public enum CharAttribute : ushort
+		{
+			None = 0x0000,
+
+			FOREGROUND_BLUE = 0x0001,
+
+			FOREGROUND_GREEN = 0x0002,
+
+			FOREGROUND_RED = 0x0004,
+
+			ForegroundYellow = 0x0006,
+	
+			FOREGROUND_INTENSITY = 0x0008,
+
+			BACKGROUND_BLUE = 0x0010,
+
+			BACKGROUND_GREEN = 0x0020,
+
+			BACKGROUND_RED = 0x0040,
+
+			BackgroundYellow = 0x60,
+
+			BACKGROUND_INTENSITY = 0x0080,
+
+			/// <summary>
+			/// Leading byte.
+			/// </summary>
+			COMMON_LVB_LEADING_BYTE = 0x0100,
+
+			/// <summary>
+			/// Trailing byte.
+			/// </summary>
+			COMMON_LVB_TRAILING_BYTE = 0x0200,
+
+			/// <summary>
+			/// Top horizontal
+			/// </summary>
+			COMMON_LVB_GRID_HORIZONTAL = 0x0400,
+
+			/// <summary>
+			/// Left vertical.
+			/// </summary>
+			COMMON_LVB_GRID_LVERTICAL = 0x0800,
+
+			/// <summary>
+			/// Right vertical.
+			/// </summary>
+			COMMON_LVB_GRID_RVERTICAL = 0x1000,
+
+			/// <summary>
+			/// Reverse foreground and background attribute.
+			/// </summary>
+			COMMON_LVB_REVERSE_VIDEO = 0x4000,
+
+			/// <summary>
+			/// Underscore.
+			/// </summary>
+			COMMON_LVB_UNDERSCORE = 0x8000,
+		}
+
+		///////////////////////////////
+		// Console title management ///
 		///////////////////////////////
 		[DllImport("Kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 		public static extern bool SetConsoleTitle(
@@ -58,22 +166,10 @@ namespace Uncoal.Internal
 
 
 
-		[StructLayout(LayoutKind.Sequential)]
-		public struct COORD
-		{
-			public short X;
 
-			public short Y;
 
-			public COORD(short x, short y)
-			{
-				X = x;
-				Y = y;
-			}
-		}
-
-		  /////////////////////
-		 // Font management //
+		/////////////////////
+		// Font management //
 		/////////////////////
 		[DllImport("kernel32")]
 		public static extern COORD GetConsoleFontSize(
@@ -123,8 +219,8 @@ namespace Uncoal.Internal
 			public string FaceName;
 		}
 
-		  //////////////////////////////
-		 // Console input management //
+		//////////////////////////////
+		// Console input management //
 		//////////////////////////////
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
 		public static extern bool ReadConsoleInput(
@@ -251,8 +347,8 @@ namespace Uncoal.Internal
 			public COORD dwSize;
 		}
 
-		  //////////////////////////
-		 // Console mode changes //
+		//////////////////////////
+		// Console mode changes //
 		//////////////////////////
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetConsoleMode(

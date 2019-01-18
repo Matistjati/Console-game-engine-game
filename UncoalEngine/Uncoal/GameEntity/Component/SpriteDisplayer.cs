@@ -9,15 +9,15 @@ namespace Uncoal.Engine
 
 		internal int generation = 0;
 
-		public string[,] ColorMap => Sprite.colorValues;
+		public string[,] ColorMap => Sprite.spriteMap;
 
 		public Sprite Sprite;
 
-		public int Width => Sprite.colorValues.GetLength(0);
+		public int Width => Sprite.spriteMap.GetLength(0);
 
-		public int Heigth => Sprite.colorValues.GetLength(1);
+		public int Heigth => Sprite.spriteMap.GetLength(1);
 
-		public bool IsInitialized => Sprite?.colorValues != null;
+		public bool IsInitialized => Sprite?.spriteMap != null;
 
 		private float lastScaleImage;
 		Bitmap imageBase;
