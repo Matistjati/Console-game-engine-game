@@ -1,17 +1,21 @@
 ﻿using System;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Uncoal.Internal;
 using Uncoal.Runner;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
+using static Uncoal.Internal.NativeMethods;
+
 
 namespace Uncoal.Engine
 {
 	public class GameObject
 	{
+#pragma warning disable IDE1006 // Naming Styles
 		public PhysicalState physicalState { get; set; } = new PhysicalState();
+#pragma warning restore IDE1006 // Naming Styles
 
 		internal List<Component> components = new List<Component>();
 
@@ -66,7 +70,7 @@ namespace Uncoal.Engine
 		}
 
 		[MethodImpl]
-		public static void SetSpriteSafe(Sprite sprite, string[,] newSprite)
+		public static void SetSpriteSafe(Sprite sprite, CHAR_INFO[,] newSprite)
 		{
 			FrameRunner.spritesToReassign.Enqueue(new SpritePair(sprite, newSprite));
 		}

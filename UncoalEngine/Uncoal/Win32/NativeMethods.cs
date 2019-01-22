@@ -4,13 +4,13 @@ using System.Text;
 
 namespace Uncoal.Internal
 {
-	internal static class NativeMethods
+	public static class NativeMethods
 	{
 		/////////////////////
 		// Console handles //
 		/////////////////////
 		[DllImport("kernel32")]
-		public static extern IntPtr GetStdHandle(StdHandle index);
+		internal static extern IntPtr GetStdHandle(StdHandle index);
 
 		public enum StdHandle
 		{
@@ -54,7 +54,7 @@ namespace Uncoal.Internal
 		// Console write operations //
 		//////////////////////////////
 		[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-		public static extern bool WriteConsoleW(
+		internal static extern bool WriteConsoleW(
 			IntPtr hConsoleOutput,
 			StringBuilder lpBuffer,
 			int nNumberOfCharsToWrite,
@@ -63,7 +63,7 @@ namespace Uncoal.Internal
 
 
 		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool FillConsoleOutputCharacter(
+		internal static extern bool FillConsoleOutputCharacter(
 			IntPtr hConsoleOutput,
 			char character,
 			int nLength,
@@ -86,6 +86,11 @@ namespace Uncoal.Internal
 		{
 			public char UnicodeChar;
 			public CharAttribute Attributes;
+
+			public override string ToString()
+			{
+				return new string(UnicodeChar, 1);
+			}
 		}
 
 		[Flags]
@@ -153,18 +158,32 @@ namespace Uncoal.Internal
 		// Console title management ///
 		///////////////////////////////
 		[DllImport("Kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-		public static extern bool SetConsoleTitle(
+		internal static extern bool SetConsoleTitle(
 			string lpConsoleTitle);
 
 
 		[DllImport("kernel32")]
-		public static extern bool GetConsoleTitle(
+		internal static extern bool GetConsoleTitle(
 			[MarshalAs(UnmanagedType.LPArray)] byte[] lpConsoleTitle,
 			uint nSize);
 
 
 
+		//////////////////////
+		// Console utility ///
+		//////////////////////
+		[DllImport("kernel32.dll", SetLastError = true)]
+		internal static extern bool SetConsoleWindowInfo(
+			IntPtr hConsoleOutput,
+			bool bAbsolute,
+			[In] ref SMALL_RECT lpConsoleWindow
+		);
 
+		[DllImport("kernel32.dll", SetLastError = true)]
+		internal static extern bool SetConsoleScreenBufferSize(
+			IntPtr hConsoleOutput,
+			COORD dwSize
+		);
 
 
 
@@ -172,20 +191,20 @@ namespace Uncoal.Internal
 		// Font management //
 		/////////////////////
 		[DllImport("kernel32")]
-		public static extern COORD GetConsoleFontSize(
+		internal static extern COORD GetConsoleFontSize(
 			IntPtr hConsoleOutput,
 			int nFont);
 
 
 		[DllImport("kernel32")]
-		public static extern bool GetCurrentConsoleFont(
+		internal static extern bool GetCurrentConsoleFont(
 			IntPtr hConsoleOutput,
 			bool bMaximumWindow,
 			ref CONSOLE_FONT_INFO lpConsoleCurrentFont);
 
 
 		[StructLayout(LayoutKind.Sequential)]
-		public struct CONSOLE_FONT_INFO
+		internal struct CONSOLE_FONT_INFO
 		{
 			public int nFont;
 			public COORD dwFontSize;
@@ -193,21 +212,21 @@ namespace Uncoal.Internal
 
 
 		[DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-		public static extern bool SetCurrentConsoleFontEx(
+		internal static extern bool SetCurrentConsoleFontEx(
 			IntPtr hConsoleOutput,
 			bool bMaximumWindow,
 			ref CONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
 
 
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-		public static extern bool GetCurrentConsoleFontEx(
+		internal static extern bool GetCurrentConsoleFontEx(
 			IntPtr hConsoleOutput,
 			bool bMaximumWindow,
 			ref CONSOLE_FONT_INFOEX lpConsoleCurrentFont);
 
 
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-		public struct CONSOLE_FONT_INFOEX
+		internal struct CONSOLE_FONT_INFOEX
 		{
 			public uint cbSize;
 			public uint nFont;
@@ -223,7 +242,7 @@ namespace Uncoal.Internal
 		// Console input management //
 		//////////////////////////////
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-		public static extern bool ReadConsoleInput(
+		internal static extern bool ReadConsoleInput(
 			IntPtr hConsoleInput,
 			[Out] INPUT_RECORD[] lpBuffer,
 			uint nLength,
@@ -231,20 +250,20 @@ namespace Uncoal.Internal
 
 
 		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-		public static extern bool WriteConsoleInput(
+		internal static extern bool WriteConsoleInput(
 			IntPtr hConsoleInput,
 			INPUT_RECORD[] lpBuffer,
 			uint nLength,
 			ref uint lpNumberOfEventsWritten);
 
 		[DllImport("kernel32.dll")]
-		public static extern bool FlushConsoleInputBuffer(
+		internal static extern bool FlushConsoleInputBuffer(
 			IntPtr hConsoleInput);
 
 		// Code analysis will bring errors, but things here work
 		// This is most likely due to the union
 		[StructLayout(LayoutKind.Explicit, CharSet = CharSet.Unicode)]
-		public struct INPUT_RECORD
+		internal struct INPUT_RECORD
 		{
 			public const ushort KEY_EVENT = 0x0001,
 				MOUSE_EVENT = 0x0002,
@@ -351,13 +370,13 @@ namespace Uncoal.Internal
 		// Console mode changes //
 		//////////////////////////
 		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool GetConsoleMode(
+		internal static extern bool GetConsoleMode(
 			IntPtr hConsoleInput,
 			ref ConsoleMode lpMode);
 
 
 		[DllImport("kernel32.dll", SetLastError = true)]
-		public static extern bool SetConsoleMode(
+		internal static extern bool SetConsoleMode(
 			IntPtr hConsoleInput,
 			ConsoleMode dwMode);
 

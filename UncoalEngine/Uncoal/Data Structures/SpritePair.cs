@@ -1,13 +1,14 @@
 ﻿using Uncoal.Engine;
+using static Uncoal.Internal.NativeMethods;
 
 namespace Uncoal.Internal
 {
 	class SpritePair
 	{
 		public Sprite sprite;
-		public string[,] newSprite;
+		public CHAR_INFO[,] newSprite;
 
-		public SpritePair(Sprite oldSprite, string[,] NewSwprite)
+		public SpritePair(Sprite oldSprite, CHAR_INFO[,] NewSwprite)
 		{
 			sprite = oldSprite;
 			newSprite = NewSwprite;

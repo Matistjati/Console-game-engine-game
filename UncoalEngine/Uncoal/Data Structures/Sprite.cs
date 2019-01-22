@@ -3,8 +3,8 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Text;
-using static Uncoal.Internal.NativeMethods;
 using Uncoal.Internal;
+using static Uncoal.Internal.NativeMethods;
 
 namespace Uncoal.Engine
 {

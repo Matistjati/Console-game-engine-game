@@ -1,28 +1,51 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 
 namespace Uncoal.Internal
 {
-	internal static class ConsoleColorHelper
+	public static class ConsoleColorHelper
 	{
-	 	internal static ConsoleColor ClosestConsoleColor(byte r, byte g, byte b)
+		static ConsoleColor[] consoleColors;
+		static Color[] consoleColorsRGB;
+
+		static ConsoleColorHelper()
+		{
+			consoleColors = Enum.GetValues(typeof(ConsoleColor)).Cast<ConsoleColor>().ToArray();
+			consoleColorsRGB = new Color[consoleColors.Length];
+			for (int i = 0; i < consoleColors.Length; i++)
+			{
+				string name = Enum.GetName(typeof(ConsoleColor), consoleColors[i]);
+				Color color = Color.FromName(name == "DarkYellow" ? "Orange" : name); // Bug fix, darkyellow is weird
+				consoleColorsRGB[i] = color;
+			}
+		}
+
+	 	public static ConsoleColor ClosestConsoleColor(byte r, byte g, byte b)
 		{
 			ConsoleColor ret = 0;
 			double rr = r, gg = g, bb = b, delta = double.MaxValue;
 
-			foreach (ConsoleColor cc in Enum.GetValues(typeof(ConsoleColor)))
+			// Gets the total color difference and returns the consolecolor with the least difference
+			for (int i = 0; i < consoleColors.Length; i++)
 			{
-				var n = Enum.GetName(typeof(ConsoleColor), cc);
-				var c = Color.FromName(n == "DarkYellow" ? "Orange" : n); // Bug fix
-				var t = Math.Pow(c.R - rr, 2.0) + Math.Pow(c.G - gg, 2.0) + Math.Pow(c.B - bb, 2.0);
-				if (t == 0.0)
-					return cc;
-				if (t < delta)
+				Color currentColor = consoleColorsRGB[i];
+
+				double redDelta = currentColor.R - rr;
+				double greenDelta = currentColor.G - gg;
+				double blueDelta = currentColor.B - bb;
+				double deltaSum = redDelta * redDelta + greenDelta * greenDelta + blueDelta * blueDelta;
+
+				if (deltaSum == 0.0)
+					return consoleColors[i];
+
+				if (deltaSum < delta)
 				{
-					delta = t;
-					ret = cc;
+					delta = deltaSum;
+					ret = consoleColors[i];
 				}
 			}
+
 			return ret;
 		}
 	}

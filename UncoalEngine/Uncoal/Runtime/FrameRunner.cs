@@ -83,7 +83,23 @@ namespace Uncoal.Runner
 
 		public static void Run()
 		{
-			playField = new CHAR_INFO[Console.BufferWidth, Console.BufferHeight];
+			short bufferWidth = (short)Console.BufferWidth;
+			short bufferHeight = (short)Console.BufferHeight;
+			playField = new CHAR_INFO[bufferWidth, bufferHeight];
+
+			SMALL_RECT window_size = new SMALL_RECT
+			{
+				Left = 0,
+				Top = 0,
+				Right = (short)(bufferWidth - 1),
+				Bottom = (short)(bufferHeight - 1)
+			};
+			COORD screen_buffer = new COORD(bufferWidth, bufferHeight);
+
+			IntPtr stdOutHandle = GetStdHandle(StdHandle.OutputHandle);
+
+			SetConsoleWindowInfo(stdOutHandle, true, ref window_size);
+			SetConsoleScreenBufferSize(stdOutHandle, screen_buffer);
 
 			lastFrameIteration = new TimeSpan();
 
@@ -117,15 +133,16 @@ namespace Uncoal.Runner
 					RemoveGameObjectsFromUpdate();
 				}
 
-				if (renderSprites.IsCompleted)
-				{
+				//if (renderSprites.IsCompleted)
+				//{
 					// Achieving thread safety by only modifying the gameobjects when no code using them is running
 					if (destructionQueue.Count != 0)
 					{
 						DestroyGameObjects();
 					}
 
-					renderSprites = Task.Run((Action)RenderSprites);
+					//renderSprites = Task.Run((Action)RenderSprites);
+					RenderSprites();
 
 					////// Debugging
 
@@ -142,7 +159,7 @@ namespace Uncoal.Runner
 					//		throw;
 					//	}
 					//});
-				}
+				//}
 			}
 		}
 
@@ -150,11 +167,6 @@ namespace Uncoal.Runner
 		static List<SmallRectangle> spritePositions = new List<SmallRectangle>(40);
 
 		static CHAR_INFO[,] playField;
-
-		// Believe me, it can become about this big
-
-		static Task writeConsole;
-
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void RenderSprites()
@@ -189,9 +201,6 @@ namespace Uncoal.Runner
 			ClearOldSprites();
 
 
-			// Used for clearing the last frame drawing
-			List<SmallRectangle> spritePositionsCopy = new List<SmallRectangle>(spritePositions);
-
 			spritePositions.Clear();
 
 
@@ -203,35 +212,35 @@ namespace Uncoal.Runner
 
 
 
-			// Preparing what is used to build the new allrows
-			PrepareLineInfo(spritePositionsCopy);
-
 			// We have to finish filling colors before using it
 			Task.WaitAll(fillColors.ToArray());
 
-			// We don't want to risk changing allrows while still writing
-			writeConsole?.Wait();
+			CallWriteConsole();
+			
+		}
 
-			// Joining allrows from colors
-
-			// Handle to console output buffer
+		static void CallWriteConsole()
+		{
 			IntPtr stdOutHandle = GetStdHandle(StdHandle.OutputHandle);
 
-			// Writing all the rows to the console
-			writeConsole = Task.Run(() =>
-			{
-				bool success = WriteConsoleW(
-				stdOutHandle,   // The handle
-				allRows,        // Characters to write
-				allRows.Length, // Amount of characters to write
-				out int charsWritten,
-				IntPtr.Zero);// Reserved
 
-				if (!success)
-				{
-					Log.DefaultLogger.LogError($"Error callong writeconsole: {Marshal.GetLastWin32Error()}");
-				}
-			});
+			SMALL_RECT window_size = new SMALL_RECT
+			{
+				Left = 0,
+				Top = 0,
+				Right = (short)(playField.GetLength(0) - 1),
+				Bottom = (short)(playField.GetLength(1) - 1)
+			};
+
+			// Handle to console output buffer
+
+			WriteConsoleOutput(
+				stdOutHandle,
+				playField,
+				new COORD((short)playField.GetLength(0), (short)playField.GetLength(1)),
+				new COORD(0, 0),
+				ref window_size
+			);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -344,9 +353,9 @@ namespace Uncoal.Runner
 					CHAR_INFO cell = sprite.Sprite.spriteMap[x, y];
 
 
-					if (cell[0] == ' ')
-						if (playField[x + X, y + Y] != null)
-							continue;
+					//if (cell.UnicodeChar == ' ')
+					//	if (playField[x + X, y + Y] != null)
+					//		continue;
 
 					playField[x + X, y + Y] = cell;
 				}
@@ -378,131 +387,10 @@ namespace Uncoal.Runner
 						{
 							for (int y = positivePositionY; y < totalHeight; y++)
 							{
-								playField[x, y] = null;
+								playField[x, y] = new CHAR_INFO { UnicodeChar = ' ' };
 							}
 						});
 				});
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void PrepareLineInfo(List<SmallRectangle> spritePositionsCopy)
-		{
-			filledRows.Clear();
-
-			/////////////////////////////
-			// Hashing the y positions //
-			/////////////////////////////
-
-			int colorWidth = playField.GetLength(0);
-			int colorHeight = playField.GetLength(1);
-
-			// Filling with sprites to rendered
-			Task iterateSpritePos = Task.Run(() =>
-			{
-				for (int i = 0; i < spritePositions.Count; i++)
-				{
-					// Combining concepts of for and foreach for even faster
-					SmallRectangle rectangle = spritePositions[i];
-
-					if (rectangle.Y < 0)
-					{
-						rectangle.Height += rectangle.Y;
-						rectangle.Y = 0;
-					}
-
-
-					for (ushort y = (ushort)rectangle.Y; y < rectangle.Height + rectangle.Y; y++)
-					{
-						if (filledRows.TryGetValue(y, out Distance currentRow))
-						{
-							if (rectangle.X < currentRow.start && rectangle.X > 0)
-							{
-								currentRow.length += currentRow.start - rectangle.X;
-
-								currentRow.start = rectangle.X;
-							}
-							else
-							{
-								currentRow.length += rectangle.X - currentRow.start;
-
-								if (currentRow.length + currentRow.start > colorWidth)
-								{
-									currentRow.length = colorWidth - currentRow.start;
-								}
-							}
-
-							// Enable if we want to use sprites of different sizes
-							if (currentRow.length < rectangle.Width)
-							{
-								currentRow.length = rectangle.Width;
-							}
-
-							filledRows[y] = currentRow;
-						}
-						else
-						{
-							filledRows[y] = new Distance(
-								Start: (rectangle.X < 0) ? 0 : rectangle.X,
-								Length: rectangle.Width);
-						}
-					}
-				}
-			});
-
-			// Sprites to be removed
-			Task iterateSpritePosCopy = Task.Run(() =>
-			{
-				for (int i = 0; i < spritePositionsCopy.Count; i++)
-				{
-					// Combining concepts of for and foreach for even faster
-					SmallRectangle rectangle = spritePositionsCopy[i];
-
-					if (rectangle.Y < 0)
-					{
-						rectangle.Height += rectangle.Y;
-						rectangle.Y = 0;
-					}
-
-
-					for (ushort y = (ushort)rectangle.Y; y < rectangle.Height + rectangle.Y; y++)
-					{
-						if (filledRows.TryGetValue(y, out Distance currentRow))
-						{
-							if (rectangle.X < currentRow.start && rectangle.X > 0)
-							{
-								currentRow.length += currentRow.start - rectangle.X;
-
-								currentRow.start = rectangle.X;
-							}
-							else
-							{
-								currentRow.length += rectangle.X - currentRow.start;
-
-								if (currentRow.length + currentRow.start > colorWidth)
-								{
-									currentRow.length = colorWidth - currentRow.start;
-								}
-							}
-
-							// Enable if we want to use sprites of different sizes
-							if (currentRow.length < rectangle.Width)
-							{
-								currentRow.length = rectangle.Width;
-							}
-
-							filledRows[y] = currentRow;
-						}
-						else
-						{
-							filledRows[y] = new Distance(
-								Start: (rectangle.X < 0) ? 0 : rectangle.X,
-								Length: rectangle.Width);
-						}
-					}
-				}
-			});
-
-			Task.WaitAll(iterateSpritePos, iterateSpritePosCopy);
 		}
 
 
