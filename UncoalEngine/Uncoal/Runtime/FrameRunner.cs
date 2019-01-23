@@ -20,6 +20,8 @@ namespace Uncoal.Runner
 
 		static bool run;
 
+		static readonly char defaultChar = default(CHAR_INFO).UnicodeChar;
+
 		public static void Pause()
 		{
 			run = false;
@@ -60,7 +62,7 @@ namespace Uncoal.Runner
 		{
 			Delegate[] methods = updateCallBack?.GetInvocationList();
 
-			Parallel.For(0, updateRemovalQueue.Count, (int j) =>
+			Parallel.For(0, updateRemovalQueue.Count, _ =>
 			{
 				GameObject gameObject = updateRemovalQueue.Dequeue();
 
@@ -91,15 +93,17 @@ namespace Uncoal.Runner
 			{
 				Left = 0,
 				Top = 0,
-				Right = (short)(bufferWidth - 1),
-				Bottom = (short)(bufferHeight - 1)
+				Right = (short)(bufferHeight - 1),
+				Bottom = (short)(bufferWidth - 1)
 			};
-			COORD screen_buffer = new COORD(bufferWidth, bufferHeight);
+			COORD screen_buffer = new COORD((short)playField.GetLength(1), (short)playField.GetLength(0));
 
 			IntPtr stdOutHandle = GetStdHandle(StdHandle.OutputHandle);
 
 			SetConsoleWindowInfo(stdOutHandle, true, ref window_size);
 			SetConsoleScreenBufferSize(stdOutHandle, screen_buffer);
+
+
 
 			lastFrameIteration = new TimeSpan();
 
@@ -228,8 +232,8 @@ namespace Uncoal.Runner
 			{
 				Left = 0,
 				Top = 0,
-				Right = (short)(playField.GetLength(0) - 1),
-				Bottom = (short)(playField.GetLength(1) - 1)
+				Right = (short)(playField.GetLength(1) - 1),
+				Bottom = (short)(playField.GetLength(0) - 1)
 			};
 
 			// Handle to console output buffer
@@ -237,7 +241,7 @@ namespace Uncoal.Runner
 			WriteConsoleOutput(
 				stdOutHandle,
 				playField,
-				new COORD((short)playField.GetLength(0), (short)playField.GetLength(1)),
+				new COORD((short)playField.GetLength(1), (short)playField.GetLength(0)),
 				new COORD(0, 0),
 				ref window_size
 			);
@@ -353,9 +357,8 @@ namespace Uncoal.Runner
 					CHAR_INFO cell = sprite.Sprite.spriteMap[x, y];
 
 
-					//if (cell.UnicodeChar == ' ')
-					//	if (playField[x + X, y + Y] != null)
-					//		continue;
+					//if (cell.UnicodeChar == '█')
+					//	continue;
 
 					playField[x + X, y + Y] = cell;
 				}

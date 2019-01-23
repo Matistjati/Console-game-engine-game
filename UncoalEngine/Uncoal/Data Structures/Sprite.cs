@@ -75,8 +75,16 @@ namespace Uncoal.Engine
 
 						int xIndex = x / bytesPerPixel;
 
-						spriteMap[xIndex, y].UnicodeChar = blockChar;
-						spriteMap[xIndex, y].Attributes |= (CharAttribute)ConsoleColorHelper.ClosestConsoleColor(red, green, blue);
+						if (blue == 0 && green == 0 && red == 0)
+						{
+							spriteMap[xIndex, y].UnicodeChar = ' ';
+							spriteMap[xIndex, y].Attributes = 0;
+						}
+						else
+						{
+							spriteMap[xIndex, y].UnicodeChar = blockChar;
+							spriteMap[xIndex, y].Attributes |= (CharAttribute)ConsoleColorHelper.ClosestConsoleColor(red, green, blue);
+						}
 					}
 				}
 				image.UnlockBits(bitmapData);

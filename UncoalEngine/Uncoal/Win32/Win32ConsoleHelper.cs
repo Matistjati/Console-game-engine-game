@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using static Uncoal.Internal.NativeMethods;
 
@@ -18,13 +19,19 @@ namespace Uncoal.Internal
 
 			CONSOLE_FONT_INFOEX ConsoleFontInfo = new CONSOLE_FONT_INFOEX();
 			ConsoleFontInfo.cbSize = (uint)Marshal.SizeOf(ConsoleFontInfo);
-			GetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
+
+			if (!GetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo))
+			{
+				throw new Win32Exception();
+			}
+
 			ConsoleFontInfo.dwFontSize.X = (short)x;
 			ConsoleFontInfo.dwFontSize.Y = (short)y;
 
-			SetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
-
-			Marshal.FreeHGlobal(outPutHandle);
+			if (!SetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo))
+			{
+				throw new Win32Exception();
+			} 
 		}
 
 		public enum ConsoleFont
@@ -70,28 +77,34 @@ namespace Uncoal.Internal
 			if (outPutHandle == INVALID_HANDLE_VALUE)
 			{
 				Log.DefaultLogger.LogInfo($"Invalid handle {outPutHandle}");
-				return;
+				throw new Win32Exception();
 			}
 
 			CONSOLE_FONT_INFOEX ConsoleFontInfo = new CONSOLE_FONT_INFOEX();
 			ConsoleFontInfo.cbSize = (uint)Marshal.SizeOf(ConsoleFontInfo);
-			GetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
+
+			if (!GetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo))
+			{
+				throw new Win32Exception();
+			}
 
 			// For some reason, the terminal font can't be changed
 			if (ConsoleFontInfo.FaceName == "Terminal")
-			{
-				Marshal.FreeHGlobal(outPutHandle);
 				return;
-			}
+
 
 			ConsoleFontInfo.FaceName = newFontString;
 
 
-			bool SUCCess = SetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
+			if (!SetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo))
+			{
+				throw new Win32Exception();
+			}
 
-			GetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo);
-
-			Marshal.FreeHGlobal(outPutHandle);
+			if (!GetCurrentConsoleFontEx(outPutHandle, false, ref ConsoleFontInfo))
+			{
+				throw new Win32Exception();
+			}
 		}
 	}
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -60,7 +61,7 @@ namespace Uncoal.Runner
 			// Invoking all start methods on our GameObjects
 			foreach (GameObject gameObject in gameObjects)
 			{
-				foreach (Component component in gameObject.components)
+				foreach (Uncoal.Engine.Component component in gameObject.components)
 				{
 					if (ReflectiveHelper<Type>.TryGetMethodFromComponent(component, "start", out MethodInfo method))
 					{
@@ -108,35 +109,34 @@ namespace Uncoal.Runner
 			// Setting how many frames we want to run between drawing to the console according to what was passed in start
 
 			// Set the console's title to a preset gamename
-			SetConsoleTitle(gameName);
+			if (!SetConsoleTitle(gameName))
+			{
+				throw new Win32Exception();
+			}
 
 
 			// Activating escape sequences
 
 			IntPtr bufferHandle = GetStdHandle(StdHandle.OutputHandle);
-			int handleResult = Marshal.GetLastWin32Error();
 
-			if (bufferHandle == INVALID_HANDLE_VALUE || handleResult != 0)
+			if (bufferHandle == INVALID_HANDLE_VALUE)
 			{
-				Log.DefaultLogger.LogError($"Win32Error calling GetStdHandle (invalid handle): {handleResult}. Handle was {bufferHandle}");
+				throw new Win32Exception();
 			}
 
 			ConsoleMode mode = 0;
 
-			GetConsoleMode(bufferHandle, ref mode);
-			int getModeResult = Marshal.GetLastWin32Error();
-
-			if (getModeResult != 0)
+			
+			if (!GetConsoleMode(bufferHandle, ref mode))
 			{
-				Log.DefaultLogger.LogError($"Win32Error calling GetConsoleMode: {getModeResult}");
+				throw new Win32Exception();
 			}
 
-			SetConsoleMode(bufferHandle, mode | ConsoleMode.ENABLE_VIRTUAL_TERMINAL_PROCESSING); // Enable escape sequences
-			int setConsoleResult = Marshal.GetLastWin32Error();
+			
 
-			if (setConsoleResult != 0)
+			if (!SetConsoleMode(bufferHandle, mode | ConsoleMode.ENABLE_LVB_GRID_WORLDWIDE)) // Enable colors
 			{
-				Log.DefaultLogger.LogError($"Win32Error calling setconsolemode: {setConsoleResult}");
+				throw new Win32Exception();
 			}
 
 			// Set up input handlelers
